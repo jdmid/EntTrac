@@ -35,7 +35,6 @@ public class MangaService {
     public MangaItem getManga(String mangaId) {
         return mangaRepository.findById(mangaId);
     }
-
     public MangaItem addToLibrary(MangaItem item) {
         item.setPk("USER#default");
         item.setSk("MANGA#" + item.getMangaId());
