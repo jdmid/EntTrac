@@ -100,4 +100,54 @@ public class MangaServiceTest {
         mangaService.removeFromLibrary("abc123");
         verify(mangaRepository, times(1)).delete("abc123");
     }
+
+    @Test
+    void getDetails_ShouldDelegateToClient() {
+        MangaSearchResult searchResult = MangaSearchResult.builder()
+                .id("abc123")
+                .title("One Piece")
+                .build();
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(searchResult);
+
+        MangaSearchResult result = mangaService.getDetails("abc123");
+
+        assertEquals("One Piece", result.getTitle());
+        verify(mangaMetadataClient, times(1)).getDetails("abc123");
+    }
+
+    @Test
+    void getManga_ShouldReturnItemFromRepository() {
+        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+
+        MangaItem result = mangaService.getManga("abc123");
+
+        assertEquals("Test Manga", result.getTitle());
+        verify(mangaRepository, times(1)).findById("abc123");
+    }
+
+    @Test
+    void refreshLatestChapter_ShouldUpdateWhenDetailsAvailable() {
+        MangaSearchResult details = MangaSearchResult.builder()
+                .id("abc123")
+                .latestChapter(75)
+                .build();
+
+        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
+
+        MangaItem result = mangaService.refreshLatestChapter("abc123");
+
+        assertEquals(75, result.getLatestChapter());
+        verify(mangaRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshLatestChapter_ShouldThrowWhenNotFound() {
+        when(mangaRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                mangaService.refreshLatestChapter("notreal"));
+
+        assertEquals("Manga not found: notreal", ex.getMessage());
+    }
 }

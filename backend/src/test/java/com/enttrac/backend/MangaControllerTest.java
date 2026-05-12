@@ -109,4 +109,32 @@ public class MangaControllerTest {
         mockMvc.perform(delete("/api/manga/library/abc123"))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void refresh_ShouldReturnUpdatedItem() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+        item.setLatestChapter(1105);
+
+        when(mangaService.refreshLatestChapter("abc123")).thenReturn(item);
+
+        mockMvc.perform(post("/api/manga/library/abc123/refresh"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latestChapter").value(1105));
+    }
+
+    @Test
+    void getManga_ShouldReturnItemWhenFound() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+        item.setStatus("READING");
+
+        when(mangaService.getManga("abc123")).thenReturn(item);
+
+        mockMvc.perform(get("/api/manga/library/abc123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("One Piece"));
+    }
 }
