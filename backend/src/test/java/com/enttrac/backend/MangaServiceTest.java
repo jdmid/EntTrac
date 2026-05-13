@@ -150,4 +150,24 @@ public class MangaServiceTest {
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
+
+    @Test
+    void updateScore_ShouldUpdateScore() {
+        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+
+        MangaItem result = mangaService.updateScore("abc123", 9);
+
+        assertEquals(9, result.getScore());
+        verify(mangaRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void updateScore_ShouldThrowWhenNotFound() {
+        when(mangaRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                mangaService.updateScore("notreal", 9));
+
+        assertEquals("Manga not found: notreal", ex.getMessage());
+    }
 }

@@ -137,4 +137,51 @@ public class MangaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("One Piece"));
     }
+
+    @Test
+    void updateScore_ShouldReturnUpdatedItem() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+        item.setScore(9);
+
+        when(mangaService.updateScore("abc123", 9)).thenReturn(item);
+
+        mockMvc.perform(patch("/api/manga/library/abc123/score")
+                        .param("score", "9"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.score").value(9));
+    }
+
+    @Test
+    void addToLibrary_ShouldReturn400WhenStatusInvalid() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+        item.setStatus("INVALID");
+        item.setChaptersRead(0);
+
+        mockMvc.perform(post("/api/manga/library")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(item)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn400OnIllegalArgument() throws Exception {
+        when(mangaService.getLibrary()).thenThrow(new IllegalArgumentException("Invalid argument"));
+
+        mockMvc.perform(get("/api/manga/library"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Invalid argument"));
+    }
+
+    @Test
+    void shouldReturn500OnRuntimeException() throws Exception {
+        when(mangaService.getLibrary()).thenThrow(new RuntimeException("Something went wrong"));
+
+        mockMvc.perform(get("/api/manga/library"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("Something went wrong"));
+    }
 }
