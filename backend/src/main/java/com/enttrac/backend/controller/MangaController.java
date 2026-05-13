@@ -4,13 +4,18 @@ import com.enttrac.backend.model.MangaItem;
 import com.enttrac.backend.model.MangaSearchResult;
 import com.enttrac.backend.service.MangaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/manga")
 @CrossOrigin(origins = "http://localhost:5173")
+@Validated
 public class MangaController {
 
     private final MangaService mangaService;
@@ -43,7 +48,7 @@ public class MangaController {
 
     // Add manga to library
     @PostMapping("/library")
-    public ResponseEntity<MangaItem> addToLibrary(@RequestBody MangaItem item) {
+    public ResponseEntity<MangaItem> addToLibrary(@Valid @RequestBody MangaItem item) {
         return ResponseEntity.ok(mangaService.addToLibrary(item));
     }
 
@@ -59,6 +64,13 @@ public class MangaController {
     @PostMapping("/library/{mangaId}/refresh")
     public ResponseEntity<MangaItem> refresh(@PathVariable String mangaId) {
         return ResponseEntity.ok(mangaService.refreshLatestChapter(mangaId));
+    }
+
+    @PatchMapping("/library/{mangaId}/score")
+    public ResponseEntity<MangaItem> updateScore(
+            @PathVariable String mangaId,
+            @RequestParam @Min(1) @Max(10) int score) {
+        return ResponseEntity.ok(mangaService.updateScore(mangaId, score));
     }
 
     // Remove from library

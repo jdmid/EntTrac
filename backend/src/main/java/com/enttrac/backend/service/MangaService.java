@@ -69,6 +69,17 @@ public class MangaService {
         return item;
     }
 
+    public MangaItem updateScore(String mangaId, int score) {
+        MangaItem item = mangaRepository.findById(mangaId);
+        if (item == null) {
+            throw new RuntimeException("Manga not found: " + mangaId);
+        }
+        item.setScore(score);
+        item.setUpdatedAt(Instant.now().toString());
+        mangaRepository.save(item);
+        return item;
+    }
+
     public void removeFromLibrary(String mangaId) {
         mangaRepository.delete(mangaId);
     }

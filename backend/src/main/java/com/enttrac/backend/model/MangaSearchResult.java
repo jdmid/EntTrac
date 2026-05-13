@@ -15,5 +15,5 @@ public class MangaSearchResult {
     private String description;
     private String coverUrl;
     private Integer latestChapter;
-    private String status;        // ongoing, completed, hiatus, cancelled
+    private String status;        // ongoing, finished, hiatus, cancelled
 }
