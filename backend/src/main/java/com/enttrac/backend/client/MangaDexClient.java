@@ -23,8 +23,7 @@ public class MangaDexClient implements MangaMetadataClient {
     @Override
     public List<MangaSearchResult> search(String query) {
         JsonNode response = restClient.get()
-                .uri("/manga?title={query}&limit=10&includes[]=cover_art", query)
-                .retrieve()
+                .uri("/manga?title={query}&limit=10&includes[]=cover_art&includes[]=author&includes[]=artist", query)                .retrieve()
                 .body(JsonNode.class);
 
         List<MangaSearchResult> results = new ArrayList<>();
@@ -41,8 +40,7 @@ public class MangaDexClient implements MangaMetadataClient {
     @Override
     public MangaSearchResult getDetails(String id) {
         JsonNode response = restClient.get()
-                .uri("/manga/{id}?includes[]=cover_art", id)
-                .retrieve()
+                .uri("/manga/{id}?includes[]=cover_art&includes[]=author&includes[]=artist", id)                .retrieve()
                 .body(JsonNode.class);
 
         if (response != null && response.has("data")) {
@@ -92,6 +90,21 @@ public class MangaDexClient implements MangaMetadataClient {
             }
         }
 
+        // Get author and artist
+        String author = null;
+        String artist = null;
+        if (relationships != null) {
+            for (JsonNode rel : relationships) {
+                String relType = rel.get("type").asText();
+                if ("author".equals(relType) && rel.has("attributes")) {
+                    author = rel.get("attributes").get("name").asText();
+                }
+                if ("artist".equals(relType) && rel.has("attributes")) {
+                    artist = rel.get("attributes").get("name").asText();
+                }
+            }
+        }
+
         return MangaSearchResult.builder()
                 .id(id)
                 .title(title)
@@ -99,6 +112,8 @@ public class MangaDexClient implements MangaMetadataClient {
                 .status(status)
                 .latestChapter(latestChapter)
                 .coverUrl(coverUrl)
+                .author(author)
+                .artist(artist)
                 .build();
     }
 }

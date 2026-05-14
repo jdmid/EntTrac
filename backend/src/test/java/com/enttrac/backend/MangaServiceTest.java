@@ -84,15 +84,18 @@ public class MangaServiceTest {
     void search_ShouldDelegateToClient() {
         MangaSearchResult searchResult = MangaSearchResult.builder()
                 .id("abc123")
-                .title("Test Manga")
+                .title("Berserk")
+                .author("Miura Kentarou")
+                .artist("Miura Kentarou")
                 .build();
-        when(mangaMetadataClient.search("test")).thenReturn(List.of(searchResult));
+        when(mangaMetadataClient.search("Berserk")).thenReturn(List.of(searchResult));
 
-        List<MangaSearchResult> results = mangaService.search("test");
+        List<MangaSearchResult> results = mangaService.search("Berserk");
 
         assertEquals(1, results.size());
-        assertEquals("Test Manga", results.get(0).getTitle());
-        verify(mangaMetadataClient, times(1)).search("test");
+        assertEquals("Berserk", results.get(0).getTitle());
+        assertEquals("Miura Kentarou", results.get(0).getAuthor());
+        verify(mangaMetadataClient, times(1)).search("Berserk");
     }
 
     @Test

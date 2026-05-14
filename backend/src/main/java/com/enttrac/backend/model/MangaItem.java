@@ -45,6 +45,8 @@ public class MangaItem {
     private int chaptersRead;
     private Integer latestChapter;
     private Integer totalChapters;
+    private String author;
+    private String artist;
     private String coverUrl;
 
     @Min(value = 1, message = "Score must be between 1 and 10")
