@@ -51,7 +51,7 @@ public class MangaControllerTest {
         MangaItem item = new MangaItem();
         item.setMangaId("abc123");
         item.setTitle("One Piece");
-        item.setStatus("READING");
+        item.setStatus("CONSUMING");
         item.setChaptersRead(100);
 
         when(mangaService.getLibrary()).thenReturn(List.of(item));
@@ -75,7 +75,7 @@ public class MangaControllerTest {
         MangaItem item = new MangaItem();
         item.setMangaId("abc123");
         item.setTitle("One Piece");
-        item.setStatus("READING");
+        item.setStatus("CONSUMING");
         item.setChaptersRead(0);
 
         when(mangaService.addToLibrary(any(MangaItem.class))).thenReturn(item);
@@ -129,7 +129,7 @@ public class MangaControllerTest {
         MangaItem item = new MangaItem();
         item.setMangaId("abc123");
         item.setTitle("One Piece");
-        item.setStatus("READING");
+        item.setStatus("CONSUMING");
 
         when(mangaService.getManga("abc123")).thenReturn(item);
 

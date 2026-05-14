@@ -36,8 +36,8 @@ public class MangaItem {
     private String title;
 
     @Pattern(
-            regexp = "READING|PLAN_TO_READ|FINISHED|DROPPED",
-            message = "Status must be READING, PLAN_TO_READ, FINISHED, or DROPPED"
+            regexp = "CONSUMING|PLANNED|FINISHED|DROPPED",
+            message = "Status must be CONSUMING, PLANNED, FINISHED, or DROPPED"
     )
     private String status;
 

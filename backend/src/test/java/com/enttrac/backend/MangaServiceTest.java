@@ -36,7 +36,7 @@ public class MangaServiceTest {
         testItem = new MangaItem();
         testItem.setMangaId("abc123");
         testItem.setTitle("Test Manga");
-        testItem.setStatus("READING");
+        testItem.setStatus("CONSUMING");
         testItem.setChaptersRead(10);
         testItem.setLatestChapter(50);
     }
