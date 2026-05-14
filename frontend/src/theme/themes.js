@@ -28,8 +28,8 @@ export const themes = {
 }
 
 export const statusStyles = {
-  READING:      { bg: '#163326', border: '#2a5a3a', label: 'Reading' },
-  PLAN_TO_READ: { bg: '#101e38', border: '#1e3a60', label: 'Plan to Read' },
+  CONSUMING:      { bg: '#163326', border: '#2a5a3a', label: 'Reading' },
+  PLANNED: { bg: '#101e38', border: '#1e3a60', label: 'Plan to Read' },
   FINISHED:     { bg: '#222228', border: '#3a3a44', label: 'Finished' },
   DROPPED:      { bg: '#2e1212', border: '#501c1c', label: 'Dropped' },
 }
