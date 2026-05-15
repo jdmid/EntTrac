@@ -17,6 +17,11 @@ export const updateProgress = (mangaId, chaptersRead) =>
     params: { chaptersRead },
   })
 
+export const updateStatus = (mangaId, status) =>
+  client.patch(`/manga/library/${mangaId}/status`, null, {
+    params: { status },
+  })
+
 export const updateScore = (mangaId, score) =>
   client.patch(`/manga/library/${mangaId}/score`, null, {
     params: { score },

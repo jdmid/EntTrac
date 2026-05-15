@@ -80,6 +80,17 @@ public class MangaService {
         return item;
     }
 
+    public MangaItem updateStatus(String mangaId, String status) {
+        MangaItem item = mangaRepository.findById(mangaId);
+        if (item == null) {
+            throw new RuntimeException("Manga not found: " + mangaId);
+        }
+        item.setStatus(status);
+        item.setUpdatedAt(Instant.now().toString());
+        mangaRepository.save(item);
+        return item;
+    }
+    
     public void removeFromLibrary(String mangaId) {
         mangaRepository.delete(mangaId);
     }

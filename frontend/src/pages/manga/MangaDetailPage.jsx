@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import { getManga, updateProgress, updateScore, removeFromLibrary } from '../../api/mangaApi'
+import { getManga, updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
 
 const STATUS_OPTIONS = [
@@ -52,6 +52,18 @@ function MangaDetailPage() {
         setManga(res.data)
         setScore(newScore)
       })
+      .catch(console.error)
+  }
+
+  function handleStatusChange(newStatus) {
+    updateStatus(mangaId, newStatus)
+      .then((res) => setManga(res.data))
+      .catch(console.error)
+  }
+
+  function handleRefresh() {
+    refreshLatestChapter(mangaId)
+      .then((res) => setManga(res.data))
       .catch(console.error)
   }
 
@@ -130,6 +142,32 @@ function MangaDetailPage() {
               )}
             </div>
 
+            {/* Refresh button */}
+            <button
+              onClick={handleRefresh}
+              className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
+              style={{
+                background: theme.accentBg,
+                border: `0.5px solid ${theme.accentBorder}`,
+                color: theme.accent,
+              }}
+            >
+              ↻ Refresh chapters
+            </button>
+
+            {/* Remove button */}
+            <button
+              onClick={handleRemove}
+              className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
+              style={{
+                background: '#2e1212',
+                border: '0.5px solid #501c1c',
+                color: '#f87171',
+              }}
+            >
+              Remove from library
+            </button>
+
             {/* Score */}
             <div className="mt-3">
               <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
@@ -157,24 +195,25 @@ function MangaDetailPage() {
           {/* Right col — info */}
           <div className="flex-1 min-w-0">
 
-            {/* Title */}
-            <h1 className="text-[22px] font-medium text-[#e2e2f0] m-0 mb-1">
-              {manga.title}
-            </h1>
+          {/* Title */}
+          <h1 className="text-[22px] font-medium text-[#e2e2f0] m-0 mb-1">
+            {manga.title}
+          </h1>
 
-            {/* Series status + chapters */}
-            <p className="text-[12px] text-[#555566] m-0 mb-3 capitalize">
-              {manga.seriesStatus ?? 'Unknown status'}
-              {manga.latestChapter != null ? ` · Ch. ${manga.latestChapter}` : ''}
+          {/* Series status + chapters */}
+          <p className="text-[12px] text-[#555566] m-0 mb-1 capitalize">
+            {manga.seriesStatus ?? 'Unknown status'}
+            {manga.latestChapter != null ? ` · Ch. ${manga.latestChapter}` : ''}
+          </p>
+
+          {/* Author and artist */}
+          {(manga.author || manga.artist) && (
+            <p className="text-[12px] text-[#555566] m-0 mb-3">
+              {manga.author && <span>By <span style={{ color: themes.manga.accent }}>{manga.author}</span></span>}
+              {manga.author && manga.artist && <span> · </span>}
+              {manga.artist && <span>Art by <span style={{ color: themes.manga.accent }}>{manga.artist}</span></span>}
             </p>
-
-            {/* Reading status badge */}
-            <span
-              className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-full mb-4"
-              style={style.badge}
-            >
-              {style.label}
-            </span>
+          )}
 
             {/* Description */}
             <div className="mb-4">
@@ -252,6 +291,7 @@ function MangaDetailPage() {
                 {STATUS_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
+                    onClick={() => handleStatusChange(opt.value)}
                     className="px-3 py-1 text-[11px] rounded-full transition-colors"
                     style={{
                       background: manga.status === opt.value
@@ -270,19 +310,6 @@ function MangaDetailPage() {
                 ))}
               </div>
             </div>
-
-            {/* Remove button */}
-            <button
-              onClick={handleRemove}
-              className="px-4 py-1.5 text-[12px] rounded transition-colors"
-              style={{
-                background: '#2e1212',
-                border: '0.5px solid #501c1c',
-                color: '#f87171',
-              }}
-            >
-              Remove from library
-            </button>
 
           </div>
         </div>

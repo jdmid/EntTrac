@@ -54,6 +54,8 @@ public class MangaItem {
     private Integer score; // nullable — unscored until user rates it
     private String lastRefreshed;
     private String updatedAt;
+    private String description;
+    private String seriesStatus;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("PK")

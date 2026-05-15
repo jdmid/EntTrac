@@ -60,6 +60,14 @@ public class MangaController {
         return ResponseEntity.ok(mangaService.updateProgress(mangaId, chaptersRead));
     }
 
+    // Update status
+    @PatchMapping("/library/{mangaId}/status")
+    public ResponseEntity<MangaItem> updateStatus(
+            @PathVariable String mangaId,
+            @RequestParam @Pattern(regexp = "CONSUMING|PLANNED|FINISHED|DROPPED") String status) {
+        return ResponseEntity.ok(mangaService.updateStatus(mangaId, status));
+    }
+
     // Refresh latest chapter from API
     @PostMapping("/library/{mangaId}/refresh")
     public ResponseEntity<MangaItem> refresh(@PathVariable String mangaId) {

@@ -42,6 +42,10 @@ function MangaSearchPage() {
       chaptersRead: 0,
       latestChapter: manga.latestChapter,
       coverUrl: manga.coverUrl,
+      author: manga.author,
+      artist: manga.artist,
+      description: manga.description,
+      seriesStatus: manga.status,
     })
       .then(() => {
         setAddedIds((prev) => new Set([...prev, manga.id]))
