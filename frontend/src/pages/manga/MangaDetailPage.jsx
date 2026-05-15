@@ -241,6 +241,42 @@ function MangaDetailPage() {
               <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                 Progress
               </p>
+
+              {/* Chapter count + unread */}
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[13px] font-medium text-[#e2e2f0]">
+                  {chaptersRead}
+                  {manga.latestChapter != null && (
+                    <span className="text-[12px] text-[#555566]"> / {manga.latestChapter} chapters</span>
+                  )}
+                </span>
+                {unread != null && unread > 0 && (
+                  <span
+                    className="text-[11px] px-2 py-[3px] rounded-full"
+                    style={{ background: theme.unreadBadge, color: theme.accent }}
+                  >
+                    +{unread} unread
+                  </span>
+                )}
+              </div>
+
+              {/* Progress bar */}
+              {manga.latestChapter != null && (
+                <div
+                  className="w-full h-[3px] rounded-full mb-2"
+                  style={{ background: theme.cardBorder }}
+                >
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(100, (chaptersRead / manga.latestChapter) * 100)}%`,
+                      background: theme.accent,
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Input row */}
               <div className="flex items-center gap-2">
                 <span className="text-[12px] text-[#777788]">Ch.</span>
                 <input
@@ -271,14 +307,6 @@ function MangaDetailPage() {
                 >
                   Save
                 </button>
-                {unread != null && unread > 0 && (
-                  <span
-                    className="text-[11px] px-2 py-[3px] rounded-full"
-                    style={{ background: theme.unreadBadge, color: theme.accent }}
-                  >
-                    +{unread} unread
-                  </span>
-                )}
               </div>
             </div>
 
