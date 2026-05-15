@@ -167,29 +167,6 @@ function MangaDetailPage() {
             >
               Remove from library
             </button>
-
-            {/* Score */}
-            <div className="mt-3">
-              <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
-                Your Score
-              </p>
-              <div className="flex gap-1 flex-wrap">
-                {[1,2,3,4,5,6,7,8,9,10].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => handleScoreSave(n)}
-                    className="w-7 h-7 rounded text-[11px] transition-colors"
-                    style={{
-                      background: score === n ? theme.accent : theme.topBar,
-                      color: score === n ? '#fff' : '#555566',
-                      border: `0.5px solid ${score === n ? theme.accent : '#2a2a3a'}`,
-                    }}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Right col — info */}
@@ -234,6 +211,46 @@ function MangaDetailPage() {
                   {descExpanded ? 'Show less' : 'Read more'}
                 </button>
               )}
+            </div>
+            
+            {/* Score */}
+            <div className="mt-3">
+              <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
+                Score
+              </p>
+
+              {/* Score card */}
+              <div
+                className="rounded-lg p-3 mb-2 text-center"
+                style={{
+                  background: theme.topBar,
+                  border: `0.5px solid ${theme.cardBorder}`,
+                }}
+              >
+                <p
+                  className="text-[28px] font-medium m-0 mb-0.5"
+                  style={{ color: '#fbbf24' }}
+                >
+                  {score ?? '—'}
+                </p>
+                <p className="text-[11px] text-[#555566] m-0">
+                  Your score
+                </p>
+
+                {/* Star display */}
+                <div className="flex justify-center gap-0.5 mt-2">
+                  {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                    <span
+                      key={n}
+                      onClick={() => handleScoreSave(n)}
+                      className="cursor-pointer text-[14px] transition-colors"
+                      style={{ color: score != null && n <= score ? '#fbbf24' : '#333344' }}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Progress */}
@@ -309,7 +326,7 @@ function MangaDetailPage() {
                 </button>
               </div>
             </div>
-
+            
             {/* Status selector */}
             <div className="mb-6">
               <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
