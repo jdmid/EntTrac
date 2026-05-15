@@ -14,6 +14,14 @@ const MANGA_STATUS_FILTERS = [
   { value: 'DROPPED',   label: 'Dropped' },
 ]
 
+const SERIES_STATUS_FILTERS = [
+  { value: 'ALL',       label: 'All' },
+  { value: 'ongoing',   label: 'Ongoing' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'hiatus',    label: 'Hiatus' },
+  { value: 'cancelled', label: 'Cancelled' },
+]
+
 function sortManga(items, sortBy) {
   const arr = [...items]
   switch (sortBy) {
@@ -79,8 +87,14 @@ function MangaLibraryPage() {
       items = items.filter((m) => m.status === statusFilter)
     }
 
+    if (seriesStatusFilter !== 'ALL') {
+      items = items.filter((m) =>
+        m.seriesStatus?.toLowerCase() === seriesStatusFilter.toLowerCase()
+      )
+    }
+
     return sortManga(items, sortBy)
-  }, [library, statusFilter, sortBy])
+  }, [library, statusFilter, seriesStatusFilter, sortBy])
 
   return (
     <div
@@ -105,6 +119,7 @@ function MangaLibraryPage() {
           statusFilters={MANGA_STATUS_FILTERS}
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
+          seriesStatusFilters={SERIES_STATUS_FILTERS}
           seriesStatusFilter={seriesStatusFilter}
           onSeriesStatusChange={setSeriesStatusFilter}
           sortBy={sortBy}
