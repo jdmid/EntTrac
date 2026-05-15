@@ -149,6 +149,8 @@ function MangaLibraryPage() {
                 theme={theme}
                 icon="📖"
                 progressLabel="Ch."
+                coverUrl={manga.coverUrl}
+                seriesStatus={manga.seriesStatus}
                 onClick={() => navigate(`/manga/library/${manga.mangaId}`)}
               />
             ))}
