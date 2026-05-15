@@ -35,7 +35,13 @@ public class MangaService {
     public MangaItem getManga(String mangaId) {
         return mangaRepository.findById(mangaId);
     }
+    
     public MangaItem addToLibrary(MangaItem item) {
+        // Check if already exists
+        MangaItem existing = mangaRepository.findById(item.getMangaId());
+        if (existing != null) {
+            return existing; // already in library, don't overwrite
+        }
         item.setPk("USER#default");
         item.setSk("MANGA#" + item.getMangaId());
         item.setUpdatedAt(Instant.now().toString());

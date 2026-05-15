@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import MediaCard from '../../components/MediaCard'
-import { searchManga, addToLibrary } from '../../api/mangaApi'
+import { searchManga, addToLibrary, getLibrary } from '../../api/mangaApi'
 import { themes } from '../../theme/themes'
 
 function MangaSearchPage() {
@@ -14,6 +14,13 @@ function MangaSearchPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [addedIds, setAddedIds] = useState(new Set())
+
+  useEffect(() => {
+    getLibrary().then((res) => {
+      const ids = new Set(res.data.map((m) => m.mangaId))
+      setAddedIds(ids)
+    }).catch(console.error)
+  }, [])
 
   function handleSearch(e) {
     e.preventDefault()
@@ -134,6 +141,7 @@ function MangaSearchPage() {
                 icon="📖"
                 isAdded={addedIds.has(manga.id)}
                 onAdd={() => handleAdd(manga)}
+                onClick={() => navigate(`/manga/library/${manga.id}`)}
               />
             ))}
           </div>

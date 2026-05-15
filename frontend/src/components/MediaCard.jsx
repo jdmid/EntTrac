@@ -21,7 +21,7 @@ function MediaCard({
 
   return (
     <div
-      onClick={onAdd ? undefined : onClick}
+      onClick={onClick}
       className="rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
       style={{ border: '0.5px solid rgba(255,255,255,0.09)' }}
     >

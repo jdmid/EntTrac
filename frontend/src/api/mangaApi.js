@@ -22,6 +22,9 @@ export const updateStatus = (mangaId, status) =>
     params: { status },
   })
 
+export const getMangaDetails = (mangaId) =>
+  client.get(`/manga/details/${mangaId}`) 
+
 export const updateScore = (mangaId, score) =>
   client.patch(`/manga/library/${mangaId}/score`, null, {
     params: { score },

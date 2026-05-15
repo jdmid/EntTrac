@@ -61,7 +61,7 @@ public class MangaController {
         return ResponseEntity.ok(mangaService.updateProgress(mangaId, chaptersRead));
     }
 
-    // Update status
+    // Update status from user
     @PatchMapping("/library/{mangaId}/status")
     public ResponseEntity<MangaItem> updateStatus(
             @PathVariable String mangaId,
@@ -75,6 +75,7 @@ public class MangaController {
         return ResponseEntity.ok(mangaService.refreshLatestChapter(mangaId));
     }
 
+    // Update score from user
     @PatchMapping("/library/{mangaId}/score")
     public ResponseEntity<MangaItem> updateScore(
             @PathVariable String mangaId,
@@ -87,5 +88,15 @@ public class MangaController {
     public ResponseEntity<Void> removeFromLibrary(@PathVariable String mangaId) {
         mangaService.removeFromLibrary(mangaId);
         return ResponseEntity.noContent().build();
+    }
+
+    // Get manga details from API
+    @GetMapping("/details/{mangaId}")
+    public ResponseEntity<MangaSearchResult> getDetails(@PathVariable String mangaId) {
+        MangaSearchResult result = mangaService.getDetails(mangaId);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 }
