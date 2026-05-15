@@ -12,6 +12,7 @@ function MediaCard({
   theme,
   icon,
   progressLabel,
+  isAdded,
   onAdd,
   onClick,
 }) {
@@ -39,7 +40,7 @@ function MediaCard({
           <span style={{ fontSize: 28, color: theme.cardIcon }}>{icon}</span>
         )}
 
-        {/* Score pill — only shown if score prop is passed */}
+        {/* Score pill */}
         {score !== undefined && (
           <div
             className="absolute top-1.5 right-1.5 rounded-full px-[7px] py-[2px] text-[11px] font-semibold"
@@ -53,6 +54,7 @@ function MediaCard({
           </div>
         )}
       </div>
+      {/* ↑ end cover div */}
 
       {/* Card body */}
       <div
@@ -69,21 +71,21 @@ function MediaCard({
           {title}
         </p>
 
-        {/* Author — only shown if passed */}
+        {/* Author */}
         {author && (
           <p className="text-[10px] text-[#555566] m-0 mb-[3px] truncate">
             {author}
           </p>
         )}
 
-        {/* Series status — only shown if passed */}
+        {/* Series status */}
         {seriesStatus && (
           <p className="text-[10px] text-[#555566] m-0 mb-[5px] capitalize">
-            {seriesStatus}
+            {seriesStatus}{total != null ? ` · Ch. ${total}` : ''}
           </p>
         )}
 
-        {/* Status badge — only shown if status passed */}
+        {/* Status badge */}
         {style && (
           <span
             className="inline-block text-[10px] font-medium px-[7px] py-[2px] rounded-full mb-1.5"
@@ -93,7 +95,7 @@ function MediaCard({
           </span>
         )}
 
-        {/* Progress row — only shown if progressLabel passed */}
+        {/* Progress row */}
         {progressLabel && (
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8a8a9a]">
@@ -111,22 +113,37 @@ function MediaCard({
           </div>
         )}
 
-        {/* Add to library button — only shown if onAdd passed */}
-        {onAdd && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onAdd()
-            }}
-            className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
-            style={{
-              background: theme.accentBg,
-              border: `0.5px solid ${theme.accentBorder}`,
-              color: theme.accent,
-            }}
-          >
-            + Add to library
-          </button>
+        {/* Add button / Added confirmation */}
+        {(onAdd || isAdded) && (
+          <div className="mt-2">
+            {isAdded ? (
+              <div
+                className="w-full py-1.5 text-[11px] rounded text-center"
+                style={{
+                  background: '#1f4a32',
+                  color: '#4ade80',
+                  border: '0.5px solid #2a5a3a',
+                }}
+              >
+                ✓ Added to library
+              </div>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAdd()
+                }}
+                className="w-full py-1.5 text-[11px] rounded transition-colors"
+                style={{
+                  background: theme.accentBg,
+                  border: `0.5px solid ${theme.accentBorder}`,
+                  color: theme.accent,
+                }}
+              >
+                + Add to library
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

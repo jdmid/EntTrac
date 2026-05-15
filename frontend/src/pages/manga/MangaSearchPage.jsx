@@ -125,16 +125,11 @@ function MangaSearchPage() {
                 author={manga.author}
                 seriesStatus={manga.status}
                 coverUrl={manga.coverUrl}
-                total={manga.latestChapter}
+                total={manga.latestChapter ?? null}
                 theme={theme}
                 icon="📖"
-                progressLabel="Ch."
-                progress={0}
-                onAdd={
-                  addedIds.has(manga.id)
-                    ? null
-                    : () => handleAdd(manga)
-                }
+                isAdded={addedIds.has(manga.id)}
+                onAdd={() => handleAdd(manga)}
               />
             ))}
           </div>
