@@ -90,7 +90,7 @@ public class MangaService {
         mangaRepository.save(item);
         return item;
     }
-    
+
     public void removeFromLibrary(String mangaId) {
         mangaRepository.delete(mangaId);
     }
