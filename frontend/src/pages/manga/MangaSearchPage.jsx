@@ -141,7 +141,7 @@ function MangaSearchPage() {
                 icon="📖"
                 isAdded={addedIds.has(manga.id)}
                 onAdd={() => handleAdd(manga)}
-                onClick={() => navigate(`/manga/library/${manga.id}`)}
+                onClick={() => navigate(`/manga/library/${manga.id}`, { state: { from: 'search' } })}
               />
             ))}
           </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation} from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import { getManga, updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary } from '../../api/mangaApi'
+import { getManga,getMangaDetails,updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary, addToLibrary } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
 
 const STATUS_OPTIONS = [
@@ -24,6 +24,9 @@ function MangaDetailPage() {
   const [chaptersRead, setChaptersRead] = useState(0)
   const [score, setScore] = useState(null)
   const [descExpanded, setDescExpanded] = useState(false)
+  const [inLibrary, setInLibrary] = useState(true)
+  const location = useLocation()
+  const fromSearch = location.state?.from === 'search'
 
   useEffect(() => {
     getManga(mangaId)
@@ -33,10 +36,18 @@ function MangaDetailPage() {
         setScore(res.data.score ?? null)
         setLoading(false)
       })
-      .catch((err) => {
-        console.error(err)
-        setError('Failed to load manga.')
-        setLoading(false)
+      .catch(() => {
+        // Not in library — fetch from MangaDex
+        getMangaDetails(mangaId)
+          .then((res) => {
+            setManga(res.data)
+            setInLibrary(false)
+            setLoading(false)
+          })
+          .catch(() => {
+            setError('Failed to load manga.')
+            setLoading(false)
+          })
       })
   }, [mangaId])
 
@@ -69,7 +80,26 @@ function MangaDetailPage() {
 
   function handleRemove() {
     removeFromLibrary(mangaId)
-      .then(() => navigate('/manga/library'))
+      .then(() => navigate(fromSearch ? '/manga/search' : '/manga/library'))
+      .catch(console.error)
+  }
+
+  function handleAdd() {
+    addToLibrary({
+      mangaId: manga.id,
+      title: manga.title,
+      status: 'PLANNED',
+      chaptersRead: 0,
+      latestChapter: manga.latestChapter,
+      coverUrl: manga.coverUrl,
+      author: manga.author,
+      artist: manga.artist,
+      description: manga.description,
+      seriesStatus: manga.status,
+    })
+      .then(() => {
+        setInLibrary(true)
+      })
       .catch(console.error)
   }
 
@@ -114,9 +144,9 @@ function MangaDetailPage() {
           <span
             className="cursor-pointer transition-colors"
             style={{ color: theme.accent }}
-            onClick={() => navigate('/manga/library')}
+            onClick={() => navigate(fromSearch ? '/manga/search' : '/manga/library')}
           >
-            ← Library
+            ← {fromSearch ? 'Search' : 'Library'}
           </span>
           <span style={{ color: '#333344' }}>/</span>
           <span style={{ color: '#777788' }}>{manga.title}</span>
@@ -142,31 +172,47 @@ function MangaDetailPage() {
               )}
             </div>
 
-            {/* Refresh button */}
-            <button
-              onClick={handleRefresh}
-              className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
-              style={{
-                background: theme.accentBg,
-                border: `0.5px solid ${theme.accentBorder}`,
-                color: theme.accent,
-              }}
-            >
-              ↻ Refresh chapters
-            </button>
+            {/* Refresh button — only if in library */}
+            {inLibrary && (
+              <button
+                onClick={handleRefresh}
+                className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
+                style={{
+                  background: theme.accentBg,
+                  border: `0.5px solid ${theme.accentBorder}`,
+                  color: theme.accent,
+                }}
+              >
+                ↻ Refresh chapters
+              </button>
+            )}
 
-            {/* Remove button */}
-            <button
-              onClick={handleRemove}
-              className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
-              style={{
-                background: '#2e1212',
-                border: '0.5px solid #501c1c',
-                color: '#f87171',
-              }}
-            >
-              Remove from library
-            </button>
+            {/* Remove or Add button */}
+            {inLibrary ? (
+              <button
+                onClick={handleRemove}
+                className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
+                style={{
+                  background: '#2e1212',
+                  border: '0.5px solid #501c1c',
+                  color: '#f87171',
+                }}
+              >
+                Remove from library
+              </button>
+            ) : (
+              <button
+                onClick={handleAdd}
+                className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
+                style={{
+                  background: theme.accentBg,
+                  border: `0.5px solid ${theme.accentBorder}`,
+                  color: theme.accent,
+                }}
+              >
+                + Add to library
+              </button>
+            )}
           </div>
 
           {/* Right col — info */}
@@ -213,7 +259,8 @@ function MangaDetailPage() {
               )}
             </div>
             
-            {/* Score */}
+            {/* Score - only if in library */}
+            {inLibrary && (
             <div className="mt-3">
               <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                 Score
@@ -252,8 +299,10 @@ function MangaDetailPage() {
                 </div>
               </div>
             </div>
+            )}
 
-            {/* Progress */}
+            {/* Progress - only if in library*/}
+            {inLibrary && (
             <div className="mb-4">
               <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                 Progress
@@ -326,8 +375,10 @@ function MangaDetailPage() {
                 </button>
               </div>
             </div>
+            )}
             
-            {/* Status selector */}
+            {/* Status selector - only if in library*/}
+            {inLibrary && (
             <div className="mb-6">
               <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                 Status
@@ -355,7 +406,7 @@ function MangaDetailPage() {
                 ))}
               </div>
             </div>
-
+            )}
           </div>
         </div>
       </div>

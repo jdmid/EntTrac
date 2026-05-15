@@ -35,7 +35,7 @@ public class MangaService {
     public MangaItem getManga(String mangaId) {
         return mangaRepository.findById(mangaId);
     }
-    
+
     public MangaItem addToLibrary(MangaItem item) {
         // Check if already exists
         MangaItem existing = mangaRepository.findById(item.getMangaId());
