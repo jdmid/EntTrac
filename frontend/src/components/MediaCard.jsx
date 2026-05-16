@@ -2,7 +2,7 @@ import { statusStyles } from '../theme/themes'
 
 function MediaCard({ 
   title,
-  author,
+  creator,
   score,
   status,
   progress,
@@ -71,8 +71,8 @@ function MediaCard({
           {title}
         </p>
 
-        {/* Author */}
-        {author && (
+        {/* Creator */}
+        {creator && (
           <p className="text-[10px] text-[#555566] m-0 mb-[3px] truncate">
             {author}
           </p>

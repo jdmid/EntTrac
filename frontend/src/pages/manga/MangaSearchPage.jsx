@@ -133,7 +133,7 @@ function MangaSearchPage() {
               <MediaCard
                 key={manga.id}
                 title={manga.title}
-                author={manga.author}
+                creator={manga.author}
                 seriesStatus={manga.status}
                 coverUrl={manga.coverUrl}
                 total={manga.latestChapter ?? null}
