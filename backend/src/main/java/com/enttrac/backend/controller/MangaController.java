@@ -99,4 +99,13 @@ public class MangaController {
         }
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/library/{mangaId}/rating")
+    public ResponseEntity<Double> getCommunityRating(@PathVariable String mangaId) {
+        Double rating = mangaService.getCommunityRating(mangaId);
+        if (rating == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(rating);
+    }
 }

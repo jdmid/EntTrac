@@ -56,6 +56,7 @@ public class MangaItem {
     private String updatedAt;
     private String description;
     private String seriesStatus;
+    private Double communityRating;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("PK")

@@ -50,6 +50,27 @@ public class MangaDexClient implements MangaMetadataClient {
         return null;
     }
 
+    @Override
+    public Double getCommunityRating(String id) {
+        try {
+            JsonNode response = restClient.get()
+                    .uri("/statistics/manga/{id}", id)
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (response != null && response.has("statistics")) {
+                JsonNode stats = response.get("statistics").get(id);
+                if (stats != null && stats.has("rating")) {
+                    double bayesian = stats.get("rating").get("bayesian").asDouble();
+                    return Math.round(bayesian * 10.0) / 10.0;
+                }
+            }
+        } catch (Exception e) {
+            // rating unavailable
+        }
+        return null;
+    }
+
     private MangaSearchResult mapToSearchResult(JsonNode manga) {
         String id = manga.get("id").asText();
 

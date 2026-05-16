@@ -97,6 +97,10 @@ public class MangaService {
         return item;
     }
 
+    public Double getCommunityRating(String mangaId) {
+        return mangaMetadataClient.getCommunityRating(mangaId);
+    }
+
     public void removeFromLibrary(String mangaId) {
         mangaRepository.delete(mangaId);
     }
