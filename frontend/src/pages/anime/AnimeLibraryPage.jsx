@@ -5,6 +5,7 @@ import MediaCard from '../../components/MediaCard'
 import FilterBar from '../../components/FilterBar'
 import { getAnimeLibrary } from '../../api/animeApi'
 import { themes, statusStyles } from '../../theme/themes'
+import { SERIES_STATUS_FILTERS } from '../../utils/statusMapping'
 
 const ANIME_STATUS_FILTERS = [
   { value: 'ALL',       label: 'All' },
@@ -108,6 +109,7 @@ function AnimeLibraryPage() {
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
           seriesStatusFilter={seriesStatusFilter}
+          seriesStatusFilters={SERIES_STATUS_FILTERS.anime}
           onSeriesStatusChange={setSeriesStatusFilter}
           sortBy={sortBy}
           onSortChange={setSortBy}

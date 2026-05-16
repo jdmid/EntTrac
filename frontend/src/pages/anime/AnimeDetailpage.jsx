@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import { getAnime, getAnimeDetails, updateAnimeProgress, updateAnimeScore, updateAnimeStatus, refreshLatestEpisode, removeAnimeFromLibrary, addAnimeToLibrary, getAnimeCommunityRating } from '../../api/animeApi'
 import { themes, statusStyles } from '../../theme/themes'
+import { normalizeSeriesStatus } from '../../utils/statusMapping'
 
 const STATUS_OPTIONS = [
   { value: 'CONSUMING', label: 'Watching' },
@@ -96,7 +97,7 @@ function AnimeDetailPage() {
       totalEpisodes: anime.totalEpisodes,
       coverUrl: anime.coverUrl,
       description: anime.description,
-      seriesStatus: anime.status,
+      seriesStatus: normalizeSeriesStatus(anime.status, 'anime'),
       studio: anime.studio,
       season: anime.season,
       communityRating: anime.communityRating,

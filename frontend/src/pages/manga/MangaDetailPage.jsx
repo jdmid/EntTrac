@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation} from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import { getManga,getMangaDetails,updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary, addToLibrary, getCommunityRating } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
+import { normalizeSeriesStatus } from '../../utils/statusMapping'
 
 const STATUS_OPTIONS = [
   { value: 'CONSUMING', label: 'Reading' },
@@ -101,7 +102,7 @@ function MangaDetailPage() {
       author: manga.author,
       artist: manga.artist,
       description: manga.description,
-      seriesStatus: manga.status,
+      seriesStatus: normalizeSeriesStatus(manga.status, 'manga'),
     })
       .then(() => {
         setInLibrary(true)

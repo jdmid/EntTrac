@@ -5,6 +5,7 @@ import MediaCard from '../../components/MediaCard'
 import FilterBar from '../../components/FilterBar'
 import { getLibrary } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
+import { SERIES_STATUS_FILTERS } from '../../utils/statusMapping'
 
 const MANGA_STATUS_FILTERS = [
   { value: 'ALL',       label: 'All' },
@@ -12,14 +13,6 @@ const MANGA_STATUS_FILTERS = [
   { value: 'PLANNED',   label: 'Plan to Read' },
   { value: 'FINISHED',  label: 'Finished' },
   { value: 'DROPPED',   label: 'Dropped' },
-]
-
-const SERIES_STATUS_FILTERS = [
-  { value: 'ALL',       label: 'All' },
-  { value: 'ongoing',   label: 'Ongoing' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'hiatus',    label: 'Hiatus' },
-  { value: 'cancelled', label: 'Cancelled' },
 ]
 
 function sortManga(items, sortBy) {
@@ -119,7 +112,7 @@ function MangaLibraryPage() {
           statusFilters={MANGA_STATUS_FILTERS}
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
-          seriesStatusFilters={SERIES_STATUS_FILTERS}
+          seriesStatusFilters={SERIES_STATUS_FILTERS.manga}
           seriesStatusFilter={seriesStatusFilter}
           onSeriesStatusChange={setSeriesStatusFilter}
           sortBy={sortBy}

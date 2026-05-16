@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import MediaCard from '../../components/MediaCard'
 import { searchAnime, addAnimeToLibrary, getAnimeLibrary } from '../../api/animeApi'
+import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
 
 function AnimeSearchPage() {
@@ -50,7 +51,7 @@ function AnimeSearchPage() {
       totalEpisodes: anime.totalEpisodes,
       coverUrl: anime.coverUrl,
       description: anime.description,
-      seriesStatus: anime.status,
+      seriesStatus: normalizeSeriesStatus(anime.status, 'anime'),
       studio: anime.studio,
       season: anime.season,
       communityRating: anime.communityRating,

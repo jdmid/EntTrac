@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import MediaCard from '../../components/MediaCard'
 import { searchManga, addToLibrary, getLibrary } from '../../api/mangaApi'
+import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
 
 function MangaSearchPage() {
@@ -52,7 +53,7 @@ function MangaSearchPage() {
       author: manga.author,
       artist: manga.artist,
       description: manga.description,
-      seriesStatus: manga.status,
+      seriesStatus: normalizeSeriesStatus(manga.status, 'manga'),
     })
       .then(() => {
         setAddedIds((prev) => new Set([...prev, manga.id]))

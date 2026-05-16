@@ -26,16 +26,9 @@ function Chip({ label, isActive, accent, onClick }) {
   )
 }
 
-function FilterBar({ statusFilters, statusFilter, onStatusChange, seriesStatusFilter, onSeriesStatusChange, sortBy, onSortChange, theme }) {
+function FilterBar({ statusFilters, statusFilter, onStatusChange, seriesStatusFilter, onSeriesStatusChange, sortBy, onSortChange, theme, seriesStatusFilters }) {
   const [showMoreFilters, setShowMoreFilters] = useState(false)
 
-  const SERIES_STATUS_FILTERS = [
-    { value: 'ALL', label: 'All' },
-    { value: 'ONGOING', label: 'Ongoing' },
-    { value: 'COMPLETED', label: 'Completed' },
-    { value: 'HIATUS', label: 'Hiatus' },
-    { value: 'CANCELLED', label: 'Cancelled' },
-  ]
 
   return (
     <div className="mb-4">
@@ -83,7 +76,7 @@ function FilterBar({ statusFilters, statusFilter, onStatusChange, seriesStatusFi
               Series
             </span>
 
-            {SERIES_STATUS_FILTERS.map((f) => (
+            {seriesStatusFilters.map((f) => (
                 <Chip
                 key={f.value}
                 label={f.label}
