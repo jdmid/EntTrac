@@ -159,12 +159,12 @@ function MangaDetailPage() {
         </div>
 
         {/* Detail layout */}
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
 
           {/* Left col — cover */}
-          <div className="shrink-0 w-[180px]">
+          <div className="shrink-0 w-full md:w-[180px]">
             <div
-              className="w-full aspect-[2/3] rounded-lg overflow-hidden flex items-center justify-center"
+              className="w-full aspect-[2/3] md:aspect-[2/3] max-h-[300px] md:max-h-none rounded-lg overflow-hidden flex items-center justify-center"
               style={{ background: theme.cardCover }}
             >
               {manga.coverUrl ? (
