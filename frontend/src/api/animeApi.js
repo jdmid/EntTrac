@@ -43,3 +43,6 @@ export const updateAnimeNotes = (animeId, notes) =>
   client.patch(`/anime/library/${animeId}/notes`, notes, {
     headers: { 'Content-Type': 'text/plain' }
   })
+
+  export const refreshAllAnime = () =>
+  client.post('/anime/library/refresh-all')

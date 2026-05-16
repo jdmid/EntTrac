@@ -43,3 +43,6 @@ export const updateMangaNotes = (mangaId, notes) =>
   client.patch(`/manga/library/${mangaId}/notes`, notes, {
     headers: { 'Content-Type': 'text/plain' }
   })
+
+export const refreshAllManga = () =>
+  client.post('/manga/library/refresh-all')

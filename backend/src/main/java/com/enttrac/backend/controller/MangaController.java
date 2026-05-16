@@ -117,4 +117,9 @@ public class MangaController {
             @RequestBody(required = false) String notes) {
         return ResponseEntity.ok(mangaService.updateNotes(mangaId, notes != null ? notes : ""));
     }
+
+    @PostMapping("/library/refresh-all")
+    public ResponseEntity<List<MangaItem>> refreshAll() {
+        return ResponseEntity.ok(mangaService.refreshAll());
+    }
 }

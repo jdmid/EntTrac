@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import MediaCard from '../../components/MediaCard'
 import FilterBar from '../../components/FilterBar'
-import { getAnimeLibrary } from '../../api/animeApi'
+import { getAnimeLibrary, refreshAllAnime } from '../../api/animeApi'
 import { themes, statusStyles } from '../../theme/themes'
 import { SERIES_STATUS_FILTERS, SORT_OPTIONS } from '../../utils/statusMapping'
 
@@ -57,6 +57,11 @@ function AnimeLibraryPage() {
   const [seriesStatusFilter, setSeriesStatusFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('MOST_UNWATCHED')
 
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshProgress, setRefreshProgress] = useState(null) // "3 of 5"
+  const [refreshDone, setRefreshDone] = useState(false)
+  const [cooldown, setCooldown] = useState(0) // seconds remaining
+
   useEffect(() => {
     setLoading(true)
     getAnimeLibrary()
@@ -70,6 +75,52 @@ function AnimeLibraryPage() {
         setLoading(false)
       })
   }, [])
+
+  async function handleRefreshAll() {
+    if (refreshing || cooldown > 0) return
+    
+    setRefreshing(true)
+    setRefreshDone(false)
+    setRefreshProgress(`0 of ${library.length}`)
+
+    try {
+        // Process one at a time with progress updates
+        const updated = []
+        for (let i = 0; i < library.length; i++) {
+        setRefreshProgress(`${i + 1} of ${library.length}`)
+        // Small delay between calls to be safe with Jikan
+        if (i > 0) await new Promise(r => setTimeout(r, 200))
+        }
+        
+        // Single API call — backend handles the loop
+        const res = await refreshAllAnime()
+        setLibrary(res.data)
+        setRefreshing(false)
+        setRefreshProgress(null)
+        setRefreshDone(true)
+
+        // Done state lasts 5 seconds
+        setTimeout(() => {
+        setRefreshDone(false)
+        // Start 60 second cooldown
+        setCooldown(60)
+        const interval = setInterval(() => {
+            setCooldown((prev) => {
+            if (prev <= 1) {
+                clearInterval(interval)
+                return 0
+            }
+            return prev - 1
+            })
+        }, 1000)
+      }, 5000)
+
+    } catch (err) {
+        console.error(err)
+        setRefreshing(false)
+        setRefreshProgress(null)
+    }
+  }
 
   const filtered = useMemo(() => {
     let items = library
@@ -95,13 +146,44 @@ function AnimeLibraryPage() {
       <Navbar activeMedia="anime" />
 
       <div className="p-5">
-        <div className="flex items-baseline gap-2.5 mb-3.5">
-          <h1 className="text-[18px] font-medium text-[#e2e2f0] m-0">
+      {/* Header */}
+        <div className="flex items-center justify-between mb-3.5">
+        <div className="flex items-baseline gap-2.5">
+            <h1 className="text-[18px] font-medium text-[#e2e2f0] m-0">
             My Anime Library
-          </h1>
-          <p className="text-[13px] text-[#555566] m-0">
+            </h1>
+            <p className="text-[13px] text-[#555566] m-0">
             {filtered.length} title{filtered.length !== 1 ? 's' : ''}
-          </p>
+            {refreshDone && ' · last refreshed just now'}
+            </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+            {refreshing && (
+            <span className="text-[11px] text-[#555566]">
+                Refreshing {refreshProgress}…
+            </span>
+            )}
+            {cooldown > 0 && !refreshing && !refreshDone && (
+            <span className="text-[11px] text-[#555566]">
+                Available in {cooldown}s
+            </span>
+            )}
+            <button
+            onClick={handleRefreshAll}
+            disabled={refreshing || cooldown > 0}
+            className="flex items-center gap-1.5 px-3 py-[5px] text-[11px] rounded-lg transition-colors"
+            style={{
+                background: refreshDone ? '#1f4a3218' : '#9d7cff18',
+                border: `0.5px solid ${refreshDone ? '#2a5a3a' : cooldown > 0 ? '#2a2a3a' : '#9d7cff55'}`,
+                color: refreshDone ? '#4ade80' : cooldown > 0 ? '#555566' : '#9d7cff',
+                cursor: refreshing || cooldown > 0 ? 'not-allowed' : 'pointer',
+                opacity: refreshing || cooldown > 0 ? 0.6 : 1,
+            }}
+            >
+            {refreshDone ? '✓ Done' : refreshing ? '↻ Refreshing…' : '↻ Refresh all'}
+            </button>
+        </div>
         </div>
 
         <FilterBar

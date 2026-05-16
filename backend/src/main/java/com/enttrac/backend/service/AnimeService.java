@@ -7,6 +7,7 @@ import com.enttrac.backend.repository.AnimeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO: refactor into shared MediaService when adding third medium
@@ -114,5 +115,26 @@ public class AnimeService {
         item.setUpdatedAt(Instant.now().toString());
         animeRepository.save(item);
         return item;
+    }
+
+    public List<AnimeItem> refreshAll() {
+        List<AnimeItem> library = animeRepository.findAll();
+        List<AnimeItem> updated = new ArrayList<>();
+
+        for (AnimeItem item : library) {
+            try {
+                AnimeSearchResult details = animeMetadataClient.getDetails(item.getAnimeId());
+                if (details != null && details.getTotalEpisodes() != null) {
+                    item.setTotalEpisodes(details.getTotalEpisodes());
+                    item.setLastRefreshed(Instant.now().toString());
+                    item.setUpdatedAt(Instant.now().toString());
+                    animeRepository.save(item);
+                }
+                updated.add(item);
+            } catch (Exception e) {
+                updated.add(item);
+            }
+        }
+        return updated;
     }
 }

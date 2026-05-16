@@ -7,6 +7,7 @@ import com.enttrac.backend.repository.MangaRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO: refactor into shared MediaService when adding third medium
@@ -111,6 +112,27 @@ public class MangaService {
         item.setUpdatedAt(Instant.now().toString());
         mangaRepository.save(item);
         return item;
+    }
+    public List<MangaItem> refreshAll() {
+        List<MangaItem> library = mangaRepository.findAll();
+        List<MangaItem> updated = new ArrayList<>();
+
+        for (MangaItem item : library) {
+            try {
+                MangaSearchResult details = mangaMetadataClient.getDetails(item.getMangaId());
+                if (details != null && details.getLatestChapter() != null) {
+                    item.setLatestChapter(details.getLatestChapter());
+                    item.setLastRefreshed(Instant.now().toString());
+                    item.setUpdatedAt(Instant.now().toString());
+                    mangaRepository.save(item);
+                }
+                updated.add(item);
+            } catch (Exception e) {
+                // skip this item if it fails, continue with rest
+                updated.add(item);
+            }
+        }
+        return updated;
     }
 
     public void removeFromLibrary(String mangaId) {

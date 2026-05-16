@@ -105,4 +105,9 @@ public class AnimeController {
             @RequestBody(required = false) String notes) {
         return ResponseEntity.ok(animeService.updateNotes(animeId, notes != null ? notes : ""));
     }
+
+    @PostMapping("/library/refresh-all")
+    public ResponseEntity<List<AnimeItem>> refreshAll() {
+        return ResponseEntity.ok(animeService.refreshAll());
+    }
 }
