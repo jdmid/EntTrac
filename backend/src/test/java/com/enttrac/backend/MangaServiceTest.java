@@ -173,4 +173,53 @@ public class MangaServiceTest {
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
+
+    @Test
+    void updateStatus_ShouldUpdateStatus() {
+        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+
+        MangaItem result = mangaService.updateStatus("abc123", "FINISHED");
+
+        assertEquals("FINISHED", result.getStatus());
+        verify(mangaRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void updateStatus_ShouldThrowWhenNotFound() {
+        when(mangaRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                mangaService.updateStatus("notreal", "FINISHED"));
+
+        assertEquals("Manga not found: notreal", ex.getMessage());
+    }
+
+    @Test
+    void getCommunityRating_ShouldDelegateToClient() {
+        when(mangaMetadataClient.getCommunityRating("abc123")).thenReturn(9.6);
+
+        Double result = mangaService.getCommunityRating("abc123");
+
+        assertEquals(9.6, result);
+        verify(mangaMetadataClient, times(1)).getCommunityRating("abc123");
+    }
+
+    @Test
+    void getCommunityRating_ShouldReturnNullWhenUnavailable() {
+        when(mangaMetadataClient.getCommunityRating("abc123")).thenReturn(null);
+
+        Double result = mangaService.getCommunityRating("abc123");
+
+        assertNull(result);
+    }
+
+    @Test
+    void addToLibrary_ShouldReturnExistingWhenAlreadyInLibrary() {
+        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+
+        MangaItem result = mangaService.addToLibrary(testItem);
+
+        assertEquals(testItem, result);
+        verify(mangaRepository, never()).save(any());
+    }
 }

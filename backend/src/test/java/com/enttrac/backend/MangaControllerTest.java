@@ -184,4 +184,67 @@ public class MangaControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error").value("Something went wrong"));
     }
+
+    @Test
+    void updateStatus_ShouldReturnUpdatedItem() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+        item.setStatus("CONSUMING");
+
+        when(mangaService.updateStatus("abc123", "CONSUMING")).thenReturn(item);
+
+        mockMvc.perform(patch("/api/manga/library/abc123/status")
+                        .param("status", "CONSUMING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CONSUMING"));
+    }
+
+    @Test
+    void updateStatus_ShouldReturn400WhenStatusInvalid() throws Exception {
+        mockMvc.perform(patch("/api/manga/library/abc123/status")
+                        .param("status", "INVALID"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getDetails_ShouldReturnResultWhenFound() throws Exception {
+        MangaSearchResult result = MangaSearchResult.builder()
+                .id("abc123")
+                .title("One Piece")
+                .status("ongoing")
+                .build();
+
+        when(mangaService.getDetails("abc123")).thenReturn(result);
+
+        mockMvc.perform(get("/api/manga/details/abc123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("One Piece"))
+                .andExpect(jsonPath("$.id").value("abc123"));
+    }
+
+    @Test
+    void getDetails_ShouldReturn404WhenNotFound() throws Exception {
+        when(mangaService.getDetails("notreal")).thenReturn(null);
+
+        mockMvc.perform(get("/api/manga/details/notreal"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCommunityRating_ShouldReturnRatingWhenAvailable() throws Exception {
+        when(mangaService.getCommunityRating("abc123")).thenReturn(9.6);
+
+        mockMvc.perform(get("/api/manga/library/abc123/rating"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(9.6));
+    }
+
+    @Test
+    void getCommunityRating_ShouldReturn204WhenUnavailable() throws Exception {
+        when(mangaService.getCommunityRating("abc123")).thenReturn(null);
+
+        mockMvc.perform(get("/api/manga/library/abc123/rating"))
+                .andExpect(status().isNoContent());
+    }
 }
