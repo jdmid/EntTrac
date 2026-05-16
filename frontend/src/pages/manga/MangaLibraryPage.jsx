@@ -5,7 +5,7 @@ import MediaCard from '../../components/MediaCard'
 import FilterBar from '../../components/FilterBar'
 import { getLibrary } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
-import { SERIES_STATUS_FILTERS } from '../../utils/statusMapping'
+import { SERIES_STATUS_FILTERS, SORT_OPTIONS  } from '../../utils/statusMapping'
 
 const MANGA_STATUS_FILTERS = [
   { value: 'ALL',       label: 'All' },
@@ -115,6 +115,7 @@ function MangaLibraryPage() {
           seriesStatusFilters={SERIES_STATUS_FILTERS.manga}
           seriesStatusFilter={seriesStatusFilter}
           onSeriesStatusChange={setSeriesStatusFilter}
+          sortOptions={SORT_OPTIONS.manga}
           sortBy={sortBy}
           onSortChange={setSortBy}
           theme={theme}

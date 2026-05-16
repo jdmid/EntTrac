@@ -36,5 +36,26 @@ export const SERIES_STATUS_FILTERS = {
     { value: 'ongoing',  label: 'Currently Airing' },
     { value: 'finished', label: 'Finished Airing' },
     { value: 'upcoming', label: 'Not Yet Aired' },
+  ],  
+}
+
+export const SORT_OPTIONS = {
+  manga: [
+    { value: 'MOST_UNREAD',       label: 'Most unread' },
+    { value: 'ALPHA_AZ',          label: 'Alphabetical A–Z' },
+    { value: 'ALPHA_ZA',          label: 'Alphabetical Z–A' },
+    { value: 'SCORE_HIGH',        label: 'Score (high to low)' },
+    { value: 'SCORE_LOW',         label: 'Score (low to high)' },
+    { value: 'RECENTLY_UPDATED',  label: 'Recently updated' },
+    { value: 'RECENTLY_ADDED',    label: 'Recently added' },
+  ],
+  anime: [
+    { value: 'MOST_UNREAD',       label: 'Most unwatched' },
+    { value: 'ALPHA_AZ',          label: 'Alphabetical A–Z' },
+    { value: 'ALPHA_ZA',          label: 'Alphabetical Z–A' },
+    { value: 'SCORE_HIGH',        label: 'Score (high to low)' },
+    { value: 'SCORE_LOW',         label: 'Score (low to high)' },
+    { value: 'RECENTLY_UPDATED',  label: 'Recently updated' },
+    { value: 'RECENTLY_ADDED',    label: 'Recently added' },
   ],
 }

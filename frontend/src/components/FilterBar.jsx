@@ -1,15 +1,5 @@
 import { useState } from 'react'
 
-const SORT_OPTIONS = [
-  { value: 'MOST_UNREAD', label: 'Most unread' },
-  { value: 'ALPHA_AZ', label: 'Alphabetical A–Z' },
-  { value: 'ALPHA_ZA', label: 'Alphabetical Z–A' },
-  { value: 'SCORE_HIGH', label: 'Score (high to low)' },
-  { value: 'SCORE_LOW', label: 'Score (low to high)' },
-  { value: 'RECENTLY_UPDATED', label: 'Recently updated' },
-  { value: 'RECENTLY_ADDED', label: 'Recently added' },
-]
-
 function Chip({ label, isActive, accent, onClick }) {
   return (
     <button
@@ -26,7 +16,7 @@ function Chip({ label, isActive, accent, onClick }) {
   )
 }
 
-function FilterBar({ statusFilters, statusFilter, onStatusChange, seriesStatusFilter, onSeriesStatusChange, sortBy, onSortChange, theme, seriesStatusFilters }) {
+function FilterBar({ statusFilters, statusFilter, onStatusChange, seriesStatusFilter, onSeriesStatusChange, sortBy, onSortChange, theme, seriesStatusFilters, sortOptions }) {
   const [showMoreFilters, setShowMoreFilters] = useState(false)
 
 
@@ -110,7 +100,7 @@ function FilterBar({ statusFilters, statusFilter, onStatusChange, seriesStatusFi
             backgroundPosition: 'right 8px center',
           }}
         >
-          {SORT_OPTIONS.map((o) => (
+          {sortOptions.map((o) => (
             <option key={o.value} value={o.value} style={{ background: '#16131f' }}>
               {o.label}
             </option>
