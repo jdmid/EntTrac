@@ -32,8 +32,13 @@ function Navbar({ activeMedia = 'manga' }) {
         </button>
 
         <button
-          className="h-12 px-4 text-sm border-b-2 text-white/30 border-transparent cursor-not-allowed"
-          disabled
+          onClick={() => navigate('/anime/library')}
+          className="h-12 px-4 text-sm border-b-2 transition-colors"
+          style={
+            activeMedia === 'anime'
+              ? { color: theme.accent, borderColor: theme.accent }
+              : { color: '#777788', borderColor: 'transparent' }
+          }
         >
           Anime
         </button>
