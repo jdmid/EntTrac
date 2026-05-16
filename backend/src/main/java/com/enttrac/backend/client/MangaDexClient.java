@@ -23,7 +23,7 @@ public class MangaDexClient implements MangaMetadataClient {
     @Override
     public List<MangaSearchResult> search(String query) {
         JsonNode response = restClient.get()
-                .uri("/manga?title={query}&limit=10&includes[]=cover_art&includes[]=author&includes[]=artist", query)                .retrieve()
+                .uri("/manga?title={query}&limit=25&includes[]=cover_art&includes[]=author&includes[]=artist", query)                .retrieve()
                 .body(JsonNode.class);
 
         List<MangaSearchResult> results = new ArrayList<>();
