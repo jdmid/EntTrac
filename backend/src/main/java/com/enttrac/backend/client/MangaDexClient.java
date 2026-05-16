@@ -40,13 +40,19 @@ public class MangaDexClient implements MangaMetadataClient {
     @Override
     public MangaSearchResult getDetails(String id) {
         JsonNode response = restClient.get()
-                .uri("/manga/{id}?includes[]=cover_art&includes[]=author&includes[]=artist", id)                .retrieve()
+                .uri("/manga/{id}?includes[]=cover_art&includes[]=author&includes[]=artist", id)
+                .retrieve()
                 .body(JsonNode.class);
 
         if (response != null && response.has("data")) {
-            return mapToSearchResult(response.get("data"));
+            MangaSearchResult result = mapToSearchResult(response.get("data"));
+            // Override with accurate chapter count from aggregate
+            Integer accurateChapter = fetchLatestChapterFromFeed(id);
+            if (accurateChapter != null) {
+                result.setLatestChapter(accurateChapter);
+            }
+            return result;
         }
-
         return null;
     }
 
@@ -87,9 +93,18 @@ public class MangaDexClient implements MangaMetadataClient {
         // Get status
         String status = manga.get("attributes").get("status").asText();
 
-        // Latest chapter — use feed for accuracy (lastChapter attribute is unreliable)
-        String mangaIdForFeed = manga.get("id").asText();
-        Integer latestChapter = fetchLatestChapterFromFeed(mangaIdForFeed);
+        // Get latest chapter
+        Integer latestChapter = null;
+        if (manga.get("attributes").has("lastChapter")
+                && !manga.get("attributes").get("lastChapter").isNull()
+                && !manga.get("attributes").get("lastChapter").asText().isEmpty()) {
+            try {
+                latestChapter = (int) Double.parseDouble(
+                        manga.get("attributes").get("lastChapter").asText());
+            } catch (NumberFormatException e) {
+                // not a clean number, leave null
+            }
+        }
 
         // Get cover art URL
         String coverUrl = null;
