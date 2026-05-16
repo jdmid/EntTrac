@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 
+// TODO: refactor into shared MediaService when adding third medium
 @Service
 public class MangaService {
 
@@ -99,6 +100,17 @@ public class MangaService {
 
     public Double getCommunityRating(String mangaId) {
         return mangaMetadataClient.getCommunityRating(mangaId);
+    }
+
+    public MangaItem updateNotes(String mangaId, String notes) {
+        MangaItem item = mangaRepository.findById(mangaId);
+        if (item == null) {
+            throw new RuntimeException("Manga not found: " + mangaId);
+        }
+        item.setNotes(notes);
+        item.setUpdatedAt(Instant.now().toString());
+        mangaRepository.save(item);
+        return item;
     }
 
     public void removeFromLibrary(String mangaId) {

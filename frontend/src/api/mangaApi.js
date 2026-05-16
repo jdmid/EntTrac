@@ -38,3 +38,8 @@ export const refreshLatestChapter = (mangaId) =>
 
 export const removeFromLibrary = (mangaId) =>
   client.delete(`/manga/library/${mangaId}`)
+
+export const updateMangaNotes = (mangaId, notes) =>
+  client.patch(`/manga/library/${mangaId}/notes`, notes, {
+    headers: { 'Content-Type': 'text/plain' }
+  })

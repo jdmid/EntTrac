@@ -98,4 +98,11 @@ public class AnimeController {
         animeService.removeFromLibrary(animeId);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/library/{animeId}/notes")
+    public ResponseEntity<AnimeItem> updateNotes(
+            @PathVariable String animeId,
+            @RequestBody(required = false) String notes) {
+        return ResponseEntity.ok(animeService.updateNotes(animeId, notes != null ? notes : ""));
+    }
 }

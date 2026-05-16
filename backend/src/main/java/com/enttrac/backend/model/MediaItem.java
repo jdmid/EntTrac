@@ -46,6 +46,8 @@ public abstract class MediaItem {
     private String lastRefreshed;
     private String updatedAt;
 
+    private String notes;
+
     @DynamoDbPartitionKey
     @DynamoDbAttribute("PK")
     public String getPk() { return pk; }

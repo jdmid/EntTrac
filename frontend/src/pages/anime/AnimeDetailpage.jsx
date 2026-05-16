@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import { getAnime, getAnimeDetails, updateAnimeProgress, updateAnimeScore, updateAnimeStatus, refreshLatestEpisode, removeAnimeFromLibrary, addAnimeToLibrary, getAnimeCommunityRating } from '../../api/animeApi'
+import NotesDialog from '../../components/NotesDialog'
+import { getAnime, getAnimeDetails, updateAnimeProgress, updateAnimeScore, updateAnimeStatus, refreshLatestEpisode, removeAnimeFromLibrary, addAnimeToLibrary, getAnimeCommunityRating, updateAnimeNotes } from '../../api/animeApi'
 import { themes, statusStyles } from '../../theme/themes'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 
@@ -28,6 +29,7 @@ function AnimeDetailPage() {
   const [descExpanded, setDescExpanded] = useState(false)
   const [inLibrary, setInLibrary] = useState(true)
   const [communityRating, setCommunityRating] = useState(null)
+  const [notesOpen, setNotesOpen] = useState(false)
 
   useEffect(() => {
     getAnime(animeId)
@@ -36,23 +38,22 @@ function AnimeDetailPage() {
         setEpisodesWatched(res.data.episodesWatched ?? 0)
         setScore(res.data.score ?? null)
         setLoading(false)
+        setCommunityRating(res.data.communityRating ?? null)
       })
       .catch(() => {
-        getAnimeDetails(animeId)
-          .then((res) => {
-            setAnime(res.data)
-            setInLibrary(false)
-            setLoading(false)
-          })
-          .catch(() => {
-            setError('Failed to load anime.')
-            setLoading(false)
-          })
+        setTimeout(() => {
+            getAnimeDetails(animeId)
+            .then((res) => {
+                setAnime(res.data)
+                setInLibrary(false)
+                setLoading(false)
+            })
+            .catch(() => {
+                setError('Failed to load anime.')
+                setLoading(false)
+            })
+        }, 500)    
       })
-
-    getAnimeCommunityRating(animeId)
-      .then((res) => setCommunityRating(res.data))
-      .catch(() => setCommunityRating(null))
   }, [animeId])
 
   function handleProgressSave() {
@@ -106,6 +107,11 @@ function AnimeDetailPage() {
       .catch(console.error)
   }
 
+  function handleNotesSave(notes) {
+    return updateAnimeNotes(animeId, notes)
+        .then((res) => setAnime(res.data))
+    }
+
   if (loading) {
     return (
       <div className="min-h-screen" style={{ background: theme.background }}>
@@ -142,17 +148,33 @@ function AnimeDetailPage() {
 
       <div className="p-5">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-5 text-[12px]">
-          <span
+        {/* Breadcrumb + Notes button */}
+        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2 text-[12px]">
+            <span
             className="cursor-pointer transition-colors"
             style={{ color: theme.accent }}
             onClick={() => navigate(fromSearch ? '/anime/search' : '/anime/library')}
-          >
+            >
             ← {fromSearch ? 'Search' : 'Library'}
-          </span>
-          <span style={{ color: '#333344' }}>/</span>
-          <span style={{ color: '#777788' }}>{anime.title}</span>
+            </span>
+            <span style={{ color: '#333344' }}>/</span>
+            <span style={{ color: '#777788' }}>{anime.title}</span>
+        </div>
+
+        {inLibrary && (
+            <button
+            onClick={() => setNotesOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] rounded-lg transition-colors"
+            style={{
+                background: theme.accentBg,
+                border: `0.5px solid ${theme.accentBorder}`,
+                color: theme.accent,
+            }}
+            >
+            📝 Notes
+            </button>
+        )}
         </div>
 
         {/* Detail layout */}
@@ -430,6 +452,15 @@ function AnimeDetailPage() {
           </div>
         </div>
       </div>
+    <NotesDialog
+        isOpen={notesOpen}
+        onClose={() => setNotesOpen(false)}
+        title={anime.title}
+        initialNotes={anime.notes}
+        currentProgress={anime.episodesWatched}
+        progressLabel="Ep."
+        onSave={handleNotesSave}
+      />
     </div>
   )
 }

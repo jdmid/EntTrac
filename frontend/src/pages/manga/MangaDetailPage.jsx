@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation} from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import { getManga,getMangaDetails,updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary, addToLibrary, getCommunityRating } from '../../api/mangaApi'
+import NotesDialog from '../../components/NotesDialog'
+import { getManga,getMangaDetails,updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary, addToLibrary, getCommunityRating, updateMangaNotes } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 
@@ -29,6 +30,7 @@ function MangaDetailPage() {
   const location = useLocation()
   const fromSearch = location.state?.from === 'search'
   const [communityRating, setCommunityRating] = useState(null)
+  const [notesOpen, setNotesOpen] = useState(false)
 
   useEffect(() => {
     getManga(mangaId)
@@ -110,6 +112,11 @@ function MangaDetailPage() {
       .catch(console.error)
   }
 
+  function handleNotesSave(notes) {
+    return updateMangaNotes(mangaId, notes)
+      .then((res) => setManga(res.data))
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen" style={{ background: theme.background }}>
@@ -146,17 +153,33 @@ function MangaDetailPage() {
 
       <div className="p-5">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-5 text-[12px]">
-          <span
-            className="cursor-pointer transition-colors"
-            style={{ color: theme.accent }}
-            onClick={() => navigate(fromSearch ? '/manga/search' : '/manga/library')}
-          >
-            ← {fromSearch ? 'Search' : 'Library'}
-          </span>
-          <span style={{ color: '#333344' }}>/</span>
-          <span style={{ color: '#777788' }}>{manga.title}</span>
+        {/* Breadcrumb + Notes button */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2 text-[12px]">
+            <span
+              className="cursor-pointer transition-colors"
+              style={{ color: theme.accent }}
+              onClick={() => navigate(fromSearch ? '/manga/search' : '/manga/library')}
+            >
+              ← {fromSearch ? 'Search' : 'Library'}
+            </span>
+            <span style={{ color: '#333344' }}>/</span>
+            <span style={{ color: '#777788' }}>{manga.title}</span>
+          </div>
+
+          {inLibrary && (
+            <button
+              onClick={() => setNotesOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] rounded-lg transition-colors"
+              style={{
+                background: theme.accentBg,
+                border: `0.5px solid ${theme.accentBorder}`,
+                color: theme.accent,
+              }}
+            >
+              📝 Notes
+            </button>
+          )}
         </div>
 
         {/* Detail layout */}
@@ -432,6 +455,15 @@ function MangaDetailPage() {
           </div>
         </div>
       </div>
+    <NotesDialog
+        isOpen={notesOpen}
+        onClose={() => setNotesOpen(false)}
+        title={manga.title}
+        initialNotes={manga.notes}
+        currentProgress={manga.chaptersRead}
+        progressLabel="Ch."
+        onSave={handleNotesSave}
+      />
     </div>
   )
 }

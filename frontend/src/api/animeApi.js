@@ -38,3 +38,8 @@ export const getAnimeDetails = (animeId) =>
 
 export const getAnimeCommunityRating = (animeId) =>
   client.get(`/anime/library/${animeId}/rating`)
+
+export const updateAnimeNotes = (animeId, notes) =>
+  client.patch(`/anime/library/${animeId}/notes`, notes, {
+    headers: { 'Content-Type': 'text/plain' }
+  })
