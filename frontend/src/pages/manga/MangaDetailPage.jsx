@@ -285,13 +285,14 @@ function MangaDetailPage() {
                 </p>
 
                 {/* Star display */}
-                <div className="flex justify-center gap-0.5 mt-2">
+                <div className="flex justify-center gap-1 mt-2">
                   {[1,2,3,4,5,6,7,8,9,10].map((n) => (
                     <span
                       key={n}
                       onClick={() => handleScoreSave(n)}
-                      className="cursor-pointer text-[14px] transition-colors"
+                      className="cursor-pointer text-[16px] transition-colors"
                       style={{ color: score != null && n <= score ? '#fbbf24' : '#333344' }}
+                      title={`Score ${n}`}
                     >
                       ★
                     </span>
