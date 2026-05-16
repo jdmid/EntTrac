@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation} from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import { getManga,getMangaDetails,updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary, addToLibrary } from '../../api/mangaApi'
+import { getManga,getMangaDetails,updateProgress, updateScore, updateStatus, refreshLatestChapter, removeFromLibrary, addToLibrary, getCommunityRating } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
 
 const STATUS_OPTIONS = [
@@ -27,6 +27,7 @@ function MangaDetailPage() {
   const [inLibrary, setInLibrary] = useState(true)
   const location = useLocation()
   const fromSearch = location.state?.from === 'search'
+  const [communityRating, setCommunityRating] = useState(null)
 
   useEffect(() => {
     getManga(mangaId)
@@ -49,6 +50,11 @@ function MangaDetailPage() {
             setLoading(false)
           })
       })
+
+    // Fetch community rating separately — always from MangaDex
+    getCommunityRating(mangaId)
+      .then((res) => setCommunityRating(res.data))
+      .catch(() => setCommunityRating(null))
   }, [mangaId])
 
   function handleProgressSave() {
@@ -261,45 +267,69 @@ function MangaDetailPage() {
             
             {/* Score - only if in library */}
             {inLibrary && (
-            <div className="mt-3">
-              <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
-                Score
-              </p>
-
-              {/* Score card */}
-              <div
-                className="rounded-lg p-3 mb-2 text-center"
-                style={{
-                  background: theme.topBar,
-                  border: `0.5px solid ${theme.cardBorder}`,
-                }}
-              >
-                <p
-                  className="text-[28px] font-medium m-0 mb-0.5"
-                  style={{ color: '#fbbf24' }}
-                >
-                  {score ?? '—'}
+              <div className="mt-3 mb-4">
+                <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
+                  Score
                 </p>
-                <p className="text-[11px] text-[#555566] m-0">
-                  Your score
-                </p>
+                
+                {/* Score cards row */}
+                <div className="flex gap-2 w-fit">
 
-                {/* Star display */}
-                <div className="flex justify-center gap-1 mt-2">
-                  {[1,2,3,4,5,6,7,8,9,10].map((n) => (
-                    <span
-                      key={n}
-                      onClick={() => handleScoreSave(n)}
-                      className="cursor-pointer text-[16px] transition-colors"
-                      style={{ color: score != null && n <= score ? '#fbbf24' : '#333344' }}
-                      title={`Score ${n}`}
+                  {/* Your score card */}
+                  <div
+                    className="flex-1 rounded-lg p-3 text-center"
+                    style={{
+                      background: theme.topBar,
+                      border: `0.5px solid ${theme.cardBorder}`,
+                    }}
+                  >
+                    <p
+                      className="text-[28px] font-medium m-0 mb-0.5"
+                      style={{ color: '#fbbf24' }}
                     >
-                      ★
-                    </span>
-                  ))}
+                      {score ?? '—'}
+                    </p>
+                    <p className="text-[11px] text-[#555566] m-0">
+                      Your score
+                    </p>
+                    <div className="flex justify-center gap-1 mt-2">
+                      {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                        <span
+                          key={n}
+                          onClick={() => handleScoreSave(n)}
+                          className="cursor-pointer text-[16px] transition-colors"
+                          style={{ color: score != null && n <= score ? '#fbbf24' : '#333344' }}
+                          title={`Score ${n}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Community rating card */}
+                  <div
+                    className="flex-1 rounded-lg p-3 text-center"
+                    style={{
+                      background: theme.topBar,
+                      border: `0.5px solid ${theme.cardBorder}`,
+                    }}
+                  >
+                    <p
+                      className="text-[28px] font-medium m-0 mb-0.5"
+                      style={{ color: '#fbbf24' }}
+                    >
+                      {communityRating ?? '—'}
+                    </p>
+                    <p className="text-[11px] text-[#555566] m-0">
+                      MangaDex score
+                    </p>
+                    <p className="text-[11px] text-[#333344] m-0 mt-1">
+                      Community rating
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
             )}
 
             {/* Progress - only if in library*/}
