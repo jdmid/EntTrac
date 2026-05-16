@@ -164,14 +164,14 @@ function MangaDetailPage() {
           {/* Left col — cover */}
           <div className="shrink-0 w-full md:w-[180px]">
             <div
-              className="w-full aspect-[2/3] md:aspect-[2/3] max-h-[300px] md:max-h-none rounded-lg overflow-hidden flex items-center justify-center"
+              className="w-full rounded-lg overflow-hidden flex items-center justify-center"
               style={{ background: theme.cardCover }}
             >
               {manga.coverUrl ? (
                 <img
                   src={manga.coverUrl}
                   alt={manga.title}
-                  className="w-full h-full object-cover object-top"
+                  className="w-full object-contain"
                 />
               ) : (
                 <span style={{ fontSize: 40, color: theme.cardIcon }}>📖</span>
