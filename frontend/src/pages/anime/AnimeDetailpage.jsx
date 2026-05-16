@@ -380,6 +380,7 @@ function AnimeDetailPage() {
                     max={anime.totalEpisodes ?? 9999}
                     value={episodesWatched}
                     onChange={(e) => setEpisodesWatched(Number(e.target.value))}
+                    onBlur={handleProgressSave}
                     className="w-16 px-2 py-1 rounded text-[12px] text-[#e2e2f0] outline-none text-center"
                     style={{
                       background: theme.topBar,
@@ -391,17 +392,6 @@ function AnimeDetailPage() {
                       / {anime.totalEpisodes}
                     </span>
                   )}
-                  <button
-                    onClick={handleProgressSave}
-                    className="px-3 py-1 text-[11px] rounded transition-colors"
-                    style={{
-                      background: theme.accentBg,
-                      border: `0.5px solid ${theme.accentBorder}`,
-                      color: theme.accent,
-                    }}
-                  >
-                    Save
-                  </button>
                 </div>
               </div>
             )}
