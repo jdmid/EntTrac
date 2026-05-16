@@ -74,7 +74,7 @@ function MediaCard({
         {/* Creator */}
         {creator && (
           <p className="text-[10px] text-[#555566] m-0 mb-[3px] truncate">
-            {author}
+            {creator}
           </p>
         )}
 
