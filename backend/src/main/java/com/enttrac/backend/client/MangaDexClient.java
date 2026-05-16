@@ -87,16 +87,9 @@ public class MangaDexClient implements MangaMetadataClient {
         // Get status
         String status = manga.get("attributes").get("status").asText();
 
-        // Get latest chapter
-        JsonNode lastChapterNode = manga.get("attributes").get("lastChapter");
-        Integer latestChapter = null;
-        if (lastChapterNode != null && !lastChapterNode.isNull() && !lastChapterNode.asText().isEmpty()) {
-            try {
-                latestChapter = Integer.parseInt(lastChapterNode.asText());
-            } catch (NumberFormatException e) {
-                // some manga have non-numeric chapter numbers, leave null
-            }
-        }
+        // Latest chapter — use feed for accuracy (lastChapter attribute is unreliable)
+        String mangaIdForFeed = manga.get("id").asText();
+        Integer latestChapter = fetchLatestChapterFromFeed(mangaIdForFeed);
 
         // Get cover art URL
         String coverUrl = null;
@@ -136,5 +129,40 @@ public class MangaDexClient implements MangaMetadataClient {
                 .author(author)
                 .artist(artist)
                 .build();
+    }
+
+    private Integer fetchLatestChapterFromFeed(String mangaId) {
+        try {
+            JsonNode response = restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/manga/{id}/aggregate")
+                            .queryParam("translatedLanguage[]", "en")
+                            .build(mangaId))
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (response != null && response.has("volumes")) {
+                double maxChapter = -1;
+                for (JsonNode volume : response.get("volumes")) {
+                    if (volume.has("chapters")) {
+                        for (JsonNode chapter : volume.get("chapters")) {
+                            if (chapter.has("chapter")) {
+                                try {
+                                    double num = Double.parseDouble(
+                                            chapter.get("chapter").asText());
+                                    if (num > maxChapter) maxChapter = num;
+                                } catch (NumberFormatException e) {
+                                    // skip non-numeric entries
+                                }
+                            }
+                        }
+                    }
+                }
+                if (maxChapter >= 0) return (int) maxChapter;
+            }
+        } catch (Exception e) {
+            // fall through
+        }
+        return null;
     }
 }
