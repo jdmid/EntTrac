@@ -56,10 +56,10 @@ The project started as a manga and anime tracker and is continuously growing to 
 - **Responsive design** — works on desktop and mobile
 - **Status color coding** — card colors reflect reading/watching status across all media types
 - **Unread/unwatched tracking** — see at a glance how many chapters or episodes you're behind
+- **User notes** - and and edit personal notes on any library item's detail page
 
 ### Planned Features
 
-- User notes on detail pages
 - Refresh all button on library page (bulk update chapter/episode counts)
 - MangaUpdates API integration for improved chapter count accuracy
 - TV shows tab
