@@ -7,6 +7,7 @@ function MediaCard({
   status,
   progress,
   total,
+  totalLabel = 'Ch.',
   seriesStatus,
   coverUrl,
   theme,
@@ -81,7 +82,7 @@ function MediaCard({
         {/* Series status */}
         {seriesStatus && (
           <p className="text-[10px] text-[#555566] m-0 mb-[5px] capitalize">
-            {seriesStatus}{total != null ? ` · Ch. ${total}` : ''}
+            {seriesStatus}{total != null && total > 1 ? ` · ${totalLabel} ${total}` : ''}
           </p>
         )}
 

@@ -146,6 +146,7 @@ function AnimeLibraryPage() {
                 status={anime.status}
                 progress={anime.episodesWatched}
                 total={anime.totalEpisodes}
+                totalLabel="Ep."
                 seriesStatus={anime.seriesStatus}
                 coverUrl={anime.coverUrl}
                 theme={theme}
