@@ -130,8 +130,6 @@ function AnimeSearchPage() {
                 creator={anime.studio}
                 seriesStatus={anime.status}
                 coverUrl={anime.coverUrl}
-                total={anime.totalEpisodes ?? null}
-                totalLabel="Ep."
                 theme={theme}
                 icon="📺"
                 isAdded={addedIds.has(anime.id)}

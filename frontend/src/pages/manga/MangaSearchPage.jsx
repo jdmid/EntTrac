@@ -137,7 +137,6 @@ function MangaSearchPage() {
                 creator={manga.author}
                 seriesStatus={manga.status}
                 coverUrl={manga.coverUrl}
-                total={manga.latestChapter ?? null}
                 theme={theme}
                 icon="📖"
                 isAdded={addedIds.has(manga.id)}
