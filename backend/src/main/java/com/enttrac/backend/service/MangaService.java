@@ -43,7 +43,7 @@ public class MangaService {
             return existing; // already in library, don't overwrite
         }
         item.setPk("USER#default");
-        item.setSk("MANGA#" + item.getMangaId());
+        item.setSk("MANGA#MANGADEX#" + item.getMangaId());
         item.setUpdatedAt(Instant.now().toString());
         mangaRepository.save(item);
         return item;

@@ -30,7 +30,7 @@ public class MangaRepository {
     public MangaItem findById(String mangaId) {
         Key key = Key.builder()
                 .partitionValue(USER_PK)
-                .sortValue("MANGA#" + mangaId)
+                .sortValue("MANGA#MANGADEX#" + mangaId)
                 .build();
         return table.getItem(key);
     }
@@ -49,7 +49,7 @@ public class MangaRepository {
     public void delete(String mangaId) {
         Key key = Key.builder()
                 .partitionValue(USER_PK)
-                .sortValue("MANGA#" + mangaId)
+                .sortValue("MANGA#MANGADEX#" + mangaId)
                 .build();
         table.deleteItem(key);
     }

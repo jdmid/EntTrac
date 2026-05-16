@@ -46,7 +46,7 @@ public class MangaServiceTest {
         MangaItem result = mangaService.addToLibrary(testItem);
 
         assertEquals("USER#default", result.getPk());
-        assertEquals("MANGA#abc123", result.getSk());
+        assertEquals("MANGA#MANGADEX#abc123", result.getSk());
         verify(mangaRepository, times(1)).save(testItem);
     }
 
