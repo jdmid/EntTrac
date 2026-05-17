@@ -1,6 +1,6 @@
 package com.enttrac.backend.service;
 
-import com.enttrac.backend.client.AnimeMetadataClient;
+import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.AnimeItem;
 import com.enttrac.backend.model.AnimeSearchResult;
 import com.enttrac.backend.repository.AnimeRepository;
@@ -15,9 +15,10 @@ import java.util.List;
 public class AnimeService {
 
     private final AnimeRepository animeRepository;
-    private final AnimeMetadataClient animeMetadataClient;
+    private final MediaMetadataClient<AnimeSearchResult> animeMetadataClient;
 
-    public AnimeService(AnimeRepository animeRepository, AnimeMetadataClient animeMetadataClient) {
+    public AnimeService(AnimeRepository animeRepository,
+                        MediaMetadataClient<AnimeSearchResult> animeMetadataClient) {
         this.animeRepository = animeRepository;
         this.animeMetadataClient = animeMetadataClient;
     }

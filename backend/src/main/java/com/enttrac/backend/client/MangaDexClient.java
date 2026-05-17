@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class MangaDexClient implements MangaMetadataClient {
+public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
 
     private static final String BASE_URL = "https://api.mangadex.org";
     private final RestClient restClient;

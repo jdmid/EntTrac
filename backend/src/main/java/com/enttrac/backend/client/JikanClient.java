@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class JikanClient implements AnimeMetadataClient {
+public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
 
     private static final String BASE_URL = "https://api.jikan.moe/v4";
     private final RestClient restClient;

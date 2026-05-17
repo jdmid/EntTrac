@@ -1,6 +1,6 @@
 package com.enttrac.backend.service;
 
-import com.enttrac.backend.client.MangaMetadataClient;
+import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.MangaItem;
 import com.enttrac.backend.model.MangaSearchResult;
 import com.enttrac.backend.repository.MangaRepository;
@@ -15,9 +15,10 @@ import java.util.List;
 public class MangaService {
 
     private final MangaRepository mangaRepository;
-    private final MangaMetadataClient mangaMetadataClient;
+    private final MediaMetadataClient<MangaSearchResult> mangaMetadataClient;
 
-    public MangaService(MangaRepository mangaRepository, MangaMetadataClient mangaMetadataClient) {
+    public MangaService(MangaRepository mangaRepository,
+                        MediaMetadataClient<MangaSearchResult> mangaMetadataClient) {
         this.mangaRepository = mangaRepository;
         this.mangaMetadataClient = mangaMetadataClient;
     }

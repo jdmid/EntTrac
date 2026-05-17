@@ -1,6 +1,6 @@
 package com.enttrac.backend;
 
-import com.enttrac.backend.client.MangaMetadataClient;
+import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.MangaItem;
 import com.enttrac.backend.model.MangaSearchResult;
 import com.enttrac.backend.repository.MangaRepository;
@@ -24,7 +24,7 @@ public class MangaServiceTest {
     private MangaRepository mangaRepository;
 
     @Mock
-    private MangaMetadataClient mangaMetadataClient;
+    private MediaMetadataClient<MangaSearchResult> mangaMetadataClient;
 
     @InjectMocks
     private MangaService mangaService;

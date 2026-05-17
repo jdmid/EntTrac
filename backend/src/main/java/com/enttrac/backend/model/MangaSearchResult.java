@@ -1,21 +1,34 @@
 package com.enttrac.backend.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class MangaSearchResult {
-    private String id;
-    private String title;
-    private String description;
-    private String coverUrl;
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class MangaSearchResult extends MediaSearchResult {
     private Integer latestChapter;
     private String author;
     private String artist;
-    private String status;        // ongoing, finished, hiatus, cancelled
+
+    @lombok.Builder
+    public MangaSearchResult(String id, String title, String description,
+                             String coverUrl, String status, Double communityRating,
+                             Integer latestChapter, String author, String artist) {
+        super();
+        setId(id);
+        setTitle(title);
+        setDescription(description);
+        setCoverUrl(coverUrl);
+        setStatus(status);
+        setCommunityRating(communityRating);
+        this.latestChapter = latestChapter;
+        this.author = author;
+        this.artist = artist;
+    }
 }

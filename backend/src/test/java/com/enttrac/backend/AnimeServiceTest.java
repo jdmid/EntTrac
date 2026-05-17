@@ -1,6 +1,6 @@
 package com.enttrac.backend.service;
 
-import com.enttrac.backend.client.AnimeMetadataClient;
+import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.AnimeItem;
 import com.enttrac.backend.model.AnimeSearchResult;
 import com.enttrac.backend.repository.AnimeRepository;
@@ -23,7 +23,7 @@ public class AnimeServiceTest {
     private AnimeRepository animeRepository;
 
     @Mock
-    private AnimeMetadataClient animeMetadataClient;
+    private MediaMetadataClient<AnimeSearchResult> animeMetadataClient;
 
     @InjectMocks
     private AnimeService animeService;
