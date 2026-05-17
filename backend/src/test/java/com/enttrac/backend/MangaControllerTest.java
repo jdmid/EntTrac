@@ -247,4 +247,43 @@ public class MangaControllerTest {
         mockMvc.perform(get("/api/manga/library/abc123/rating"))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void updateNotes_ShouldReturnUpdatedItem() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+
+        when(mangaService.updateNotes("abc123", "Great manga")).thenReturn(item);
+
+        mockMvc.perform(patch("/api/manga/library/abc123/notes")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("Great manga"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void updateNotes_ShouldHandleNullBody() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+
+        when(mangaService.updateNotes("abc123", "")).thenReturn(item);
+
+        mockMvc.perform(patch("/api/manga/library/abc123/notes"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void refreshAll_ShouldReturnUpdatedLibrary() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+
+        when(mangaService.refreshAll()).thenReturn(List.of(item));
+
+        mockMvc.perform(post("/api/manga/library/refresh-all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].mangaId").value("abc123"));
+    }
 }

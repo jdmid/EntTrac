@@ -222,4 +222,96 @@ public class MangaServiceTest {
         assertEquals(testItem, result);
         verify(mangaRepository, never()).save(any());
     }
+
+    @Test
+    void updateNotes_ShouldUpdateNotes() {
+        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+
+        MangaItem result = mangaService.updateNotes("abc123", "Great manga");
+
+        assertEquals("Great manga", result.getNotes());
+        verify(mangaRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void updateNotes_ShouldThrowWhenNotFound() {
+        when(mangaRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                mangaService.updateNotes("notreal", "some notes"));
+
+        assertEquals("Manga not found: notreal", ex.getMessage());
+    }
+
+    @Test
+    void refreshAll_ShouldUpdateLatestChapterWhenDetailsAvailable() {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+        item.setLatestChapter(100);
+
+        MangaSearchResult details = MangaSearchResult.builder()
+                .id("abc123")
+                .latestChapter(110)
+                .build();
+
+        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
+
+        List<MangaItem> result = mangaService.refreshAll();
+
+        assertEquals(1, result.size());
+        assertEquals(110, result.get(0).getLatestChapter());
+        verify(mangaRepository, times(1)).save(item);
+    }
+
+    @Test
+    void refreshAll_ShouldSkipUpdateWhenDetailsNull() {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setLatestChapter(100);
+
+        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(null);
+
+        List<MangaItem> result = mangaService.refreshAll();
+
+        assertEquals(1, result.size());
+        verify(mangaRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshAll_ShouldSkipUpdateWhenLatestChapterNull() {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setLatestChapter(100);
+
+        MangaSearchResult details = MangaSearchResult.builder()
+                .id("abc123")
+                .latestChapter(null)
+                .build();
+
+        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
+
+        List<MangaItem> result = mangaService.refreshAll();
+
+        assertEquals(1, result.size());
+        verify(mangaRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshAll_ShouldContinueWhenOneItemFails() {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+
+        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaMetadataClient.getDetails("abc123"))
+                .thenThrow(new RuntimeException("API down"));
+
+        List<MangaItem> result = mangaService.refreshAll();
+
+        assertEquals(1, result.size());
+        verify(mangaRepository, never()).save(any());
+    }
 }
