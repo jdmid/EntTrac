@@ -61,7 +61,6 @@ The project started as a manga and anime tracker and is continuously growing to 
 
 ### Planned Features
 
-- MangaUpdates API integration for improved chapter count accuracy
 - TV shows tab
 - Books tab
 - Movies tab
