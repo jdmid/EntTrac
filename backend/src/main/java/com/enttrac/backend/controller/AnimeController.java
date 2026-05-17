@@ -1,7 +1,7 @@
 package com.enttrac.backend.controller;
 
-import com.enttrac.backend.model.AnimeItem;
-import com.enttrac.backend.model.AnimeSearchResult;
+import com.enttrac.backend.model.item.AnimeItem;
+import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.service.AnimeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

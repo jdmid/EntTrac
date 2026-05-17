@@ -1,6 +1,6 @@
 package com.enttrac.backend.client;
 
-import com.enttrac.backend.model.AnimeSearchResult;
+import com.enttrac.backend.model.result.AnimeSearchResult;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Component("jikanClient")
 public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
 
     private static final String BASE_URL = "https://api.jikan.moe/v4";

@@ -1,6 +1,6 @@
 package com.enttrac.backend.repository;
 
-import com.enttrac.backend.model.item.AnimeItem;
+import com.enttrac.backend.model.item.TvItem;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -12,30 +12,30 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class AnimeRepository {
+public class TvRepository {
 
     private static final String TABLE_NAME = "EntTrac";
     private static final String USER_PK = "USER#default";
 
-    private final DynamoDbTable<AnimeItem> table;
+    private final DynamoDbTable<TvItem> table;
 
-    public AnimeRepository(DynamoDbEnhancedClient enhancedClient) {
-        this.table = enhancedClient.table(TABLE_NAME, TableSchema.fromBean(AnimeItem.class));
+    public TvRepository(DynamoDbEnhancedClient enhancedClient) {
+        this.table = enhancedClient.table(TABLE_NAME, TableSchema.fromBean(TvItem.class));
     }
 
-    public void save(AnimeItem item) {
+    public void save(TvItem item) {
         table.putItem(item);
     }
 
-    public AnimeItem findById(String animeId) {
+    public TvItem findById(String tvId) {
         Key key = Key.builder()
                 .partitionValue(USER_PK)
-                .sortValue("ANIME#JIKAN#" + animeId)
+                .sortValue("TV#TMDB#" + tvId)
                 .build();
         return table.getItem(key);
     }
 
-    public List<AnimeItem> findAll() {
+    public List<TvItem> findAll() {
         QueryConditional queryConditional = QueryConditional
                 .keyEqualTo(Key.builder()
                         .partitionValue(USER_PK)
@@ -44,14 +44,14 @@ public class AnimeRepository {
         return table.query(queryConditional)
                 .items()
                 .stream()
-                .filter(item -> item.getSk().startsWith("ANIME#"))
+                .filter(item -> item.getSk().startsWith("TV#"))
                 .collect(Collectors.toList());
     }
 
-    public void delete(String animeId) {
+    public void delete(String tvId) {
         Key key = Key.builder()
                 .partitionValue(USER_PK)
-                .sortValue("ANIME#JIKAN#" + animeId)
+                .sortValue("TV#TMDB#" + tvId)
                 .build();
         table.deleteItem(key);
     }

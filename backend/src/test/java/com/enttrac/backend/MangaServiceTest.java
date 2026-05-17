@@ -1,8 +1,8 @@
 package com.enttrac.backend;
 
 import com.enttrac.backend.client.MediaMetadataClient;
-import com.enttrac.backend.model.MangaItem;
-import com.enttrac.backend.model.MangaSearchResult;
+import com.enttrac.backend.model.item.MangaItem;
+import com.enttrac.backend.model.result.MangaSearchResult;
 import com.enttrac.backend.repository.MangaRepository;
 import com.enttrac.backend.service.MangaService;
 import org.junit.jupiter.api.BeforeEach;

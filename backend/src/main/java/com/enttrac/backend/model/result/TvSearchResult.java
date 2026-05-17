@@ -1,4 +1,4 @@
-package com.enttrac.backend.model;
+package com.enttrac.backend.model.result;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,13 +20,14 @@ public class TvSearchResult extends MediaSearchResult {
     private Integer totalEpisodes;
     private List<Integer> seasonEpisodes;
     private String nextEpisodeDate;
+    private Integer numberOfSeasons;
 
     @lombok.Builder
     public TvSearchResult(String id, String title, String description,
                           String coverUrl, String status, Double communityRating,
                           String network, String genres, String firstAirYear,
                           String seriesType, Integer totalEpisodes,
-                          List<Integer> seasonEpisodes, String nextEpisodeDate) {
+                          List<Integer> seasonEpisodes, String nextEpisodeDate, Integer numberOfSeasons) {
         super();
         setId(id);
         setTitle(title);
@@ -41,5 +42,6 @@ public class TvSearchResult extends MediaSearchResult {
         this.totalEpisodes = totalEpisodes;
         this.seasonEpisodes = seasonEpisodes;
         this.nextEpisodeDate = nextEpisodeDate;
+        this.numberOfSeasons = numberOfSeasons;
     }
 }

@@ -1,7 +1,7 @@
 package com.enttrac.backend;
 
-import com.enttrac.backend.model.MangaItem;
-import com.enttrac.backend.model.MangaSearchResult;
+import com.enttrac.backend.model.item.MangaItem;
+import com.enttrac.backend.model.result.MangaSearchResult;
 import com.enttrac.backend.service.MangaService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

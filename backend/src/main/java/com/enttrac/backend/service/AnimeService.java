@@ -1,9 +1,10 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.MediaMetadataClient;
-import com.enttrac.backend.model.AnimeItem;
-import com.enttrac.backend.model.AnimeSearchResult;
+import com.enttrac.backend.model.item.AnimeItem;
+import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.repository.AnimeRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -18,7 +19,7 @@ public class AnimeService {
     private final MediaMetadataClient<AnimeSearchResult> animeMetadataClient;
 
     public AnimeService(AnimeRepository animeRepository,
-                        MediaMetadataClient<AnimeSearchResult> animeMetadataClient) {
+                        @Qualifier("jikanClient") MediaMetadataClient<AnimeSearchResult> animeMetadataClient) {
         this.animeRepository = animeRepository;
         this.animeMetadataClient = animeMetadataClient;
     }

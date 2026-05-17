@@ -1,6 +1,6 @@
 package com.enttrac.backend.client;
 
-import com.enttrac.backend.model.MediaSearchResult;
+import com.enttrac.backend.model.result.MediaSearchResult;
 import java.util.List;
 
 public interface MediaMetadataClient<T extends MediaSearchResult> {

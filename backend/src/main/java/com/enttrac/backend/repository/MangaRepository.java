@@ -1,6 +1,6 @@
 package com.enttrac.backend.repository;
 
-import com.enttrac.backend.model.MangaItem;
+import com.enttrac.backend.model.item.MangaItem;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;

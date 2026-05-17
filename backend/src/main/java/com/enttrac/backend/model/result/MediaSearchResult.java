@@ -1,4 +1,4 @@
-package com.enttrac.backend.model;
+package com.enttrac.backend.model.result;
 
 import lombok.Getter;
 import lombok.Setter;
