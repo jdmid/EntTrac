@@ -233,8 +233,9 @@ function AnimeLibraryPage() {
                 seriesStatus={anime.seriesStatus}
                 coverUrl={anime.coverUrl}
                 theme={theme}
-                icon="📺"
+                icon="🎞️"
                 progressLabel="Ep."
+                medium="anime"
                 onClick={() => navigate(`/anime/library/${anime.animeId}`)}
               />
             ))}

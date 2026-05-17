@@ -240,6 +240,7 @@ function MangaLibraryPage() {
                 progressLabel="Ch."
                 coverUrl={manga.coverUrl}
                 seriesStatus={manga.seriesStatus}
+                medium="manga"
                 onClick={() => navigate(`/manga/library/${manga.mangaId}`)}
               />
             ))}

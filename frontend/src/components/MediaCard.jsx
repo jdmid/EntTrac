@@ -1,4 +1,4 @@
-import { statusStyles } from '../theme/themes'
+import { statusStyles, statusLabels } from '../theme/themes'
 
 function MediaCard({ 
   title,
@@ -16,8 +16,10 @@ function MediaCard({
   isAdded,
   onAdd,
   onClick,
+  medium,
 }) {
   const style = status ? (statusStyles[status] ?? statusStyles.FINISHED) : null
+  const statusLabel = medium && status ? (statusLabels[medium]?.[status] ?? style?.label) : style?.label
   const unread = total != null ? Math.max(0, total - (progress ?? 0)) : null
 
   return (
@@ -92,7 +94,7 @@ function MediaCard({
             className="inline-block text-[10px] font-medium px-[7px] py-[2px] rounded-full mb-1.5"
             style={style.badge}
           >
-            {style.label}
+            {statusLabel}
           </span>
         )}
 

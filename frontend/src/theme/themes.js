@@ -9,7 +9,7 @@ export const themes = {
     cardCover: '#221a35',
     cardBody: '#16102a',
     cardBorder: '#2a1f4a',
-    cardIcon: '#3d2a5a', 
+    cardIcon: '#3d2a5a',
     unreadBadge: '#9d7cff33',
     name: 'Manga',
   },
@@ -23,27 +23,124 @@ export const themes = {
     cardCover: '#0a2020',
     cardBody: '#0a1f1f',
     cardBorder: '#0f3535',
-    cardIcon: '#0f3535',   
+    cardIcon: '#0f3535',
     unreadBadge: '#2dd4bf33',
     name: 'Anime',
+  },
+  tv: {
+    accent: '#f59e0b',
+    accentBg: '#f59e0b18',
+    accentBorder: '#f59e0b55',
+    background: '#0f0900',
+    topBar: '#140d00',
+    subNav: '#120b00',
+    cardCover: '#1f1500',
+    cardBody: '#1a1100',
+    cardBorder: '#3d2a00',
+    cardIcon: '#3d2a00',
+    unreadBadge: '#f59e0b33',
+    name: 'TV',
+  },
+  movies: {
+    accent: '#f43f5e',
+    accentBg: '#f43f5e18',
+    accentBorder: '#f43f5e55',
+    background: '#100508',
+    topBar: '#160810',
+    subNav: '#130609',
+    cardCover: '#200a10',
+    cardBody: '#1a0810',
+    cardBorder: '#3d1020',
+    cardIcon: '#3d1020',
+    unreadBadge: '#f43f5e33',
+    name: 'Movies',
+  },
+  books: {
+    accent: '#84cc16',
+    accentBg: '#84cc1618',
+    accentBorder: '#84cc1655',
+    background: '#070d00',
+    topBar: '#0b1200',
+    subNav: '#091000',
+    cardCover: '#0e1a00',
+    cardBody: '#0b1500',
+    cardBorder: '#1a3000',
+    cardIcon: '#1a3000',
+    unreadBadge: '#84cc1633',
+    name: 'Books',
+  },
+  games: {
+    accent: '#3b82f6',
+    accentBg: '#3b82f618',
+    accentBorder: '#3b82f655',
+    background: '#00080f',
+    topBar: '#000d14',
+    subNav: '#000b11',
+    cardCover: '#00111f',
+    cardBody: '#001428',
+    cardBorder: '#001f3d',
+    cardIcon: '#001f3d',
+    unreadBadge: '#3b82f633',
+    name: 'Games',
   },
 }
 
 export const statusStyles = {
   CONSUMING: {
     bg: '#163326', border: '#2a5a3a', label: 'Reading',
-    badge: { background: '#1f4a32', color: '#4ade80' }
+    badge: { background: '#1f4a32', color: '#4ade80' },
   },
   PLANNED: {
     bg: '#101e38', border: '#1e3a60', label: 'Plan to Read',
-    badge: { background: '#1a2f50', color: '#60a5fa' }
+    badge: { background: '#1a2f50', color: '#60a5fa' },
   },
   FINISHED: {
     bg: '#222228', border: '#3a3a44', label: 'Finished',
-    badge: { background: '#2e2e38', color: '#9ca3af' }
+    badge: { background: '#2e2e38', color: '#9ca3af' },
   },
   DROPPED: {
     bg: '#2e1212', border: '#501c1c', label: 'Dropped',
-    badge: { background: '#4a1c1c', color: '#f87171' }
+    badge: { background: '#4a1c1c', color: '#f87171' },
+  },
+}
+
+// Display labels per medium — use these anywhere you need the right
+// verb for a status rather than hardcoding strings in each component
+export const statusLabels = {
+  manga: {
+    CONSUMING: 'Reading',
+    PLANNED: 'Plan to Read',
+    FINISHED: 'Finished',
+    DROPPED: 'Dropped',
+  },
+  anime: {
+    CONSUMING: 'Watching',
+    PLANNED: 'Plan to Watch',
+    FINISHED: 'Finished',
+    DROPPED: 'Dropped',
+  },
+  tv: {
+    CONSUMING: 'Watching',
+    PLANNED: 'Plan to Watch',
+    FINISHED: 'Finished',
+    DROPPED: 'Dropped',
+  },
+  movies: {
+    CONSUMING: 'Watching',
+    PLANNED: 'Plan to Watch',
+    FINISHED: 'Watched',
+    DROPPED: 'Dropped',
+  },
+  books: {
+    CONSUMING: 'Reading',
+    PLANNED: 'Plan to Read',
+    FINISHED: 'Finished',
+    DROPPED: 'Dropped',
+  },
+  games: {
+    CONSUMING: 'Playing',
+    PLANNED: 'Plan to Play',
+    FINISHED: 'Finished',
+    DROPPED: 'Dropped',
   },
 }
