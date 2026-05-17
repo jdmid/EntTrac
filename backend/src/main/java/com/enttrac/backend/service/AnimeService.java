@@ -1,6 +1,7 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.MediaMetadataClient;
+import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.repository.AnimeRepository;
@@ -55,7 +56,7 @@ public class AnimeService {
     public AnimeItem updateProgress(String animeId, int episodesWatched) {
         AnimeItem item = animeRepository.findById(animeId);
         if (item == null) {
-            throw new RuntimeException("Anime not found: " + animeId);
+            throw new NotFoundException("Anime not found: " + animeId);
         }
         item.setEpisodesWatched(episodesWatched);
         item.setUpdatedAt(Instant.now().toString());
@@ -66,7 +67,7 @@ public class AnimeService {
     public AnimeItem updateScore(String animeId, int score) {
         AnimeItem item = animeRepository.findById(animeId);
         if (item == null) {
-            throw new RuntimeException("Anime not found: " + animeId);
+            throw new NotFoundException("Anime not found: " + animeId);
         }
         item.setScore(score);
         item.setUpdatedAt(Instant.now().toString());
@@ -77,7 +78,7 @@ public class AnimeService {
     public AnimeItem updateStatus(String animeId, String status) {
         AnimeItem item = animeRepository.findById(animeId);
         if (item == null) {
-            throw new RuntimeException("Anime not found: " + animeId);
+            throw new NotFoundException("Anime not found: " + animeId);
         }
         item.setStatus(status);
         item.setUpdatedAt(Instant.now().toString());
@@ -88,7 +89,7 @@ public class AnimeService {
     public AnimeItem refreshLatestEpisode(String animeId) {
         AnimeItem item = animeRepository.findById(animeId);
         if (item == null) {
-            throw new RuntimeException("Anime not found: " + animeId);
+            throw new NotFoundException("Anime not found: " + animeId);
         }
         AnimeSearchResult details = animeMetadataClient.getDetails(animeId);
         if (details != null && details.getTotalEpisodes() != null) {
@@ -111,7 +112,7 @@ public class AnimeService {
     public AnimeItem updateNotes(String animeId, String notes) {
         AnimeItem item = animeRepository.findById(animeId);
         if (item == null) {
-            throw new RuntimeException("Anime not found: " + animeId);
+            throw new NotFoundException("Anime not found: " + animeId);
         }
         item.setNotes(notes);
         item.setUpdatedAt(Instant.now().toString());

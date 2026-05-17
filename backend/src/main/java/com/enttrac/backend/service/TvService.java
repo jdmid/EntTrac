@@ -1,6 +1,7 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.MediaMetadataClient;
+import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
 import com.enttrac.backend.repository.TvRepository;
@@ -59,7 +60,7 @@ public class TvService {
     public TvItem updateProgress(String tvId, int episodesWatched, int currentSeason) {
         TvItem item = tvRepository.findById(tvId);
         if (item == null) {
-            throw new RuntimeException("TV show not found: " + tvId);
+            throw new NotFoundException("TV show not found: " + tvId);
         }
         item.setEpisodesWatched(episodesWatched);
         item.setCurrentSeason(currentSeason);
@@ -71,7 +72,7 @@ public class TvService {
     public TvItem updateScore(String tvId, int score) {
         TvItem item = tvRepository.findById(tvId);
         if (item == null) {
-            throw new RuntimeException("TV show not found: " + tvId);
+            throw new NotFoundException("TV show not found: " + tvId);
         }
         item.setScore(score);
         item.setUpdatedAt(Instant.now().toString());
@@ -82,7 +83,7 @@ public class TvService {
     public TvItem updateStatus(String tvId, String status) {
         TvItem item = tvRepository.findById(tvId);
         if (item == null) {
-            throw new RuntimeException("TV show not found: " + tvId);
+            throw new NotFoundException("TV show not found: " + tvId);
         }
         item.setStatus(status);
         item.setUpdatedAt(Instant.now().toString());
@@ -93,7 +94,7 @@ public class TvService {
     public TvItem updateNotes(String tvId, String notes) {
         TvItem item = tvRepository.findById(tvId);
         if (item == null) {
-            throw new RuntimeException("TV show not found: " + tvId);
+            throw new NotFoundException("TV show not found: " + tvId);
         }
         item.setNotes(notes);
         item.setUpdatedAt(Instant.now().toString());
@@ -104,7 +105,7 @@ public class TvService {
     public TvItem refreshLatestEpisodes(String tvId) {
         TvItem item = tvRepository.findById(tvId);
         if (item == null) {
-            throw new RuntimeException("TV show not found: " + tvId);
+            throw new NotFoundException("TV show not found: " + tvId);
         }
         TvSearchResult details = tvMetadataClient.getDetails(tvId);
         if (details != null) {

@@ -1,6 +1,7 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.MediaMetadataClient;
+import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.MangaItem;
 import com.enttrac.backend.model.result.MangaSearchResult;
 import com.enttrac.backend.repository.MangaRepository;
@@ -56,7 +57,7 @@ public class MangaService {
     public MangaItem updateProgress(String mangaId, int chaptersRead) {
         MangaItem item = mangaRepository.findById(mangaId);
         if (item == null) {
-            throw new RuntimeException("Manga not found: " + mangaId);
+            throw new NotFoundException("Manga not found: " + mangaId);
         }
         item.setChaptersRead(chaptersRead);
         item.setUpdatedAt(Instant.now().toString());
@@ -67,7 +68,7 @@ public class MangaService {
     public MangaItem refreshLatestChapter(String mangaId) {
         MangaItem item = mangaRepository.findById(mangaId);
         if (item == null) {
-            throw new RuntimeException("Manga not found: " + mangaId);
+            throw new NotFoundException("Manga not found: " + mangaId);
         }
         MangaSearchResult details = mangaMetadataClient.getDetails(mangaId);
         if (details != null && details.getLatestChapter() != null) {
@@ -82,7 +83,7 @@ public class MangaService {
     public MangaItem updateScore(String mangaId, int score) {
         MangaItem item = mangaRepository.findById(mangaId);
         if (item == null) {
-            throw new RuntimeException("Manga not found: " + mangaId);
+            throw new NotFoundException("Manga not found: " + mangaId);
         }
         item.setScore(score);
         item.setUpdatedAt(Instant.now().toString());
@@ -93,7 +94,7 @@ public class MangaService {
     public MangaItem updateStatus(String mangaId, String status) {
         MangaItem item = mangaRepository.findById(mangaId);
         if (item == null) {
-            throw new RuntimeException("Manga not found: " + mangaId);
+            throw new NotFoundException("Manga not found: " + mangaId);
         }
         item.setStatus(status);
         item.setUpdatedAt(Instant.now().toString());
@@ -108,7 +109,7 @@ public class MangaService {
     public MangaItem updateNotes(String mangaId, String notes) {
         MangaItem item = mangaRepository.findById(mangaId);
         if (item == null) {
-            throw new RuntimeException("Manga not found: " + mangaId);
+            throw new NotFoundException("Manga not found: " + mangaId);
         }
         item.setNotes(notes);
         item.setUpdatedAt(Instant.now().toString());
