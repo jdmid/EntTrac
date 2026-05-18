@@ -22,7 +22,7 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
   if (medium === 'tv') {
     // TMDB TV values
     if (status === 'returning series') return 'ongoing'
-    if (status === 'in production') return 'ongoing'
+    if (status === 'in production') return 'in production'
     if (status === 'pilot') return 'upcoming'
     if (status === 'planned') return 'upcoming'
     if (status === 'ended') return 'finished'
@@ -68,6 +68,7 @@ export const SERIES_STATUS_FILTERS = {
     { value: 'ongoing',   label: 'Ongoing' },
     { value: 'finished',  label: 'Ended' },
     { value: 'upcoming',  label: 'Upcoming' },
+    { value: 'in production',  label: 'In Production' },
     { value: 'cancelled', label: 'Cancelled' },
   ],
   movies: [

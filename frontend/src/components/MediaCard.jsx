@@ -69,26 +69,22 @@ function MediaCard({
             : '0.5px solid rgba(255,255,255,0.06)',
         }}
       >
-        {/* Title */}
         <p className="text-[12px] font-medium text-[#d0d0e0] m-0 mb-[3px] truncate">
           {title}
         </p>
 
-        {/* Creator */}
-        {creator && (
+        {creator && creator.trim() !== '' && (
           <p className="text-[10px] text-[#555566] m-0 mb-[3px] truncate">
             {creator}
           </p>
         )}
 
-        {/* Series status */}
-        {seriesStatus && (
+        {seriesStatus && seriesStatus.trim() !== '' && (
           <p className="text-[10px] text-[#555566] m-0 mb-[5px] capitalize">
             {seriesStatus}{total != null && total > 1 ? ` · ${totalLabel} ${total}` : ''}
           </p>
         )}
 
-        {/* Status badge */}
         {style && (
           <span
             className="inline-block text-[10px] font-medium px-[7px] py-[2px] rounded-full mb-1.5"
@@ -98,13 +94,11 @@ function MediaCard({
           </span>
         )}
 
-        {/* Progress row */}
-        {progressLabel && (
+        {progressLabel && (total == null || total > 0) && (
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8a8a9a]">
               {progressLabel} {progress ?? 0}{total != null ? ` / ${total}` : ''}
             </span>
-
             {unread != null && unread > 0 && (
               <span
                 className="text-[10px] font-medium px-1.5 py-[1px] rounded-full"
@@ -116,7 +110,6 @@ function MediaCard({
           </div>
         )}
 
-        {/* Add button / Added confirmation */}
         {(onAdd || isAdded) && (
           <div className="mt-2">
             {isAdded ? (

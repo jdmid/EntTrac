@@ -16,12 +16,13 @@ public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
     private static final String BASE_URL = "https://api.themoviedb.org/3";
     private static final String IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 
+    private final String apiKey;
     private final RestClient restClient;
 
     public TmdbClient(@Value("${tmdb.api.key}") String apiKey) {
+        this.apiKey = apiKey;
         this.restClient = RestClient.builder()
                 .baseUrl(BASE_URL)
-                .defaultHeader("Authorization", "Bearer " + apiKey)
                 .defaultHeader("accept", "application/json")
                 .build();
     }
@@ -29,7 +30,7 @@ public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
     @Override
     public List<TvSearchResult> search(String query) {
         JsonNode response = restClient.get()
-                .uri("/search/tv?query={query}&language=en-US&page=1", query)
+                .uri("/search/tv?query={query}&language=en-US&page=1&api_key={apiKey}", query, apiKey)
                 .retrieve()
                 .body(JsonNode.class);
 
@@ -47,7 +48,7 @@ public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
     @Override
     public TvSearchResult getDetails(String id) {
         JsonNode response = restClient.get()
-                .uri("/tv/{id}?language=en-US&append_to_response=aggregate_credits", id)
+                .uri("/tv/{id}?language=en-US&append_to_response=aggregate_credits&api_key={apiKey}", id, apiKey)
                 .retrieve()
                 .body(JsonNode.class);
 
@@ -91,7 +92,7 @@ public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
     public Double getCommunityRating(String id) {
         try {
             JsonNode response = restClient.get()
-                    .uri("/tv/{id}?language=en-US", id)
+                    .uri("/tv/{id}?language=en-US&api_key={apiKey}", id, apiKey)
                     .retrieve()
                     .body(JsonNode.class);
 
@@ -111,8 +112,8 @@ public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
 
         if (!showNode.has("seasons")) return seasonEpisodes;
 
-        // Cutoff — one day in the future to avoid episodes airing later today
-        LocalDate cutoff = LocalDate.now().minusDays(1);
+        // Cutoff
+        LocalDate cutoff = LocalDate.now();
 
         for (JsonNode season : showNode.get("seasons")) {
             // Skip season 0 — that is TMDB's bucket for specials
@@ -122,7 +123,7 @@ public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
 
             // Fetch full season details to get per-episode air dates
             JsonNode seasonDetails = restClient.get()
-                    .uri("/tv/{id}/season/{season}?language=en-US", showId, seasonNum)
+                    .uri("/tv/{id}/season/{season}?language=en-US&api_key={apiKey}", showId, seasonNum, apiKey)
                     .retrieve()
                     .body(JsonNode.class);
 

@@ -68,6 +68,17 @@ public class TvService {
         tvRepository.save(item);
         return item;
     }
+    private String normalizeSeriesStatus(String rawStatus) {
+        if (rawStatus == null) return null;
+        String status = rawStatus.toLowerCase().trim();
+        if (status.equals("returning series")) return "ongoing";
+        if (status.equals("in production")) return "in production";
+        if (status.equals("pilot")) return "upcoming";
+        if (status.equals("planned")) return "upcoming";
+        if (status.equals("ended")) return "finished";
+        if (status.equals("canceled")) return "cancelled";
+        return null;
+    }
 
     public TvItem updateScore(String tvId, int score) {
         TvItem item = tvRepository.findById(tvId);
@@ -121,7 +132,7 @@ public class TvService {
                 item.setNextEpisodeDate(details.getNextEpisodeDate());
             }
             if (details.getStatus() != null) {
-                item.setSeriesStatus(details.getStatus());
+                item.setSeriesStatus(normalizeSeriesStatus(details.getStatus()));
             }
             if (details.getNumberOfSeasons() != null) {
                 item.setNumberOfSeasons(details.getNumberOfSeasons());
@@ -161,7 +172,7 @@ public class TvService {
                         item.setNextEpisodeDate(details.getNextEpisodeDate());
                     }
                     if (details.getStatus() != null) {
-                        item.setSeriesStatus(details.getStatus());
+                        item.setSeriesStatus(normalizeSeriesStatus(details.getStatus()));
                     }
                     if (details.getNumberOfSeasons() != null) {
                         item.setNumberOfSeasons(details.getNumberOfSeasons());
@@ -175,6 +186,7 @@ public class TvService {
                 updated.add(item);
             }
         }
+
         return updated;
     }
 }
