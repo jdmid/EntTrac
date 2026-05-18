@@ -111,4 +111,9 @@ public class TvController {
     public ResponseEntity<List<TvItem>> refreshAll() {
         return ResponseEntity.ok(tvService.refreshAll());
     }
+
+    @PostMapping("/library/refresh-ongoing")
+    public ResponseEntity<List<TvItem>> refreshOngoing() {
+        return ResponseEntity.ok(tvService.refreshOngoing());
+    }
 }

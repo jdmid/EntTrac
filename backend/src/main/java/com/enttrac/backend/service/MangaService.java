@@ -49,7 +49,9 @@ public class MangaService {
         }
         item.setPk("USER#default");
         item.setSk("MANGA#MANGADEX#" + item.getMangaId());
-        item.setUpdatedAt(Instant.now().toString());
+        String now = Instant.now().toString();
+        item.setCreatedAt(now);
+        item.setUpdatedAt(now);
         mangaRepository.save(item);
         return item;
     }
@@ -124,14 +126,44 @@ public class MangaService {
             try {
                 MangaSearchResult details = mangaMetadataClient.getDetails(item.getMangaId());
                 if (details != null && details.getLatestChapter() != null) {
-                    item.setLatestChapter(details.getLatestChapter());
                     item.setLastRefreshed(Instant.now().toString());
-                    item.setUpdatedAt(Instant.now().toString());
+                    if (!details.getLatestChapter().equals(item.getLatestChapter())) {
+                        item.setLatestChapter(details.getLatestChapter());
+                        item.setUpdatedAt(Instant.now().toString());
+                    }
                     mangaRepository.save(item);
                 }
                 updated.add(item);
             } catch (Exception e) {
                 // skip this item if it fails, continue with rest
+                updated.add(item);
+            }
+        }
+        return updated;
+    }
+
+    public List<MangaItem> refreshOngoing() {
+        List<MangaItem> library = mangaRepository.findAll();
+        List<MangaItem> updated = new ArrayList<>();
+
+        for (MangaItem item : library) {
+            try {
+                if ("completed".equals(item.getSeriesStatus()) ||
+                        "cancelled".equals(item.getSeriesStatus())) {
+                    updated.add(item);
+                    continue;
+                }
+                MangaSearchResult details = mangaMetadataClient.getDetails(item.getMangaId());
+                if (details != null && details.getLatestChapter() != null) {
+                    item.setLastRefreshed(Instant.now().toString());
+                    if (!details.getLatestChapter().equals(item.getLatestChapter())) {
+                        item.setLatestChapter(details.getLatestChapter());
+                        item.setUpdatedAt(Instant.now().toString());
+                    }
+                    mangaRepository.save(item);
+                }
+                updated.add(item);
+            } catch (Exception e) {
                 updated.add(item);
             }
         }

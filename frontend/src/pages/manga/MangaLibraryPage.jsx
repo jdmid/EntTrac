@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import MediaCard from '../../components/MediaCard'
 import FilterBar from '../../components/FilterBar'
-import { getLibrary, refreshAllManga } from '../../api/mangaApi'
+import { getLibrary, refreshAllManga, refreshOngoingManga } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
 import { SERIES_STATUS_FILTERS, SORT_OPTIONS  } from '../../utils/statusMapping'
 
@@ -38,7 +38,7 @@ function sortManga(items, sortBy) {
       )
     case 'RECENTLY_ADDED':
       return arr.sort((a, b) =>
-        (b.mangaId ?? '').localeCompare(a.mangaId ?? '')
+        (b.createdAt ?? '').localeCompare(a.createdAt ?? '')
       )
     default:
       return arr
@@ -80,11 +80,13 @@ function MangaLibraryPage() {
 
   function backgroundRefreshOngoing(items) {
     const ongoing = items.filter(
-      (item) => item.seriesStatus === 'ongoing' && item.status !== 'DROPPED'
+      (item) =>
+        (item.seriesStatus === 'ongoing' || item.seriesStatus === 'hiatus') &&
+        item.status !== 'DROPPED'
     )
     if (ongoing.length === 0) return
 
-    refreshAllManga()
+    refreshOngoingManga()
       .then((res) => {
         setLibrary(res.data)
       })

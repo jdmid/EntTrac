@@ -80,10 +80,12 @@ function SimpleProgressBar({
           max={total ?? 99999}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleUpdate() }}
           className="text-[12px] rounded-l-lg outline-none text-left"
           style={{
             background: theme.background,
             border: `0.5px solid ${theme.cardBorder}`,
+            MozAppearance: 'textfield',
             borderRight: 'none',
             color: '#e2e2f0',
             padding: '7px 12px',

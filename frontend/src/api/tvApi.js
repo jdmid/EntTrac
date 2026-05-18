@@ -46,3 +46,6 @@ export const getTvCommunityRating = (tvId) =>
 
 export const refreshAllTv = () =>
   client.post('/tv/library/refresh-all')
+
+export const refreshOngoingTv = () =>
+  client.post('/tv/library/refresh-ongoing')

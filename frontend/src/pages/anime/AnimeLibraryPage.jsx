@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import MediaCard from '../../components/MediaCard'
 import FilterBar from '../../components/FilterBar'
-import { getAnimeLibrary, refreshAllAnime } from '../../api/animeApi'
+import { getAnimeLibrary, refreshAllAnime, refreshOngoingAnime } from '../../api/animeApi'
 import { themes, statusStyles } from '../../theme/themes'
 import { SERIES_STATUS_FILTERS, SORT_OPTIONS } from '../../utils/statusMapping'
 
@@ -37,9 +37,9 @@ function sortAnime(items, sortBy) {
         (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')
       )
     case 'RECENTLY_ADDED':
-      return arr.sort((a, b) =>
-        (b.animeId ?? '').localeCompare(a.animeId ?? '')
-      )
+        return arr.sort((a, b) =>
+            (b.createdAt ?? '').localeCompare(a.createdAt ?? '')
+        )
     default:
       return arr
   }
@@ -79,11 +79,13 @@ function AnimeLibraryPage() {
 
   function backgroundRefreshOngoing(items) {
     const ongoing = items.filter(
-        (item) => item.seriesStatus === 'ongoing' && item.status !== 'DROPPED'
+      (item) =>
+        (item.seriesStatus === 'ongoing' || item.seriesStatus === 'hiatus') &&
+        item.status !== 'DROPPED'
     )
     if (ongoing.length === 0) return
 
-    refreshAllAnime()
+    refreshOngoingAnime()
         .then((res) => {
         setLibrary(res.data)
         })

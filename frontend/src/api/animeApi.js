@@ -46,3 +46,6 @@ export const updateAnimeNotes = (animeId, notes) =>
 
   export const refreshAllAnime = () =>
   client.post('/anime/library/refresh-all')
+
+  export const refreshOngoingAnime = () =>
+  client.post('/anime/library/refresh-ongoing')

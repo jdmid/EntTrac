@@ -7,7 +7,7 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
   if (medium === 'manga') {
     // MangaDex values
     if (status === 'ongoing') return 'ongoing'
-    if (status === 'completed') return 'finished'
+    if (status === 'completed') return 'completed'
     if (status === 'hiatus') return 'hiatus'
     if (status === 'cancelled') return 'cancelled'
   }
@@ -15,7 +15,7 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
   if (medium === 'anime') {
     // Jikan/MAL values
     if (status === 'currently airing') return 'ongoing'
-    if (status === 'finished airing') return 'finished'
+    if (status === 'finished airing') return 'completed'
     if (status === 'not yet aired') return 'upcoming'
   }
  
@@ -25,7 +25,7 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
     if (status === 'in production') return 'in production'
     if (status === 'pilot') return 'upcoming'
     if (status === 'planned') return 'upcoming'
-    if (status === 'ended') return 'finished'
+    if (status === 'ended') return 'completed'
     if (status === 'canceled') return 'cancelled'
   }
  
@@ -53,20 +53,20 @@ export const SERIES_STATUS_FILTERS = {
   manga: [
     { value: 'ALL',       label: 'All' },
     { value: 'ongoing',   label: 'Ongoing' },
-    { value: 'finished',  label: 'Completed' },
+    { value: 'completed',  label: 'Completed' },
     { value: 'hiatus',    label: 'Hiatus' },
     { value: 'cancelled', label: 'Cancelled' },
   ],
   anime: [
     { value: 'ALL',      label: 'All' },
     { value: 'ongoing',  label: 'Currently Airing' },
-    { value: 'finished', label: 'Finished Airing' },
+    { value: 'completed', label: 'Finished Airing' },
     { value: 'upcoming', label: 'Not Yet Aired' },
   ],
   tv: [
     { value: 'ALL',       label: 'All' },
     { value: 'ongoing',   label: 'Ongoing' },
-    { value: 'finished',  label: 'Ended' },
+    { value: 'completed',  label: 'Ended' },
     { value: 'upcoming',  label: 'Upcoming' },
     { value: 'in production',  label: 'In Production' },
     { value: 'cancelled', label: 'Cancelled' },

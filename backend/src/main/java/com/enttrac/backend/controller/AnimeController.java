@@ -110,4 +110,9 @@ public class AnimeController {
     public ResponseEntity<List<AnimeItem>> refreshAll() {
         return ResponseEntity.ok(animeService.refreshAll());
     }
+
+    @PostMapping("/library/refresh-ongoing")
+    public ResponseEntity<List<AnimeItem>> refreshOngoing() {
+        return ResponseEntity.ok(animeService.refreshOngoing());
+    }
 }

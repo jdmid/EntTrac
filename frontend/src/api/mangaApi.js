@@ -46,3 +46,6 @@ export const updateMangaNotes = (mangaId, notes) =>
 
 export const refreshAllManga = () =>
   client.post('/manga/library/refresh-all')
+
+export const refreshOngoingManga = () =>
+  client.post('/manga/library/refresh-ongoing')

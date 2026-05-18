@@ -57,11 +57,25 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
 
         if (response != null && response.has("data")) {
             MangaSearchResult result = mapToSearchResult(response.get("data"));
-            // Override with accurate chapter count from aggregate
-            Integer accurateChapter = fetchLatestChapterFromFeed(id);
-            if (accurateChapter != null) {
-                result.setLatestChapter(accurateChapter);
+
+            String mangaStatus = response.get("data")
+                    .path("attributes")
+                    .path("status")
+                    .asText("");
+
+            if ("completed".equalsIgnoreCase(mangaStatus)) {
+                // lastChapter from manga object is source of truth for completed series
+                // only fall back to feed if it came back null or 0
+                if (result.getLatestChapter() == null || result.getLatestChapter() == 0) {
+                    Integer feedChapter = fetchLatestChapterFromFeed(id);
+                    if (feedChapter != null) result.setLatestChapter(feedChapter);
+                }
+            } else {
+                // ongoing, hiatus — feed is source of truth
+                Integer feedChapter = fetchLatestChapterFromFeed(id);
+                if (feedChapter != null) result.setLatestChapter(feedChapter);
             }
+
             return result;
         }
         return null;

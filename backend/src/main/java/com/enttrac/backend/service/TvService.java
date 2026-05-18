@@ -48,7 +48,9 @@ public class TvService {
         }
         item.setPk("USER#default");
         item.setSk("TV#TMDB#" + item.getTvId());
-        item.setUpdatedAt(Instant.now().toString());
+        String now = Instant.now().toString();
+        item.setCreatedAt(now);
+        item.setUpdatedAt(now);
         // Guard against null values in seasonEpisodes list
         if (item.getSeasonEpisodes() != null) {
             item.getSeasonEpisodes().removeIf(ep -> ep == null);
@@ -75,7 +77,7 @@ public class TvService {
         if (status.equals("in production")) return "in production";
         if (status.equals("pilot")) return "upcoming";
         if (status.equals("planned")) return "upcoming";
-        if (status.equals("ended")) return "finished";
+        if (status.equals("ended")) return "completed";
         if (status.equals("canceled")) return "cancelled";
         return null;
     }
@@ -160,25 +162,41 @@ public class TvService {
             try {
                 TvSearchResult details = tvMetadataClient.getDetails(item.getTvId());
                 if (details != null) {
+                    boolean changed = false;
+
                     if (details.getSeasonEpisodes() != null) {
                         List<Integer> cleaned = new ArrayList<>(details.getSeasonEpisodes());
                         cleaned.removeIf(Objects::isNull);
-                        item.setSeasonEpisodes(cleaned);
+                        if (!cleaned.equals(item.getSeasonEpisodes())) {
+                            item.setSeasonEpisodes(cleaned);
+                            changed = true;
+                        }
                     }
-                    if (details.getTotalEpisodes() != null) {
+                    if (details.getTotalEpisodes() != null &&
+                            !details.getTotalEpisodes().equals(item.getTotalEpisodes())) {
                         item.setTotalEpisodes(details.getTotalEpisodes());
+                        changed = true;
                     }
-                    if (details.getNextEpisodeDate() != null) {
+                    if (details.getNextEpisodeDate() != null &&
+                            !details.getNextEpisodeDate().equals(item.getNextEpisodeDate())) {
                         item.setNextEpisodeDate(details.getNextEpisodeDate());
+                        changed = true;
                     }
                     if (details.getStatus() != null) {
-                        item.setSeriesStatus(normalizeSeriesStatus(details.getStatus()));
+                        String normalized = normalizeSeriesStatus(details.getStatus());
+                        if (!normalized.equals(item.getSeriesStatus())) {
+                            item.setSeriesStatus(normalized);
+                            changed = true;
+                        }
                     }
-                    if (details.getNumberOfSeasons() != null) {
+                    if (details.getNumberOfSeasons() != null &&
+                            !details.getNumberOfSeasons().equals(item.getNumberOfSeasons())) {
                         item.setNumberOfSeasons(details.getNumberOfSeasons());
+                        changed = true;
                     }
+
                     item.setLastRefreshed(Instant.now().toString());
-                    item.setUpdatedAt(Instant.now().toString());
+                    if (changed) item.setUpdatedAt(Instant.now().toString());
                     tvRepository.save(item);
                 }
                 updated.add(item);
@@ -187,6 +205,64 @@ public class TvService {
             }
         }
 
+        return updated;
+    }
+
+    public List<TvItem> refreshOngoing() {
+        List<TvItem> library = tvRepository.findAll();
+        List<TvItem> updated = new ArrayList<>();
+
+        for (TvItem item : library) {
+            try {
+                if ("completed".equals(item.getSeriesStatus()) ||
+                        "cancelled".equals(item.getSeriesStatus())) {
+                    updated.add(item);
+                    continue;
+                }
+                TvSearchResult details = tvMetadataClient.getDetails(item.getTvId());
+                if (details != null) {
+                    boolean changed = false;
+
+                    if (details.getSeasonEpisodes() != null) {
+                        List<Integer> cleaned = new ArrayList<>(details.getSeasonEpisodes());
+                        cleaned.removeIf(Objects::isNull);
+                        if (!cleaned.equals(item.getSeasonEpisodes())) {
+                            item.setSeasonEpisodes(cleaned);
+                            changed = true;
+                        }
+                    }
+                    if (details.getTotalEpisodes() != null &&
+                            !details.getTotalEpisodes().equals(item.getTotalEpisodes())) {
+                        item.setTotalEpisodes(details.getTotalEpisodes());
+                        changed = true;
+                    }
+                    if (details.getNextEpisodeDate() != null &&
+                            !details.getNextEpisodeDate().equals(item.getNextEpisodeDate())) {
+                        item.setNextEpisodeDate(details.getNextEpisodeDate());
+                        changed = true;
+                    }
+                    if (details.getStatus() != null) {
+                        String normalized = normalizeSeriesStatus(details.getStatus());
+                        if (!normalized.equals(item.getSeriesStatus())) {
+                            item.setSeriesStatus(normalized);
+                            changed = true;
+                        }
+                    }
+                    if (details.getNumberOfSeasons() != null &&
+                            !details.getNumberOfSeasons().equals(item.getNumberOfSeasons())) {
+                        item.setNumberOfSeasons(details.getNumberOfSeasons());
+                        changed = true;
+                    }
+
+                    item.setLastRefreshed(Instant.now().toString());
+                    if (changed) item.setUpdatedAt(Instant.now().toString());
+                    tvRepository.save(item);
+                }
+                updated.add(item);
+            } catch (Exception e) {
+                updated.add(item);
+            }
+        }
         return updated;
     }
 }

@@ -122,4 +122,10 @@ public class MangaController {
     public ResponseEntity<List<MangaItem>> refreshAll() {
         return ResponseEntity.ok(mangaService.refreshAll());
     }
+
+    // Refresh all ongoing series from API
+    @PostMapping("/library/refresh-ongoing")
+    public ResponseEntity<List<MangaItem>> refreshOngoing() {
+        return ResponseEntity.ok(mangaService.refreshOngoing());
+    }
 }

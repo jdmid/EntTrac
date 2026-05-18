@@ -45,6 +45,7 @@ public abstract class MediaItem {
     private Double communityRating;
     private String lastRefreshed;
     private String updatedAt;
+    private String createdAt;
 
     private String notes;
 

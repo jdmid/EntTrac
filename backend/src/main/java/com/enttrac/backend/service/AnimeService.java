@@ -48,7 +48,9 @@ public class AnimeService {
         }
         item.setPk("USER#default");
         item.setSk("ANIME#JIKAN#" + item.getAnimeId());
-        item.setUpdatedAt(Instant.now().toString());
+        String now = Instant.now().toString();
+        item.setCreatedAt(now);
+        item.setUpdatedAt(now);
         animeRepository.save(item);
         return item;
     }
@@ -127,10 +129,40 @@ public class AnimeService {
         for (AnimeItem item : library) {
             try {
                 AnimeSearchResult details = animeMetadataClient.getDetails(item.getAnimeId());
-                if (details != null && details.getTotalEpisodes() != null) {
-                    item.setTotalEpisodes(details.getTotalEpisodes());
+                if (details != null && details.getLatestEpisode() != null) {
                     item.setLastRefreshed(Instant.now().toString());
-                    item.setUpdatedAt(Instant.now().toString());
+                    if (!details.getLatestEpisode().equals(item.getLatestEpisode())) {
+                        item.setLatestEpisode(details.getLatestEpisode());
+                        item.setUpdatedAt(Instant.now().toString());
+                    }
+                    animeRepository.save(item);
+                }
+                updated.add(item);
+            } catch (Exception e) {
+                updated.add(item);
+            }
+        }
+        return updated;
+    }
+
+    public List<AnimeItem> refreshOngoing() {
+        List<AnimeItem> library = animeRepository.findAll();
+        List<AnimeItem> updated = new ArrayList<>();
+
+        for (AnimeItem item : library) {
+            try {
+                if ("completed".equals(item.getSeriesStatus()) ||
+                        "cancelled".equals(item.getSeriesStatus())) {
+                    updated.add(item);
+                    continue;
+                }
+                AnimeSearchResult details = animeMetadataClient.getDetails(item.getAnimeId());
+                if (details != null && details.getLatestEpisode() != null) {
+                    item.setLastRefreshed(Instant.now().toString());
+                    if (!details.getLatestEpisode().equals(item.getLatestEpisode())) {
+                        item.setLatestEpisode(details.getLatestEpisode());
+                        item.setUpdatedAt(Instant.now().toString());
+                    }
                     animeRepository.save(item);
                 }
                 updated.add(item);
