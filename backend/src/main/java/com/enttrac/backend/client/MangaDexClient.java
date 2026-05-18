@@ -23,7 +23,14 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
     @Override
     public List<MangaSearchResult> search(String query) {
         JsonNode response = restClient.get()
-                .uri("/manga?title={query}&limit=25&includes[]=cover_art&includes[]=author&includes[]=artist", query)                .retrieve()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/manga")
+                        .queryParam("title", query)
+                        .queryParam("limit", 25)
+                        .queryParam("includes[]", "cover_art", "author", "artist")
+                        .queryParam("contentRating[]", "safe", "suggestive")
+                        .build())
+                .retrieve()
                 .body(JsonNode.class);
 
         List<MangaSearchResult> results = new ArrayList<>();
@@ -40,7 +47,11 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
     @Override
     public MangaSearchResult getDetails(String id) {
         JsonNode response = restClient.get()
-                .uri("/manga/{id}?includes[]=cover_art&includes[]=author&includes[]=artist", id)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/manga/{id}")
+                        .queryParam("includes[]", "cover_art", "author", "artist")
+                        .queryParam("contentRating[]", "safe", "suggestive")
+                        .build(id))
                 .retrieve()
                 .body(JsonNode.class);
 

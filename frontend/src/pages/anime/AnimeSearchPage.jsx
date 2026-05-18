@@ -131,7 +131,7 @@ function AnimeSearchPage() {
                 seriesStatus={anime.status}
                 coverUrl={anime.coverUrl}
                 theme={theme}
-                icon="📺"
+                icon="🎞️"
                 isAdded={addedIds.has(anime.id)}
                 onAdd={() => handleAdd(anime)}
                 onClick={() => navigate(`/anime/library/${anime.id}`, { state: { from: 'search' } })}

@@ -68,6 +68,7 @@ function AnimeLibraryPage() {
       .then((res) => {
         setLibrary(res.data)
         setLoading(false)
+        setTimeout(() => backgroundRefreshOngoing(res.data), 1000)
       })
       .catch((err) => {
         console.error(err)
@@ -75,6 +76,21 @@ function AnimeLibraryPage() {
         setLoading(false)
       })
   }, [])
+
+  function backgroundRefreshOngoing(items) {
+    const ongoing = items.filter(
+        (item) => item.seriesStatus === 'ongoing' && item.status !== 'DROPPED'
+    )
+    if (ongoing.length === 0) return
+
+    refreshAllAnime()
+        .then((res) => {
+        setLibrary(res.data)
+        })
+        .catch((err) => {
+        console.warn('Background refresh failed:', err)
+        })
+    }
 
   async function handleRefreshAll() {
     if (refreshing || cooldown > 0) return

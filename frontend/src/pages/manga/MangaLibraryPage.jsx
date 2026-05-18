@@ -69,6 +69,7 @@ function MangaLibraryPage() {
       .then((res) => {
         setLibrary(res.data)
         setLoading(false)
+        backgroundRefreshOngoing(res.data)
       })
       .catch((err) => {
         console.error(err)
@@ -76,6 +77,21 @@ function MangaLibraryPage() {
         setLoading(false)
       })
   }, [])
+
+  function backgroundRefreshOngoing(items) {
+    const ongoing = items.filter(
+      (item) => item.seriesStatus === 'ongoing' && item.status !== 'DROPPED'
+    )
+    if (ongoing.length === 0) return
+
+    refreshAllManga()
+      .then((res) => {
+        setLibrary(res.data)
+      })
+      .catch((err) => {
+        console.warn('Background refresh failed:', err)
+      })
+  }
 
   async function handleRefreshAll() {
     if (refreshing || cooldown > 0) return
