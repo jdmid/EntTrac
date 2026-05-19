@@ -129,12 +129,27 @@ public class AnimeService {
         for (AnimeItem item : library) {
             try {
                 AnimeSearchResult details = animeMetadataClient.getDetails(item.getAnimeId());
-                if (details != null && details.getLatestEpisode() != null) {
-                    item.setLastRefreshed(Instant.now().toString());
-                    if (!details.getLatestEpisode().equals(item.getLatestEpisode())) {
+                if (details != null) {
+                    boolean changed = false;
+
+                    if (details.getLatestEpisode() != null &&
+                            !details.getLatestEpisode().equals(item.getLatestEpisode())) {
                         item.setLatestEpisode(details.getLatestEpisode());
-                        item.setUpdatedAt(Instant.now().toString());
+                        changed = true;
                     }
+                    if (details.getTotalEpisodes() != null &&
+                            !details.getTotalEpisodes().equals(item.getTotalEpisodes())) {
+                        item.setTotalEpisodes(details.getTotalEpisodes());
+                        changed = true;
+                    }
+                    if (details.getStatus() != null &&
+                            !details.getStatus().equals(item.getSeriesStatus())) {
+                        item.setSeriesStatus(details.getStatus());
+                        changed = true;
+                    }
+
+                    item.setLastRefreshed(Instant.now().toString());
+                    if (changed) item.setUpdatedAt(Instant.now().toString());
                     animeRepository.save(item);
                 }
                 updated.add(item);
@@ -157,12 +172,22 @@ public class AnimeService {
                     continue;
                 }
                 AnimeSearchResult details = animeMetadataClient.getDetails(item.getAnimeId());
-                if (details != null && details.getLatestEpisode() != null) {
-                    item.setLastRefreshed(Instant.now().toString());
-                    if (!details.getLatestEpisode().equals(item.getLatestEpisode())) {
+                if (details != null) {
+                    boolean changed = false;
+
+                    if (details.getLatestEpisode() != null &&
+                            !details.getLatestEpisode().equals(item.getLatestEpisode())) {
                         item.setLatestEpisode(details.getLatestEpisode());
-                        item.setUpdatedAt(Instant.now().toString());
+                        changed = true;
                     }
+                    if (details.getTotalEpisodes() != null &&
+                            !details.getTotalEpisodes().equals(item.getTotalEpisodes())) {
+                        item.setTotalEpisodes(details.getTotalEpisodes());
+                        changed = true;
+                    }
+
+                    item.setLastRefreshed(Instant.now().toString());
+                    if (changed) item.setUpdatedAt(Instant.now().toString());
                     animeRepository.save(item);
                 }
                 updated.add(item);
