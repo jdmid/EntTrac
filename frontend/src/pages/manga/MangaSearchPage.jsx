@@ -129,7 +129,7 @@ function MangaSearchPage() {
 
         {/* Results grid */}
         {!loading && results.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
             {results.map((manga) => (
               <MediaCard
                 key={manga.id}

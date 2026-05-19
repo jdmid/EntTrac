@@ -61,12 +61,17 @@ function MediaCard({
 
       {/* Card body */}
       <div
-        className="px-2.5 pt-2 pb-2.5"
+        className="px-2.5 pt-2"
         style={{
           background: style ? style.bg : theme.cardBody,
           borderTop: style
             ? `0.5px solid ${style.border}`
             : '0.5px solid rgba(255,255,255,0.06)',
+          paddingBottom: (() => {
+            const hasProgress = progressLabel && (total == null || total > 0)
+            const hasAddButton = onAdd || isAdded
+            return hasProgress || hasAddButton ? '10px' : '8px'
+          })(),
         }}
       >
         <p className="text-[12px] font-medium text-[#d0d0e0] m-0 mb-[3px] truncate">
@@ -87,15 +92,22 @@ function MediaCard({
 
         {style && (
           <span
-            className="inline-block text-[10px] font-medium px-[7px] py-[2px] rounded-full mb-1.5"
-            style={style.badge}
+            className="inline-block text-[10px] font-medium px-[7px] py-[2px] rounded-full"
+            style={{
+              ...style.badge,
+              marginBottom: (() => {
+                const hasProgress = progressLabel && (total == null || total > 0 || seriesStatus === 'ongoing' || seriesStatus === 'hiatus' || seriesStatus === 'in production')
+                const hasAddButton = onAdd || isAdded
+                return hasProgress || hasAddButton ? '6px' : '0px'
+              })(),
+            }}
           >
             {statusLabel}
           </span>
         )}
 
-        {progressLabel && (total == null || total > 0) && (
-          <div className="flex items-center justify-between">
+        {progressLabel && (total == null || total > 0 || seriesStatus === 'ongoing' || seriesStatus === 'hiatus' || seriesStatus === 'in production') && (
+            <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8a8a9a]">
               {progressLabel} {progress ?? 0}{total != null ? ` / ${total}` : ''}
             </span>

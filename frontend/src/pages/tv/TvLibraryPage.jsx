@@ -232,7 +232,7 @@ function TvLibraryPage() {
         )}
 
         {!loading && !error && filtered.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
             {filtered.map((show) => (
               <MediaCard
                 key={show.tvId}
