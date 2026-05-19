@@ -36,12 +36,14 @@ function TvDetailPage() {
       })
       .catch(() => {
         getTvDetails(tvId)
-          .then((res) => {
-            setShow(res.data)
-            setInLibrary(false)
-            setCommunityRating(res.data.communityRating ?? null)
-            setLoading(false)
-          })
+            .then((res) => {
+                const data = res.data
+                data.seriesStatus = normalizeSeriesStatus(data.status, 'tv')
+                setShow(data)
+                setInLibrary(false)
+                setCommunityRating(data.communityRating ?? null)
+                setLoading(false)
+            })
           .catch(() => {
             setError('Failed to load TV show.')
             setLoading(false)
