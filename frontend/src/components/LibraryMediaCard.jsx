@@ -1,6 +1,6 @@
 import { statusStyles, statusLabels } from '../theme/themes'
 
-function MediaCard({ 
+function LibraryMediaCard({
   title,
   creator,
   score,
@@ -13,8 +13,6 @@ function MediaCard({
   theme,
   icon,
   progressLabel,
-  isAdded,
-  onAdd,
   onClick,
   medium,
 }) {
@@ -28,22 +26,17 @@ function MediaCard({
       className="rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
       style={{ border: '0.5px solid rgba(255,255,255,0.09)' }}
     >
-      {/* Cover */}
+      {/* Cover — fixed aspect ratio so all cards are same height */}
       <div
         className="w-full aspect-[2/3] flex items-center justify-center relative"
         style={{ background: theme.cardCover }}
       >
         {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
+          <img src={coverUrl} alt={title} className="w-full h-full object-cover" />
         ) : (
           <span style={{ fontSize: 28, color: theme.cardIcon }}>{icon}</span>
         )}
 
-        {/* Score pill */}
         {score !== undefined && (
           <div
             className="absolute top-1.5 right-1.5 rounded-full px-[7px] py-[2px] text-[11px] font-semibold"
@@ -57,21 +50,16 @@ function MediaCard({
           </div>
         )}
       </div>
-      {/* ↑ end cover div */}
 
-      {/* Card body */}
+      {/* Body — fixed min-height so all cards align at the bottom */}
       <div
-        className="px-2.5 pt-2"
+        className="px-2.5 pt-2 pb-2.5 flex flex-col"
         style={{
+          minHeight: '110px',
           background: style ? style.bg : theme.cardBody,
           borderTop: style
             ? `0.5px solid ${style.border}`
             : '0.5px solid rgba(255,255,255,0.06)',
-          paddingBottom: (() => {
-            const hasProgress = progressLabel && (total == null || total > 0)
-            const hasAddButton = onAdd || isAdded
-            return hasProgress || hasAddButton ? '10px' : '8px'
-          })(),
         }}
       >
         <p className="text-[12px] font-medium text-[#d0d0e0] m-0 mb-[3px] truncate">
@@ -86,28 +74,23 @@ function MediaCard({
 
         {seriesStatus && seriesStatus.trim() !== '' && (
           <p className="text-[10px] text-[#555566] m-0 mb-[5px] capitalize">
-            {seriesStatus}{total != null && total > 1 ? ` · ${totalLabel} ${total}` : ''}
+            {seriesStatus}
+            {total != null && total > 1 ? ` · ${totalLabel} ${total}` : ''}
           </p>
         )}
 
         {style && (
           <span
-            className="inline-block text-[10px] font-medium px-[7px] py-[2px] rounded-full"
-            style={{
-              ...style.badge,
-              marginBottom: (() => {
-                const hasProgress = progressLabel && (total == null || total > 0 || seriesStatus === 'ongoing' || seriesStatus === 'hiatus' || seriesStatus === 'in production')
-                const hasAddButton = onAdd || isAdded
-                return hasProgress || hasAddButton ? '6px' : '0px'
-              })(),
-            }}
+            className="inline-block text-[10px] font-medium px-[7px] py-[2px] rounded-full mb-[6px] self-start"
+            style={style.badge}
           >
             {statusLabel}
           </span>
         )}
 
-        {progressLabel && (total == null || total > 0 || seriesStatus === 'ongoing' || seriesStatus === 'hiatus' || seriesStatus === 'in production') && (
-            <div className="flex items-center justify-between">
+        {/* Progress pushed to bottom with mt-auto */}
+        {progressLabel && (total == null || total > 0 || ['ongoing', 'hiatus', 'in production'].includes(seriesStatus)) && (
+          <div className="flex items-center justify-between mt-auto">
             <span className="text-[10px] text-[#8a8a9a]">
               {progressLabel} {progress ?? 0}{total != null ? ` / ${total}` : ''}
             </span>
@@ -121,41 +104,9 @@ function MediaCard({
             )}
           </div>
         )}
-
-        {(onAdd || isAdded) && (
-          <div className="mt-2">
-            {isAdded ? (
-              <div
-                className="w-full py-1.5 text-[11px] rounded text-center"
-                style={{
-                  background: '#1f4a32',
-                  color: '#4ade80',
-                  border: '0.5px solid #2a5a3a',
-                }}
-              >
-                ✓ Added to library
-              </div>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onAdd()
-                }}
-                className="w-full py-1.5 text-[11px] rounded transition-colors"
-                style={{
-                  background: theme.accentBg,
-                  border: `0.5px solid ${theme.accentBorder}`,
-                  color: theme.accent,
-                }}
-              >
-                + Add to library
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </div>
   )
 }
 
-export default MediaCard
+export default LibraryMediaCard

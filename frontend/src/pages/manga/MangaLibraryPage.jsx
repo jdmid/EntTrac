@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import MediaCard from '../../components/MediaCard'
+import LibraryMediaCard from '../../components/LibraryMediaCard'
 import FilterBar from '../../components/FilterBar'
 import { getLibrary, refreshAllManga, refreshOngoingManga } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
@@ -246,7 +246,7 @@ function MangaLibraryPage() {
         {!loading && !error && filtered.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
             {filtered.map((manga) => (
-              <MediaCard
+              <LibraryMediaCard
                 key={manga.mangaId}
                 title={manga.title}
                 score={manga.score}

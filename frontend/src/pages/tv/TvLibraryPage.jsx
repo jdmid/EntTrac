@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import MediaCard from '../../components/MediaCard'
+import LibraryMediaCard from '../../components/LibraryMediaCard'
 import FilterBar from '../../components/FilterBar'
 import { getTvLibrary, refreshAllTv, refreshOngoingTv } from '../../api/tvApi'
 import { themes } from '../../theme/themes'
@@ -234,7 +234,7 @@ function TvLibraryPage() {
         {!loading && !error && filtered.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
             {filtered.map((show) => (
-              <MediaCard
+              <LibraryMediaCard
                 key={show.tvId}
                 title={show.title}
                 score={show.score}

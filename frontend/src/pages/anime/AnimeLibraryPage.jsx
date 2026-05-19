@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import MediaCard from '../../components/MediaCard'
+import LibraryMediaCard from '../../components/LibraryMediaCard'
 import FilterBar from '../../components/FilterBar'
 import { getAnimeLibrary, refreshAllAnime, refreshOngoingAnime } from '../../api/animeApi'
 import { themes, statusStyles } from '../../theme/themes'
@@ -240,7 +240,7 @@ function AnimeLibraryPage() {
         {!loading && !error && filtered.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
             {filtered.map((anime) => (
-              <MediaCard
+              <LibraryMediaCard
                 key={anime.animeId}
                 title={anime.title}
                 score={anime.score}

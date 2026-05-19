@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import MediaCard from '../../components/MediaCard'
+import SearchMediaCard from '../../components/SearchMediaCard'
 import { searchManga, addToLibrary, getLibrary } from '../../api/mangaApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
@@ -131,7 +131,7 @@ function MangaSearchPage() {
         {!loading && results.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
             {results.map((manga) => (
-              <MediaCard
+              <SearchMediaCard 
                 key={manga.id}
                 title={manga.title}
                 creator={manga.author}

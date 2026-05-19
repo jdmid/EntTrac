@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
-import MediaCard from '../../components/MediaCard'
+import SearchMediaCard from '../../components/SearchMediaCard'
 import { searchTv, addTvToLibrary, getTvLibrary } from '../../api/tvApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
@@ -129,7 +129,7 @@ function TvSearchPage() {
         {!loading && results.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
             {results.map((show) => (
-              <MediaCard
+              <SearchMediaCard 
                 key={show.id}
                 title={show.title}
                 creator={(() => {
