@@ -29,6 +29,7 @@ function DetailPageLayout({
   theme,
   icon,
   refreshLabel,
+  refreshing,
   metaLine,
   progressSection,
 
@@ -114,14 +115,17 @@ function DetailPageLayout({
             {inLibrary && onRefresh && (
               <button
                 onClick={onRefresh}
+                disabled={refreshing}
                 className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
                 style={{
                   background: theme.accentBg,
                   border: `0.5px solid ${theme.accentBorder}`,
-                  color: theme.accent,
+                  color: refreshing ? theme.cardBorder : theme.accent,
+                  cursor: refreshing ? 'not-allowed' : 'pointer',
+                  opacity: refreshing ? 0.6 : 1,
                 }}
               >
-                {refreshLabel}
+                {refreshing ? '↻ Refreshing…' : refreshLabel}
               </button>
             )}
 

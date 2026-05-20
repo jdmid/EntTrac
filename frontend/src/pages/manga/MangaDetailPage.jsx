@@ -23,6 +23,7 @@ function MangaDetailPage() {
   const [score, setScore] = useState(null)
   const [inLibrary, setInLibrary] = useState(true)
   const [communityRating, setCommunityRating] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     getManga(mangaId)
@@ -114,8 +115,13 @@ function MangaDetailPage() {
         />
       }
       notesProgressLabel="Ch."
-      onRefresh={() =>
-        refreshLatestChapter(mangaId).then((res) => setManga(res.data))
+      refreshing={refreshing}
+      onRefresh={() => {
+        setRefreshing(true)
+        refreshLatestChapter(mangaId)
+          .then((res) => setShow(res.data))
+          .finally(() => setRefreshing(false))
+        }
       }
       onRemove={() =>
         removeFromLibrary(mangaId).then(() =>

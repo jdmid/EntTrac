@@ -23,6 +23,7 @@ function AnimeDetailPage() {
   const [score, setScore] = useState(null)
   const [inLibrary, setInLibrary] = useState(true)
   const [communityRating, setCommunityRating] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     getAnime(animeId)
@@ -121,8 +122,13 @@ function AnimeDetailPage() {
         />
       }
       notesProgressLabel="Ep."
-      onRefresh={() =>
-        refreshLatestEpisode(animeId).then((res) => setAnime(res.data))
+      refreshing={refreshing}
+      onRefresh={() => {
+        setRefreshing(true)
+        refreshLatestEpisode(animeId)
+          .then((res) => setShow(res.data))
+          .finally(() => setRefreshing(false))
+        }
       }
       onRemove={() =>
         removeAnimeFromLibrary(animeId).then(() =>

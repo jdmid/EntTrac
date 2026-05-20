@@ -23,6 +23,7 @@ function TvDetailPage() {
   const [score, setScore] = useState(null)
   const [inLibrary, setInLibrary] = useState(true)
   const [communityRating, setCommunityRating] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     getTvShow(tvId)
@@ -138,8 +139,13 @@ function TvDetailPage() {
         />
       }
       notesProgressLabel="Ep."
-      onRefresh={() =>
-        refreshTvEpisodes(tvId).then((res) => setShow(res.data))
+      refreshing={refreshing}
+      onRefresh={() => {
+        setRefreshing(true)
+        refreshTvEpisodes(tvId)
+            .then((res) => setShow(res.data))
+            .finally(() => setRefreshing(false))
+        }
       }
       onRemove={() =>
         removeFromTvLibrary(tvId).then(() =>
