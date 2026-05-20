@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import SearchMediaCard from '../../components/SearchMediaCard'
-import { searchTv, addTvToLibrary, getTvLibrary } from '../../api/tvApi'
+import { searchTv, addTvToLibrary, getTvLibrary, getTvDetails  } from '../../api/tvApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
 
@@ -44,30 +44,33 @@ function TvSearchPage() {
       })
   }
 
-  function handleAdd(show) {
-    addTvToLibrary({
-      tvId: show.id,
-      title: show.title,
-      status: 'PLANNED',
-      episodesWatched: 0,
-      currentSeason: 1,
-      totalEpisodes: show.totalEpisodes,
-      numberOfSeasons: show.numberOfSeasons,
-      seasonEpisodes: show.seasonEpisodes,
-      coverUrl: show.coverUrl,
-      description: show.description,
-      seriesStatus: normalizeSeriesStatus(show.status, 'tv'),
-      network: show.network,
-      genres: show.genres,
-      firstAirYear: show.firstAirYear,
-      seriesType: show.seriesType,
-      communityRating: show.communityRating,
-      nextEpisodeDate: show.nextEpisodeDate,
-    })
-      .then(() => {
+  async function handleAdd(show) {
+    try {
+        const detailRes = await getTvDetails(show.id)
+        const full = detailRes.data
+        await addTvToLibrary({
+        tvId: full.id ?? show.id,
+        title: full.title ?? show.title,
+        status: 'PLANNED',
+        episodesWatched: 0,
+        currentSeason: 1,
+        totalEpisodes: full.totalEpisodes ?? show.totalEpisodes,
+        numberOfSeasons: full.numberOfSeasons ?? show.numberOfSeasons,
+        seasonEpisodes: full.seasonEpisodes ?? show.seasonEpisodes,
+        coverUrl: full.coverUrl ?? show.coverUrl,
+        description: full.description ?? show.description,
+        seriesStatus: normalizeSeriesStatus(full.status ?? show.status, 'tv'),
+        network: full.network ?? show.network,
+        genres: full.genres ?? show.genres,
+        firstAirYear: full.firstAirYear ?? show.firstAirYear,
+        seriesType: full.seriesType ?? show.seriesType,
+        communityRating: full.communityRating ?? show.communityRating,
+        nextEpisodeDate: full.nextEpisodeDate,
+        })
         setAddedIds((prev) => new Set([...prev, show.id]))
-      })
-      .catch(console.error)
+    } catch (err) {
+        console.error(err)
+    }
   }
 
   return (
