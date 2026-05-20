@@ -282,7 +282,7 @@ public class TvServiceTest {
 
         assertEquals(62, result.getTotalEpisodes());
         assertEquals("S6 E1 · \"Pilot\" · 2025-01-01", result.getNextEpisodeDate());
-        assertEquals("Returning Series", result.getSeriesStatus());
+        assertEquals("ongoing", result.getSeriesStatus());
         assertEquals(5, result.getNumberOfSeasons());
         verify(tvRepository, times(1)).save(testItem);
     }
@@ -314,7 +314,7 @@ public class TvServiceTest {
         List<TvItem> result = tvService.refreshAll();
 
         assertEquals(62, result.get(0).getTotalEpisodes());
-        assertEquals("Returning Series", result.get(0).getSeriesStatus());
+        assertEquals("ongoing", result.get(0).getSeriesStatus());
         assertEquals(5, result.get(0).getNumberOfSeasons());
         verify(tvRepository, times(1)).save(testItem);
     }
@@ -405,6 +405,21 @@ public class TvServiceTest {
         List<TvItem> result = tvService.refreshAll();
 
         assertEquals(1, result.size());
+        verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshAll_ShouldHandleUnrecognizedSeriesStatus() {
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396")
+                .status("Unknown Status")
+                .totalEpisodes(62)
+                .build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        assertDoesNotThrow(() -> tvService.refreshAll());
         verify(tvRepository, times(1)).save(testItem);
     }
 }

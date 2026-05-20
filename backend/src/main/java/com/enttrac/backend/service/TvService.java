@@ -20,7 +20,7 @@ public class TvService {
     private final MediaMetadataClient<TvSearchResult> tvMetadataClient;
 
     public TvService(TvRepository tvRepository,
-                     @Qualifier("tmdbTVClient") MediaMetadataClient<TvSearchResult> tvMetadataClient) {
+                     @Qualifier("tmdbTvClient") MediaMetadataClient<TvSearchResult> tvMetadataClient) {
         this.tvRepository = tvRepository;
         this.tvMetadataClient = tvMetadataClient;
     }
@@ -184,7 +184,7 @@ public class TvService {
                     }
                     if (details.getStatus() != null) {
                         String normalized = normalizeSeriesStatus(details.getStatus());
-                        if (!normalized.equals(item.getSeriesStatus())) {
+                        if (!Objects.equals(normalized, item.getSeriesStatus())) {
                             item.setSeriesStatus(normalized);
                             changed = true;
                         }
@@ -245,7 +245,7 @@ public class TvService {
                     }
                     if (details.getStatus() != null) {
                         String normalized = normalizeSeriesStatus(details.getStatus());
-                        if (!normalized.equals(item.getSeriesStatus())) {
+                        if (!Objects.equals(normalized, item.getSeriesStatus())) {
                             item.setSeriesStatus(normalized);
                             changed = true;
                         }

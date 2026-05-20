@@ -296,8 +296,12 @@ public class AnimeServiceTest {
 
     @Test
     void refreshAll_ShouldSkipUpdateWhenTotalEpisodesNull() {
+        testItem.setSeriesStatus("ongoing");
         AnimeSearchResult details = AnimeSearchResult.builder()
-                .id("21").totalEpisodes(null).build();
+                .id("21")
+                .totalEpisodes(null)
+                .status("Currently Airing") // normalizes to "ongoing" — matches existing
+                .build();
 
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
         when(animeMetadataClient.getDetails("21")).thenReturn(details);
@@ -318,5 +322,23 @@ public class AnimeServiceTest {
 
         assertEquals(1, result.size());
         verify(animeRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshAll_ShouldNormalizeSeriesStatus() {
+        testItem.setSeriesStatus(null);
+        AnimeSearchResult details = AnimeSearchResult.builder()
+                .id("21")
+                .status("Currently Airing")
+                .totalEpisodes(1000)
+                .build();
+
+        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+
+        List<AnimeItem> result = animeService.refreshAll();
+
+        assertEquals("ongoing", result.get(0).getSeriesStatus());
+        verify(animeRepository, times(1)).save(testItem);
     }
 }

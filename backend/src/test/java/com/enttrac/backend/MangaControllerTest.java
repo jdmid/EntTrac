@@ -182,7 +182,7 @@ public class MangaControllerTest {
 
         mockMvc.perform(get("/api/manga/library"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.error").value("Something went wrong"));
+                .andExpect(jsonPath("$.error").value("Something went wrong. Please try again."));
     }
 
     @Test

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 // TODO: refactor into shared MediaService when adding third medium
 @Service
@@ -142,15 +143,19 @@ public class AnimeService {
                         item.setTotalEpisodes(details.getTotalEpisodes());
                         changed = true;
                     }
-                    if (details.getStatus() != null &&
-                            !details.getStatus().equals(item.getSeriesStatus())) {
-                        item.setSeriesStatus(details.getStatus());
-                        changed = true;
+                    if (details.getStatus() != null) {
+                        String normalized = normalizeAnimeStatus(details.getStatus());
+                        if (!Objects.equals(normalized, item.getSeriesStatus())) {
+                            item.setSeriesStatus(normalized);
+                            changed = true;
+                        }
                     }
 
-                    item.setLastRefreshed(Instant.now().toString());
-                    if (changed) item.setUpdatedAt(Instant.now().toString());
-                    animeRepository.save(item);
+                    if (changed) {
+                        item.setLastRefreshed(Instant.now().toString());
+                        item.setUpdatedAt(Instant.now().toString());
+                        animeRepository.save(item);
+                    }
                 }
                 updated.add(item);
             } catch (Exception e) {
@@ -188,9 +193,11 @@ public class AnimeService {
                         changed = true;
                     }
 
-                    item.setLastRefreshed(Instant.now().toString());
-                    if (changed) item.setUpdatedAt(Instant.now().toString());
-                    animeRepository.save(item);
+                    if (changed) {
+                        item.setLastRefreshed(Instant.now().toString());
+                        item.setUpdatedAt(Instant.now().toString());
+                        animeRepository.save(item);
+                    }
                 }
                 updated.add(item);
             } catch (Exception e) {
@@ -198,5 +205,14 @@ public class AnimeService {
             }
         }
         return updated;
+    }
+
+    private String normalizeAnimeStatus(String rawStatus) {
+        if (rawStatus == null) return null;
+        String status = rawStatus.toLowerCase().trim();
+        if (status.equals("currently airing")) return "ongoing";
+        if (status.equals("finished airing")) return "completed";
+        if (status.equals("not yet aired")) return "upcoming";
+        return null;
     }
 }
