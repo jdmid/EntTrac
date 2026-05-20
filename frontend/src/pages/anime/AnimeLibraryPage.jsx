@@ -167,9 +167,9 @@ function AnimeLibraryPage() {
             disabled={refreshing || cooldown > 0}
             className="flex items-center gap-1.5 px-3 py-[5px] text-[11px] rounded-lg transition-colors"
             style={{
-                background: refreshDone ? '#1f4a3218' : '#9d7cff18',
-                border: `0.5px solid ${refreshDone ? '#2a5a3a' : cooldown > 0 ? '#2a2a3a' : '#9d7cff55'}`,
-                color: refreshDone ? '#4ade80' : cooldown > 0 ? '#555566' : '#9d7cff',
+                background: refreshDone ? '#1f4a3218' : `${theme.accent}18`,
+                border: `0.5px solid ${refreshDone ? '#2a5a3a' : cooldown > 0 ? '#2a2a3a' : `${theme.accent}55`}`,
+                color: refreshDone ? '#4ade80' : cooldown > 0 ? '#555566' : theme.accent,
                 cursor: refreshing || cooldown > 0 ? 'not-allowed' : 'pointer',
                 opacity: refreshing || cooldown > 0 ? 0.6 : 1,
             }}
