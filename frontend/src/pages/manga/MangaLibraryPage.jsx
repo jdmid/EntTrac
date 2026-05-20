@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import LibraryMediaCard from '../../components/LibraryMediaCard'
 import FilterBar from '../../components/FilterBar'
+import AttributionFooter from '../../components/AttributionFooter'
 import { getLibrary, refreshAllManga, refreshOngoingManga } from '../../api/mangaApi'
 import { themes, statusStyles } from '../../theme/themes'
 import { SERIES_STATUS_FILTERS, SORT_OPTIONS  } from '../../utils/statusMapping'
@@ -250,6 +251,7 @@ function MangaLibraryPage() {
             ))}
           </div>
         )}
+        <AttributionFooter />
       </div>
     </div>
   )

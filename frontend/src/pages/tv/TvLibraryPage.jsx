@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import LibraryMediaCard from '../../components/LibraryMediaCard'
 import FilterBar from '../../components/FilterBar'
+import AttributionFooter from '../../components/AttributionFooter'
 import { getTvLibrary, refreshAllTv, refreshOngoingTv } from '../../api/tvApi'
 import { themes } from '../../theme/themes'
 import { SERIES_STATUS_FILTERS, SORT_OPTIONS, normalizeSeriesStatus  } from '../../utils/statusMapping'
@@ -257,6 +258,7 @@ function TvLibraryPage() {
             ))}
           </div>
         )}
+        <AttributionFooter />
       </div>
     </div>
   )

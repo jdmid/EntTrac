@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import NotesDialog from './NotesDialog'
 import { statusStyles, statusLabels } from '../theme/themes'
+import AttributionFooter from './AttributionFooter'
+
 
 const DEFAULT_STATUS_OPTIONS = [
   { value: 'CONSUMING' },
@@ -304,6 +306,7 @@ function DetailPageLayout({
           onSave={onNotesSave}
         />
       )}
+      <AttributionFooter />
     </div>
   )
 }

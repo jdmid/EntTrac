@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import SearchMediaCard from '../../components/SearchMediaCard'
+import AttributionFooter from '../../components/AttributionFooter'
 import { searchAnime, addAnimeToLibrary, getAnimeLibrary } from '../../api/animeApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
@@ -152,6 +153,7 @@ function AnimeSearchPage() {
             </span>
           </p>
         )}
+        <AttributionFooter />
       </div>
     </div>
   )

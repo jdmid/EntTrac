@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import LibraryMediaCard from '../../components/LibraryMediaCard'
+import AttributionFooter from '../../components/AttributionFooter'
 import FilterBar from '../../components/FilterBar'
 import { getAnimeLibrary, refreshAllAnime, refreshOngoingAnime } from '../../api/animeApi'
 import { themes, statusStyles } from '../../theme/themes'
@@ -245,6 +246,7 @@ function AnimeLibraryPage() {
             ))}
           </div>
         )}
+        <AttributionFooter />
       </div>
     </div>
   )

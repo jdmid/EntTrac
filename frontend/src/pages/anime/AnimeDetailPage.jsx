@@ -163,6 +163,7 @@ function AnimeDetailPage() {
         updateAnimeNotes(animeId, notes).then((res) => setAnime(res.data))
       }
     />
+
   )
 }
 

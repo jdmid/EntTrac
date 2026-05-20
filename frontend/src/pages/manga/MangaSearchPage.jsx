@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import SearchMediaCard from '../../components/SearchMediaCard'
+import AttributionFooter from '../../components/AttributionFooter'
 import { searchManga, addToLibrary, getLibrary } from '../../api/mangaApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
@@ -160,6 +161,7 @@ function MangaSearchPage() {
             </span>
           </p>
         )}
+        <AttributionFooter />
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import SearchMediaCard from '../../components/SearchMediaCard'
+import AttributionFooter from '../../components/AttributionFooter'
 import { searchTv, addTvToLibrary, getTvLibrary, getTvDetails  } from '../../api/tvApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
@@ -174,6 +175,7 @@ function TvSearchPage() {
             </span>
           </p>
         )}
+        <AttributionFooter />
       </div>
     </div>
   )
