@@ -175,7 +175,18 @@ function TvLibraryPage() {
                 opacity: refreshing || cooldown > 0 ? 0.6 : 1,
               }}
             >
-              {refreshDone ? '✓ Done' : refreshing ? '↻ Refreshing…' : '↻ Refresh all'}
+              {refreshDone ? '✓ Done' : refreshing ? (
+                <span className="flex items-center gap-1.5">
+                    <span
+                    className="inline-block w-3 h-3 rounded-full animate-spin"
+                    style={{
+                        border: `2px solid ${theme.accent}33`,
+                        borderTopColor: theme.accent,
+                    }}
+                    />
+                    Refreshing…
+                </span>
+                ) : 'Refresh all'}
             </button>
           </div>
         </div>
