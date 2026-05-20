@@ -58,10 +58,10 @@ The project started as a manga and anime tracker and is continuously growing to 
 - **Unread/unwatched tracking** — see at a glance how many chapters or episodes you're behind
 - **User notes** - edit personal notes on any library item's detail page
 - **Refresh all** — bulk update chapter/episode counts from the API with progress indicator and rate limit cooldown
+- **TV shows tab** - search TMDB, add to library, track watching progress by episode
 
 ### Planned Features
 
-- TV shows tab
 - Books tab
 - Movies tab
 - AniList as a second anime data source
