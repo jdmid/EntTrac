@@ -214,6 +214,8 @@ public class TvService {
 
         for (TvItem item : library) {
             try {
+                // Items with null or unknown seriesStatus are included intentionally —
+                // refreshing them may populate their status from the API
                 if ("completed".equals(item.getSeriesStatus()) ||
                         "cancelled".equals(item.getSeriesStatus())) {
                     updated.add(item);
