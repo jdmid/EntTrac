@@ -57,7 +57,6 @@ function TvLibraryPage() {
   const [sortBy, setSortBy] = useState('MOST_UNREAD')
 
   const [refreshing, setRefreshing] = useState(false)
-  const [refreshProgress, setRefreshProgress] = useState(null)
   const [refreshDone, setRefreshDone] = useState(false)
   const [cooldown, setCooldown] = useState(0)
 
@@ -102,37 +101,25 @@ function TvLibraryPage() {
 
     setRefreshing(true)
     setRefreshDone(false)
-    setRefreshProgress(`0 of ${library.length}`)
 
     try {
-      for (let i = 0; i < library.length; i++) {
-        setRefreshProgress(`${i + 1} of ${library.length}`)
-        if (i > 0) await new Promise(r => setTimeout(r, 200))
-      }
-
-      const res = await refreshAllTv()
-      setLibrary(res.data)
-      setRefreshing(false)
-      setRefreshProgress(null)
-      setRefreshDone(true)
-
-      setTimeout(() => {
+        const res = await refreshAllTv() 
+        setLibrary(res.data)
+        setRefreshDone(true)
+        setTimeout(() => {
         setRefreshDone(false)
         setCooldown(60)
         const interval = setInterval(() => {
-          setCooldown((prev) => {
-            if (prev <= 1) {
-              clearInterval(interval)
-              return 0
-            }
+            setCooldown((prev) => {
+            if (prev <= 1) { clearInterval(interval); return 0 }
             return prev - 1
-          })
+            })
         }, 1000)
-      }, 5000)
+        }, 5000)
     } catch (err) {
-      console.error(err)
-      setRefreshing(false)
-      setRefreshProgress(null)
+        console.error(err)
+    } finally {
+        setRefreshing(false)
     }
   }
 
@@ -171,11 +158,6 @@ function TvLibraryPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {refreshing && (
-              <span className="text-[11px] text-[#555566]">
-                Refreshing {refreshProgress}…
-              </span>
-            )}
             {cooldown > 0 && !refreshing && !refreshDone && (
               <span className="text-[11px] text-[#555566]">
                 Available in {cooldown}s
