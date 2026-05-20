@@ -10,8 +10,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component("tmdbClient")
-public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
+@Component("tmdbTvClient")
+public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
 
     private static final String BASE_URL = "https://api.themoviedb.org/3";
     private static final String IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
@@ -19,7 +19,7 @@ public class TmdbClient implements MediaMetadataClient<TvSearchResult> {
     private final String apiKey;
     private final RestClient restClient;
 
-    public TmdbClient(@Value("${tmdb.api.key}") String apiKey) {
+    public TmdbTvClient(@Value("${tmdb.api.key}") String apiKey) {
         this.apiKey = apiKey;
         this.restClient = RestClient.builder()
                 .baseUrl(BASE_URL)

@@ -20,7 +20,7 @@ public class TvService {
     private final MediaMetadataClient<TvSearchResult> tvMetadataClient;
 
     public TvService(TvRepository tvRepository,
-                     @Qualifier("tmdbClient") MediaMetadataClient<TvSearchResult> tvMetadataClient) {
+                     @Qualifier("tmdbTVClient") MediaMetadataClient<TvSearchResult> tvMetadataClient) {
         this.tvRepository = tvRepository;
         this.tvMetadataClient = tvMetadataClient;
     }
