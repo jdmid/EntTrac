@@ -341,4 +341,86 @@ public class AnimeServiceTest {
         assertEquals("ongoing", result.get(0).getSeriesStatus());
         verify(animeRepository, times(1)).save(testItem);
     }
+
+    @Test
+    void refreshOngoing_ShouldSkipCompletedItems() {
+        testItem.setSeriesStatus("completed");
+        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+
+        List<AnimeItem> result = animeService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(animeMetadataClient, never()).getDetails(any());
+        verify(animeRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldSkipCancelledItems() {
+        testItem.setSeriesStatus("cancelled");
+        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+
+        List<AnimeItem> result = animeService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(animeMetadataClient, never()).getDetails(any());
+        verify(animeRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldUpdateWhenDetailsAvailable() {
+        testItem.setSeriesStatus("ongoing");
+        testItem.setTotalEpisodes(900);
+        AnimeSearchResult details = AnimeSearchResult.builder()
+                .id("21").totalEpisodes(1000).build();
+
+        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+
+        List<AnimeItem> result = animeService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        assertEquals(1000, result.get(0).getTotalEpisodes());
+        verify(animeRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshOngoing_ShouldSkipWhenDetailsNull() {
+        testItem.setSeriesStatus("ongoing");
+        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeMetadataClient.getDetails("21")).thenReturn(null);
+
+        List<AnimeItem> result = animeService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(animeRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldContinueWhenOneItemFails() {
+        testItem.setSeriesStatus("ongoing");
+        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeMetadataClient.getDetails("21"))
+                .thenThrow(new RuntimeException("API down"));
+
+        List<AnimeItem> result = animeService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(animeRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldUpdateLatestEpisodeWhenChanged() {
+        testItem.setSeriesStatus("ongoing");
+        testItem.setLatestEpisode(10);
+        AnimeSearchResult details = AnimeSearchResult.builder()
+                .id("21").latestEpisode(11).build();
+
+        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+
+        List<AnimeItem> result = animeService.refreshOngoing();
+
+        assertEquals(11, result.get(0).getLatestEpisode());
+        verify(animeRepository, times(1)).save(testItem);
+    }
 }

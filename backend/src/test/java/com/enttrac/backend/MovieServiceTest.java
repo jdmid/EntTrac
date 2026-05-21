@@ -284,4 +284,82 @@ public class MovieServiceTest {
 
         assertNull(result);
     }
+
+    @Test
+    void refreshRatings_ShouldNormalizeReleasedStatus() {
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").status("released").imdbId("tt0137523").build();
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.refreshRatings("550");
+
+        assertEquals("released", result.getSeriesStatus());
+    }
+
+    @Test
+    void refreshRatings_ShouldNormalizeInProductionStatus() {
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").status("in production").imdbId("tt0137523").build();
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.refreshRatings("550");
+
+        assertEquals("in production", result.getSeriesStatus());
+    }
+
+    @Test
+    void refreshRatings_ShouldNormalizePostProductionStatus() {
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").status("post production").imdbId("tt0137523").build();
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.refreshRatings("550");
+
+        assertEquals("in production", result.getSeriesStatus());
+    }
+
+    @Test
+    void refreshRatings_ShouldNormalizePlannedStatus() {
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").status("planned").imdbId("tt0137523").build();
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.refreshRatings("550");
+
+        assertEquals("upcoming", result.getSeriesStatus());
+    }
+
+    @Test
+    void refreshRatings_ShouldNormalizeRumoredStatus() {
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").status("rumored").imdbId("tt0137523").build();
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.refreshRatings("550");
+
+        assertEquals("upcoming", result.getSeriesStatus());
+    }
+
+    @Test
+    void refreshRatings_ShouldNormalizeCanceledStatus() {
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").status("canceled").imdbId("tt0137523").build();
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.refreshRatings("550");
+
+        assertEquals("cancelled", result.getSeriesStatus());
+    }
 }

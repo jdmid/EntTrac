@@ -248,4 +248,17 @@ public class TvControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tvId").value("1396"));
     }
+
+    @Test
+    void refreshOngoing_ShouldReturnUpdatedLibrary() throws Exception {
+        TvItem item = new TvItem();
+        item.setTvId("1396");
+        item.setTitle("Breaking Bad");
+
+        when(tvService.refreshOngoing()).thenReturn(List.of(item));
+
+        mockMvc.perform(post("/api/tv/library/refresh-ongoing"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].tvId").value("1396"));
+    }
 }

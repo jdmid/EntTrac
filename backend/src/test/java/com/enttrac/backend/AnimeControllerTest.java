@@ -245,4 +245,17 @@ public class AnimeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].animeId").value("21"));
     }
+
+    @Test
+    void refreshOngoing_ShouldReturnUpdatedLibrary() throws Exception {
+        AnimeItem item = new AnimeItem();
+        item.setAnimeId("21");
+        item.setTitle("One Piece");
+
+        when(animeService.refreshOngoing()).thenReturn(List.of(item));
+
+        mockMvc.perform(post("/api/anime/library/refresh-ongoing"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].animeId").value("21"));
+    }
 }

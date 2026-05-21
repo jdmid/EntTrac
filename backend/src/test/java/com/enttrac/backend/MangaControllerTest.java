@@ -286,4 +286,17 @@ public class MangaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].mangaId").value("abc123"));
     }
+
+    @Test
+    void refreshOngoing_ShouldReturnUpdatedLibrary() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setTitle("One Piece");
+
+        when(mangaService.refreshOngoing()).thenReturn(List.of(item));
+
+        mockMvc.perform(post("/api/manga/library/refresh-ongoing"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].mangaId").value("abc123"));
+    }
 }

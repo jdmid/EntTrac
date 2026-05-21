@@ -314,4 +314,100 @@ public class MangaServiceTest {
         assertEquals(1, result.size());
         verify(mangaRepository, never()).save(any());
     }
+
+    @Test
+    void refreshOngoing_ShouldSkipCompletedItems() {
+        testItem.setSeriesStatus("completed");
+        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+
+        List<MangaItem> result = mangaService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(mangaMetadataClient, never()).getDetails(any());
+        verify(mangaRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldSkipCancelledItems() {
+        testItem.setSeriesStatus("cancelled");
+        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+
+        List<MangaItem> result = mangaService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(mangaMetadataClient, never()).getDetails(any());
+        verify(mangaRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldUpdateWhenDetailsAvailable() {
+        testItem.setSeriesStatus("ongoing");
+        testItem.setLatestChapter(100);
+        MangaSearchResult details = MangaSearchResult.builder()
+                .id("abc123").latestChapter(110).build();
+
+        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
+
+        List<MangaItem> result = mangaService.refreshOngoing();
+
+        assertEquals(110, result.get(0).getLatestChapter());
+        verify(mangaRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshOngoing_ShouldSkipWhenDetailsNull() {
+        testItem.setSeriesStatus("ongoing");
+        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(null);
+
+        List<MangaItem> result = mangaService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(mangaRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldSkipWhenLatestChapterNull() {
+        testItem.setSeriesStatus("ongoing");
+        MangaSearchResult details = MangaSearchResult.builder()
+                .id("abc123").latestChapter(null).build();
+
+        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
+
+        List<MangaItem> result = mangaService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(mangaRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldContinueWhenOneItemFails() {
+        testItem.setSeriesStatus("ongoing");
+        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaMetadataClient.getDetails("abc123"))
+                .thenThrow(new RuntimeException("API down"));
+
+        List<MangaItem> result = mangaService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(mangaRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldNotUpdateWhenChapterUnchanged() {
+        testItem.setSeriesStatus("ongoing");
+        testItem.setLatestChapter(100);
+        MangaSearchResult details = MangaSearchResult.builder()
+                .id("abc123").latestChapter(100).build();
+
+        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
+
+        List<MangaItem> result = mangaService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(mangaRepository, times(1)).save(testItem);
+    }
 }

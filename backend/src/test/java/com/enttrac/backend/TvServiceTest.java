@@ -422,4 +422,176 @@ public class TvServiceTest {
         assertDoesNotThrow(() -> tvService.refreshAll());
         verify(tvRepository, times(1)).save(testItem);
     }
+
+    @Test
+    void refreshOngoing_ShouldSkipCompletedItems() {
+        testItem.setSeriesStatus("completed");
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(tvMetadataClient, never()).getDetails(any());
+        verify(tvRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldSkipCancelledItems() {
+        testItem.setSeriesStatus("cancelled");
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(tvMetadataClient, never()).getDetails(any());
+        verify(tvRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldUpdateWhenDetailsAvailable() {
+        testItem.setSeriesStatus("ongoing");
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396")
+                .totalEpisodes(62)
+                .seasonEpisodes(List.of(7, 13, 13, 13, 16))
+                .status("Returning Series")
+                .numberOfSeasons(5)
+                .build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        assertEquals(62, result.get(0).getTotalEpisodes());
+        verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshOngoing_ShouldSkipWhenDetailsNull() {
+        testItem.setSeriesStatus("ongoing");
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(null);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(tvRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldContinueWhenOneItemFails() {
+        testItem.setSeriesStatus("ongoing");
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396"))
+                .thenThrow(new RuntimeException("API down"));
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals(1, result.size());
+        verify(tvRepository, never()).save(any());
+    }
+
+    @Test
+    void refreshOngoing_ShouldUpdateNextEpisodeDateWhenChanged() {
+        testItem.setSeriesStatus("ongoing");
+        testItem.setNextEpisodeDate(null);
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396")
+                .nextEpisodeDate("S2 E1 · 2025-06-01")
+                .build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals("S2 E1 · 2025-06-01", result.get(0).getNextEpisodeDate());
+        verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshOngoing_ShouldNormalizeInProductionStatus() {
+        testItem.setSeriesStatus("ongoing");
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396").status("In Production").build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals("in production", result.get(0).getSeriesStatus());
+    }
+
+    @Test
+    void refreshOngoing_ShouldNormalizePilotStatus() {
+        testItem.setSeriesStatus("ongoing");
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396").status("Pilot").build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals("upcoming", result.get(0).getSeriesStatus());
+    }
+
+    @Test
+    void refreshOngoing_ShouldNormalizePlannedStatus() {
+        testItem.setSeriesStatus("ongoing");
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396").status("Planned").build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals("upcoming", result.get(0).getSeriesStatus());
+    }
+
+    @Test
+    void refreshOngoing_ShouldNormalizeEndedStatus() {
+        testItem.setSeriesStatus("ongoing");
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396").status("Ended").build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals("completed", result.get(0).getSeriesStatus());
+    }
+
+    @Test
+    void refreshOngoing_ShouldNormalizeCanceledStatus() {
+        testItem.setSeriesStatus("ongoing");
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396").status("Canceled").build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertEquals("cancelled", result.get(0).getSeriesStatus());
+    }
+
+    @Test
+    void normalizeSeriesStatus_ShouldReturnNullForUnknownStatus() {
+        testItem.setSeriesStatus("ongoing");
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396").status("Unknown Status").build();
+
+        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        List<TvItem> result = tvService.refreshOngoing();
+
+        assertNull(result.get(0).getSeriesStatus());
+    }
 }
