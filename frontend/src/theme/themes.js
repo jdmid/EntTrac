@@ -41,7 +41,7 @@ export const themes = {
     unreadBadge: '#f59e0b33',
     name: 'TV',
   },
-  movies: {
+  movie: {
     accent: '#f43f5e',
     accentBg: '#f43f5e18',
     accentBorder: '#f43f5e55',
@@ -125,7 +125,7 @@ export const statusLabels = {
     FINISHED: 'Finished',
     DROPPED: 'Dropped',
   },
-  movies: {
+  movie: {
     CONSUMING: 'Watching',
     PLANNED: 'Plan to Watch',
     FINISHED: 'Watched',

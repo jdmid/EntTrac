@@ -29,7 +29,7 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
     if (status === 'canceled') return 'cancelled'
   }
  
-  if (medium === 'movies') {
+  if (medium === 'movie') {
     // TMDB Movie values
     if (status === 'released') return 'released'
     if (status === 'in production') return 'in production'
@@ -71,7 +71,7 @@ export const SERIES_STATUS_FILTERS = {
     { value: 'in production',  label: 'In Production' },
     { value: 'cancelled', label: 'Cancelled' },
   ],
-  movies: [
+  movie: [
     { value: 'ALL',            label: 'All' },
     { value: 'released',       label: 'Released' },
     { value: 'in production',  label: 'In Production' },
@@ -116,7 +116,7 @@ export const SORT_OPTIONS = {
     { value: 'RECENTLY_UPDATED', label: 'Recently updated' },
     { value: 'RECENTLY_ADDED',   label: 'Recently added' },
   ],
-  movies: [
+  movie: [
     { value: 'ALPHA_AZ',         label: 'Alphabetical A–Z' },
     { value: 'ALPHA_ZA',         label: 'Alphabetical Z–A' },
     { value: 'SCORE_HIGH',       label: 'Score (high to low)' },

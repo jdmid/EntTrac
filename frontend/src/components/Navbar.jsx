@@ -49,10 +49,10 @@ function Navbar({ activeMedia = 'manga' }) {
         </button>
 
         <button
-          onClick={() => navigate('/movies/library')}
+          onClick={() => navigate('/movie/library')}
           className="h-12 px-4 text-sm border-b-2 transition-colors"
-          style={activeMedia === 'movies'
-            ? { color: themes.movies.accent, borderColor: themes.movies.accent }
+          style={activeMedia === 'movie'
+            ? { color: themes.movie.accent, borderColor: themes.movie.accent }
             : { color: '#777788', borderColor: 'transparent' }}
         >
           Movies
