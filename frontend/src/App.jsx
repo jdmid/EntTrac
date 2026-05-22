@@ -8,6 +8,9 @@ import AnimeDetailPage from './pages/anime/AnimeDetailPage'
 import TvLibraryPage from './pages/tv/TvLibraryPage'
 import TvSearchPage from './pages/tv/TvSearchPage'
 import TvDetailPage from './pages/tv/TvDetailPage'
+import MovieLibraryPage from './pages/movies/MovieLibraryPage'
+import MovieSearchPage from './pages/movies/MovieSearchPage'
+import MovieDetailPage from './pages/movies/MovieDetailPage'
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
         <Route path="/tv/library" element={<TvLibraryPage />} />
         <Route path="/tv/search" element={<TvSearchPage />} />
         <Route path="/tv/library/:tvId" element={<TvDetailPage />} />
+        <Route path="/movies/library" element={<MovieLibraryPage />} />
+        <Route path="/movies/search" element={<MovieSearchPage />} />
+        <Route path="/movies/library/:movieId" element={<MovieDetailPage />} />
       </Routes>
     </BrowserRouter>
   )
