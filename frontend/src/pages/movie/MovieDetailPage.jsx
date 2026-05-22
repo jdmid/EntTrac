@@ -33,7 +33,7 @@ function MovieDetailPage() {
         // Enrich with OMDB scores if not already cached
         enrichMovieFromCache(movieId)
           .then((enriched) => setMovie(enriched.data))
-          .catch(() => {}) // silent — scores are supplementary
+          .catch((err) => console.error('Enrich failed:', err))
         getMovieCommunityRating(movieId)
           .then((res) => setCommunityRating(res.data))
           .catch(() => setCommunityRating(null))
@@ -75,67 +75,6 @@ function MovieDetailPage() {
     )
   }
 
-  // Ratings section — shown below the TMDB community rating
-  const ratingsSection = inLibrary && (
-    movie.imdbRating || movie.rottenTomatoesRating || movie.metacriticRating
-  ) ? (
-    <div className="mb-4">
-      <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
-        Ratings
-      </p>
-      <div className="flex gap-2 flex-wrap">
-        {movie.imdbRating != null && (
-          <div
-            className="rounded-lg p-3 text-center"
-            style={{
-              background: theme.topBar,
-              border: `0.5px solid ${theme.cardBorder}`,
-              minWidth: '80px',
-            }}
-          >
-            <p className="text-[20px] font-medium m-0 mb-0.5"
-              style={{ color: '#f5c518' }}>
-              {movie.imdbRating}
-            </p>
-            <p className="text-[10px] text-[#555566] m-0">IMDb</p>
-          </div>
-        )}
-        {movie.rottenTomatoesRating && (
-          <div
-            className="rounded-lg p-3 text-center"
-            style={{
-              background: theme.topBar,
-              border: `0.5px solid ${theme.cardBorder}`,
-              minWidth: '80px',
-            }}
-          >
-            <p className="text-[20px] font-medium m-0 mb-0.5"
-              style={{ color: '#fa320a' }}>
-              {movie.rottenTomatoesRating}
-            </p>
-            <p className="text-[10px] text-[#555566] m-0">Rotten Tomatoes</p>
-          </div>
-        )}
-        {movie.metacriticRating && (
-          <div
-            className="rounded-lg p-3 text-center"
-            style={{
-              background: theme.topBar,
-              border: `0.5px solid ${theme.cardBorder}`,
-              minWidth: '80px',
-            }}
-          >
-            <p className="text-[20px] font-medium m-0 mb-0.5"
-              style={{ color: '#66cc33' }}>
-              {movie.metacriticRating}
-            </p>
-            <p className="text-[10px] text-[#555566] m-0">Metacritic</p>
-          </div>
-        )}
-      </div>
-    </div>
-  ) : null
-
   return (
     <DetailPageLayout
       activeMedia="movie"
@@ -144,8 +83,8 @@ function MovieDetailPage() {
       title={movie.title}
       item={movie}
       inLibrary={inLibrary}
-      communityRating={communityRating}
-      communityRatingLabel="TMDB score"
+      communityRating={null}
+      communityRatingLabel={null}
       score={score}
       theme={theme}
       icon="🎬"
@@ -170,7 +109,77 @@ function MovieDetailPage() {
           )}
         </div>
       }
-      progressSection={ratingsSection}
+      progressSection={null}
+      ratingsSection={
+        inLibrary && (communityRating != null || movie.imdbRating || movie.rottenTomatoesRating || movie.metacriticRating) ? (
+            <div className="flex gap-2 flex-wrap">
+            {communityRating != null && (
+                <div
+                    className="rounded-lg p-3 text-center"
+                    style={{
+                    background: theme.topBar,
+                    border: `0.5px solid ${theme.cardBorder}`,
+                    minWidth: '80px',
+                    }}
+                >
+                    <p className="text-[20px] font-medium m-0 mb-0.5"
+                    style={{ color: '#01b4e4' }}>
+                    {communityRating}
+                    </p>
+                    <p className="text-[10px] text-[#555566] m-0">TMDB</p>
+                </div>
+            )}    
+            {movie.imdbRating != null && (
+                <div
+                className="rounded-lg p-3 text-center"
+                style={{
+                    background: theme.topBar,
+                    border: `0.5px solid ${theme.cardBorder}`,
+                    minWidth: '80px',
+                }}
+                >
+                <p className="text-[20px] font-medium m-0 mb-0.5"
+                    style={{ color: '#f5c518' }}>
+                    {movie.imdbRating}
+                </p>
+                <p className="text-[10px] text-[#555566] m-0">IMDb</p>
+                </div>
+            )}
+            {movie.rottenTomatoesRating && (
+                <div
+                className="rounded-lg p-3 text-center"
+                style={{
+                    background: theme.topBar,
+                    border: `0.5px solid ${theme.cardBorder}`,
+                    minWidth: '80px',
+                }}
+                >
+                <p className="text-[20px] font-medium m-0 mb-0.5"
+                    style={{ color: '#fa320a' }}>
+                    {movie.rottenTomatoesRating}
+                </p>
+                <p className="text-[10px] text-[#555566] m-0">Rotten Tomatoes</p>
+                </div>
+            )}
+            {movie.metacriticRating && (
+                <div
+                className="rounded-lg p-3 text-center"
+                style={{
+                    background: theme.topBar,
+                    border: `0.5px solid ${theme.cardBorder}`,
+                    minWidth: '80px',
+                }}
+                >
+                <p className="text-[20px] font-medium m-0 mb-0.5"
+                    style={{ color: '#66cc33' }}>
+                    {movie.metacriticRating}
+                </p>
+                <p className="text-[10px] text-[#555566] m-0">Metacritic</p>
+                </div>
+            )}
+            </div>
+        ) : null
+      } 
       notesProgressLabel={null}
       onRefresh={() => {
         setRefreshing(true)

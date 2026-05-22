@@ -26,6 +26,7 @@ function DetailPageLayout({
   communityRating,
   communityRatingLabel,
   score,
+  ratingsSection = null,
 
   // Display
   theme,
@@ -191,12 +192,12 @@ function DetailPageLayout({
             </div>
 
             {/* Score */}
+            {inLibrary && item?.status !== 'PLANNED' && (
             <div className="mb-4">
               <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                 Score
               </p>
               <div className="flex gap-2">
-                {inLibrary && item?.status !== 'PLANNED' && (
                 <div className="rounded-lg p-3 text-center w-fit"
                     style={{
                       background: theme.topBar,
@@ -204,7 +205,7 @@ function DetailPageLayout({
                     }}
                   >
                     <p className="text-[28px] font-medium m-0 mb-0.5"
-                      style={{ color: '#fbbf24' }}>
+                      style={{ color: theme.accent }}>
                       {score ?? '—'}
                     </p>
                     <p className="text-[11px] text-[#555566] m-0">Your score</p>
@@ -216,7 +217,7 @@ function DetailPageLayout({
                           className="cursor-pointer text-[16px] transition-colors"
                           style={{
                             color: score != null && n <= score
-                              ? '#fbbf24' : '#333344'
+                              ? theme.accent : '#333344'
                           }}
                           title={`Score ${n}`}
                         >
@@ -225,7 +226,6 @@ function DetailPageLayout({
                       ))}
                     </div>
                   </div>
-                )}
 
                 {communityRating != null && (
                   <div
@@ -246,9 +246,20 @@ function DetailPageLayout({
                       Community rating
                     </p>
                   </div>
-                )}
+                )}    
               </div>
             </div>
+            )}
+
+            {/* Supplementary ratings — movies only */}
+              {inLibrary && ratingsSection && (
+                <div className="mb-4">
+                  <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
+                    Ratings
+                  </p>
+                  {ratingsSection}
+                </div>
+              )}
 
             {/* Progress slot */}
             {inLibrary && progressSection && (
