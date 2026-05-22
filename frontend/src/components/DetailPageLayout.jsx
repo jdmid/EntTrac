@@ -23,8 +23,6 @@ function DetailPageLayout({
   // Data
   item,
   inLibrary,
-  communityRating,
-  communityRatingLabel,
   score,
   ratingsSection = null,
 
@@ -225,28 +223,7 @@ function DetailPageLayout({
                         </span>
                       ))}
                     </div>
-                  </div>
-
-                {communityRating != null && (
-                  <div
-                    className="rounded-lg p-3 text-center w-fit"
-                    style={{
-                      background: theme.topBar,
-                      border: `0.5px solid ${theme.cardBorder}`,
-                    }}
-                  >
-                    <p className="text-[28px] font-medium m-0 mb-0.5"
-                      style={{ color: '#fbbf24' }}>
-                      {communityRating}
-                    </p>
-                    <p className="text-[11px] text-[#555566] m-0">
-                      {communityRatingLabel}
-                    </p>
-                    <p className="text-[11px] text-[#333344] m-0 mt-1">
-                      Community rating
-                    </p>
-                  </div>
-                )}    
+                  </div>    
               </div>
             </div>
             )}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import DetailPageLayout from '../../components/DetailPageLayout'
 import SimpleProgressBar from '../../components/SimpleProgressBar'
+import RatingCard from '../../components/RatingCard'
 import {
   getAnime, getAnimeDetails, updateAnimeProgress, updateAnimeScore,
   updateAnimeStatus, refreshLatestEpisode, removeAnimeFromLibrary,
@@ -82,8 +83,6 @@ function AnimeDetailPage() {
       title={anime.title}
       item={anime}
       inLibrary={inLibrary}
-      communityRating={communityRating}
-      communityRatingLabel="MAL score"
       score={score}
       theme={theme}
       icon="🎞️"
@@ -123,6 +122,16 @@ function AnimeDetailPage() {
       }
       notesProgressLabel="Ep."
       refreshing={refreshing}
+      ratingsSection={
+        <div className="flex gap-2 flex-wrap">
+          <RatingCard
+            value={communityRating}
+            label="MAL"
+            color="#2e51a2"
+            theme={theme}
+          />
+        </div>
+      }
       onRefresh={() => {
         setRefreshing(true)
         refreshLatestEpisode(animeId)

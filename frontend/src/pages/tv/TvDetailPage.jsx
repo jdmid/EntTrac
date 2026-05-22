@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import DetailPageLayout from '../../components/DetailPageLayout'
 import TvProgressBar from '../../components/TvProgressBar'
+import RatingCard from '../../components/RatingCard'
 import {
   getTvShow, getTvDetails, updateTvProgress, updateTvScore,
   updateTvStatus, refreshTvEpisodes, removeFromTvLibrary,
@@ -87,8 +88,6 @@ function TvDetailPage() {
       title={show.title}
       item={show}
       inLibrary={inLibrary}
-      communityRating={communityRating}
-      communityRatingLabel="TMDB score"
       score={score}
       theme={theme}
       icon="📺"
@@ -140,6 +139,16 @@ function TvDetailPage() {
       }
       notesProgressLabel="Ep."
       refreshing={refreshing}
+      ratingsSection={
+        <div className="flex gap-2 flex-wrap">
+          <RatingCard
+            value={communityRating}
+            label="TMDB"
+            color="#01b4e4"
+            theme={theme}
+          />
+        </div>
+      }
       onRefresh={() => {
         setRefreshing(true)
         refreshTvEpisodes(tvId)

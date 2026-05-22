@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import DetailPageLayout from '../../components/DetailPageLayout'
 import SimpleProgressBar from '../../components/SimpleProgressBar'
+import RatingCard from '../../components/RatingCard'
 import {
   getManga, getMangaDetails, updateProgress, updateScore,
   updateStatus, refreshLatestChapter, removeFromLibrary,
@@ -78,8 +79,6 @@ function MangaDetailPage() {
       title={manga.title}
       item={manga}
       inLibrary={inLibrary}
-      communityRating={communityRating}
-      communityRatingLabel="MangaDex score"
       score={score}
       theme={theme}
       icon="📖"
@@ -116,6 +115,16 @@ function MangaDetailPage() {
       }
       notesProgressLabel="Ch."
       refreshing={refreshing}
+      ratingsSection={
+        <div className="flex gap-2 flex-wrap">
+          <RatingCard
+            value={communityRating}
+            label="MangaDex"
+            color="#f87c23"
+            theme={theme}
+          />
+        </div>
+      }
       onRefresh={() => {
         setRefreshing(true)
         refreshLatestChapter(mangaId)

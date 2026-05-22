@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import DetailPageLayout from '../../components/DetailPageLayout'
+import RatingCard from '../../components/RatingCard'
 import {
   getMovie, getMovieDetails, updateMovieScore, updateMovieStatus,
   refreshMovieRatings, removeMovieFromLibrary, addMovieToLibrary,
-  getMovieCommunityRating, updateMovieNotes, enrichMovieFromCache,
+  updateMovieNotes, enrichMovieFromCache,
 } from '../../api/movieApi'
 import { themes } from '../../theme/themes'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
@@ -21,7 +22,6 @@ function MovieDetailPage() {
   const [error, setError] = useState(null)
   const [score, setScore] = useState(null)
   const [inLibrary, setInLibrary] = useState(true)
-  const [communityRating, setCommunityRating] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
@@ -34,9 +34,6 @@ function MovieDetailPage() {
         enrichMovieFromCache(movieId)
           .then((enriched) => setMovie(enriched.data))
           .catch((err) => console.error('Enrich failed:', err))
-        getMovieCommunityRating(movieId)
-          .then((res) => setCommunityRating(res.data))
-          .catch(() => setCommunityRating(null))
       })
       .catch(() => {
         getMovieDetails(movieId)
@@ -45,7 +42,6 @@ function MovieDetailPage() {
             data.seriesStatus = normalizeSeriesStatus(data.status, 'movie')
             setMovie(data)
             setInLibrary(false)
-            setCommunityRating(data.communityRating ?? null)
             setLoading(false)
           })
           .catch(() => {
@@ -111,75 +107,13 @@ function MovieDetailPage() {
       }
       progressSection={null}
       ratingsSection={
-        inLibrary && (communityRating != null || movie.imdbRating || movie.rottenTomatoesRating || movie.metacriticRating) ? (
-            <div className="flex gap-2 flex-wrap">
-            {communityRating != null && (
-                <div
-                    className="rounded-lg p-3 text-center"
-                    style={{
-                    background: theme.topBar,
-                    border: `0.5px solid ${theme.cardBorder}`,
-                    minWidth: '80px',
-                    }}
-                >
-                    <p className="text-[20px] font-medium m-0 mb-0.5"
-                    style={{ color: '#01b4e4' }}>
-                    {communityRating}
-                    </p>
-                    <p className="text-[10px] text-[#555566] m-0">TMDB</p>
-                </div>
-            )}    
-            {movie.imdbRating != null && (
-                <div
-                className="rounded-lg p-3 text-center"
-                style={{
-                    background: theme.topBar,
-                    border: `0.5px solid ${theme.cardBorder}`,
-                    minWidth: '80px',
-                }}
-                >
-                <p className="text-[20px] font-medium m-0 mb-0.5"
-                    style={{ color: '#f5c518' }}>
-                    {movie.imdbRating}
-                </p>
-                <p className="text-[10px] text-[#555566] m-0">IMDb</p>
-                </div>
-            )}
-            {movie.rottenTomatoesRating && (
-                <div
-                className="rounded-lg p-3 text-center"
-                style={{
-                    background: theme.topBar,
-                    border: `0.5px solid ${theme.cardBorder}`,
-                    minWidth: '80px',
-                }}
-                >
-                <p className="text-[20px] font-medium m-0 mb-0.5"
-                    style={{ color: '#fa320a' }}>
-                    {movie.rottenTomatoesRating}
-                </p>
-                <p className="text-[10px] text-[#555566] m-0">Rotten Tomatoes</p>
-                </div>
-            )}
-            {movie.metacriticRating && (
-                <div
-                className="rounded-lg p-3 text-center"
-                style={{
-                    background: theme.topBar,
-                    border: `0.5px solid ${theme.cardBorder}`,
-                    minWidth: '80px',
-                }}
-                >
-                <p className="text-[20px] font-medium m-0 mb-0.5"
-                    style={{ color: '#66cc33' }}>
-                    {movie.metacriticRating}
-                </p>
-                <p className="text-[10px] text-[#555566] m-0">Metacritic</p>
-                </div>
-            )}
-            </div>
-        ) : null
-      } 
+        <div className="flex gap-2 flex-wrap">
+          <RatingCard value={movie.communityRating} label="TMDB" color="#01b4e4" theme={theme} />
+          <RatingCard value={movie.imdbRating} label="IMDb" color="#f5c518" theme={theme} />
+          <RatingCard value={movie.rottenTomatoesRating} label="Rotten Tomatoes" color="#fa320a" theme={theme} />
+          <RatingCard value={movie.metacriticRating} label="Metacritic" color="#66cc33" theme={theme} />
+        </div>
+      }
       notesProgressLabel={null}
       onRefresh={() => {
         setRefreshing(true)
