@@ -115,4 +115,9 @@ public class AnimeController {
     public ResponseEntity<List<AnimeItem>> refreshOngoing() {
         return ResponseEntity.ok(animeService.refreshOngoing());
     }
+
+    @PostMapping("/library/{id}/enrich")
+    public ResponseEntity<AnimeItem> enrich(@PathVariable String id) {
+        return ResponseEntity.ok(animeService.enrichCommunityRating(id));
+    }
 }

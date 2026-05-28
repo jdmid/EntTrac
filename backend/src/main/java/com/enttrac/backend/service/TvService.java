@@ -141,8 +141,14 @@ public class TvService {
             }
             item.setLastRefreshed(Instant.now().toString());
             item.setUpdatedAt(Instant.now().toString());
-            tvRepository.save(item);
+
         }
+
+        Double rating = tvMetadataClient.getCommunityRating(tvId);
+        if (rating != null) item.setCommunityRating(rating);
+
+        tvRepository.save(item);
+
         return item;
     }
 
@@ -266,5 +272,20 @@ public class TvService {
             }
         }
         return updated;
+    }
+
+    public TvItem enrichCommunityRating(String mangaId) {
+        TvItem item = tvRepository.findById(mangaId);
+        if (item == null) throw new NotFoundException("TV show not found: " + mangaId);
+
+        if (item.getCommunityRating() == null) {
+            Double rating = tvMetadataClient.getCommunityRating(mangaId);
+            if (rating != null) {
+                item.setCommunityRating(rating);
+                item.setUpdatedAt(Instant.now().toString());
+                tvRepository.save(item);
+            }
+        }
+        return item;
     }
 }

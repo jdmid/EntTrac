@@ -258,4 +258,17 @@ public class AnimeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].animeId").value("21"));
     }
+
+    @Test
+    void enrich_ShouldReturnEnrichedItem() throws Exception {
+        AnimeItem item = new AnimeItem();
+        item.setAnimeId("21");
+        item.setCommunityRating(8.7);
+
+        when(animeService.enrichCommunityRating("21")).thenReturn(item);
+
+        mockMvc.perform(post("/api/anime/library/21/enrich"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.communityRating").value(8.7));
+    }
 }

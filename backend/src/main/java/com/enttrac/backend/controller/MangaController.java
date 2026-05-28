@@ -128,4 +128,9 @@ public class MangaController {
     public ResponseEntity<List<MangaItem>> refreshOngoing() {
         return ResponseEntity.ok(mangaService.refreshOngoing());
     }
+
+    @PostMapping("/library/{id}/enrich")
+    public ResponseEntity<MangaItem> enrich(@PathVariable String id) {
+        return ResponseEntity.ok(mangaService.enrichCommunityRating(id));
+    }
 }

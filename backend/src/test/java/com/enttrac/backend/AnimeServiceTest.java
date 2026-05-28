@@ -187,31 +187,6 @@ public class AnimeServiceTest {
     }
 
     @Test
-    void refreshLatestEpisode_ShouldSkipSaveWhenDetailsNull() {
-        when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getDetails("21")).thenReturn(null);
-
-        AnimeItem result = animeService.refreshLatestEpisode("21");
-
-        assertNotNull(result);
-        verify(animeRepository, never()).save(any());
-    }
-
-    @Test
-    void refreshLatestEpisode_ShouldSkipSaveWhenTotalEpisodesNull() {
-        AnimeSearchResult details = AnimeSearchResult.builder()
-                .id("21").totalEpisodes(null).build();
-
-        when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
-
-        AnimeItem result = animeService.refreshLatestEpisode("21");
-
-        assertNotNull(result);
-        verify(animeRepository, never()).save(any());
-    }
-
-    @Test
     void refreshLatestEpisode_ShouldThrowWhenNotFound() {
         when(animeRepository.findById("notreal")).thenReturn(null);
 
@@ -421,6 +396,69 @@ public class AnimeServiceTest {
         List<AnimeItem> result = animeService.refreshOngoing();
 
         assertEquals(11, result.get(0).getLatestEpisode());
+        verify(animeRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichCommunityRating_ShouldFetchAndCacheWhenNull() {
+        testItem.setCommunityRating(null);
+        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeMetadataClient.getCommunityRating("21")).thenReturn(8.7);
+
+        AnimeItem result = animeService.enrichCommunityRating("21");
+
+        assertEquals(8.7, result.getCommunityRating());
+        verify(animeRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichCommunityRating_ShouldSkipWhenAlreadyCached() {
+        testItem.setCommunityRating(8.7);
+        when(animeRepository.findById("21")).thenReturn(testItem);
+
+        AnimeItem result = animeService.enrichCommunityRating("21");
+
+        assertEquals(8.7, result.getCommunityRating());
+        verify(animeMetadataClient, never()).getCommunityRating(any());
+        verify(animeRepository, never()).save(any());
+    }
+
+    @Test
+    void enrichCommunityRating_ShouldThrowWhenNotFound() {
+        when(animeRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                animeService.enrichCommunityRating("notreal"));
+
+        assertEquals("Anime not found: notreal", ex.getMessage());
+    }
+
+    @Test
+    void refreshLatestEpisode_ShouldAlsoRefreshCommunityRating() {
+        AnimeSearchResult details = AnimeSearchResult.builder()
+                .id("21").totalEpisodes(1000).build();
+
+        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(animeMetadataClient.getCommunityRating("21")).thenReturn(8.7);
+
+        AnimeItem result = animeService.refreshLatestEpisode("21");
+
+        assertEquals(1000, result.getTotalEpisodes());
+        assertEquals(8.7, result.getCommunityRating());
+        verify(animeRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshLatestEpisode_ShouldSaveEvenWhenDetailsNull() {
+        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeMetadataClient.getDetails("21")).thenReturn(null);
+        when(animeMetadataClient.getCommunityRating("21")).thenReturn(8.7);
+
+        AnimeItem result = animeService.refreshLatestEpisode("21");
+
+        assertNotNull(result);
+        assertEquals(8.7, result.getCommunityRating());
         verify(animeRepository, times(1)).save(testItem);
     }
 }

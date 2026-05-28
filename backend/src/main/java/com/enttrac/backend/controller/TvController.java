@@ -116,4 +116,9 @@ public class TvController {
     public ResponseEntity<List<TvItem>> refreshOngoing() {
         return ResponseEntity.ok(tvService.refreshOngoing());
     }
+
+    @PostMapping("/library/{id}/enrich")
+    public ResponseEntity<TvItem> enrich(@PathVariable String id) {
+        return ResponseEntity.ok(tvService.enrichCommunityRating(id));
+    }
 }

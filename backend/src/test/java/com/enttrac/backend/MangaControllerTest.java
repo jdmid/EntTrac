@@ -299,4 +299,17 @@ public class MangaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].mangaId").value("abc123"));
     }
+
+    @Test
+    void enrich_ShouldReturnEnrichedItem() throws Exception {
+        MangaItem item = new MangaItem();
+        item.setMangaId("abc123");
+        item.setCommunityRating(9.6);
+
+        when(mangaService.enrichCommunityRating("abc123")).thenReturn(item);
+
+        mockMvc.perform(post("/api/manga/library/abc123/enrich"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.communityRating").value(9.6));
+    }
 }

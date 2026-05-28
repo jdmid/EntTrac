@@ -6,7 +6,7 @@ import RatingCard from '../../components/RatingCard'
 import {
   getManga, getMangaDetails, updateProgress, updateScore,
   updateStatus, refreshLatestChapter, removeFromLibrary,
-  addToLibrary, getCommunityRating, updateMangaNotes,
+  addToLibrary, enrichMangaFromCache, updateMangaNotes,
 } from '../../api/mangaApi'
 import { themes } from '../../theme/themes'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
@@ -32,6 +32,12 @@ function MangaDetailPage() {
         setManga(res.data)
         setScore(res.data.score ?? null)
         setLoading(false)
+        enrichMangaFromCache(mangaId)
+          .then((enriched) => {
+            setManga(enriched.data)
+            setCommunityRating(enriched.data.communityRating ?? null)
+          })
+          .catch(() => setCommunityRating(null))
       })
       .catch(() => {
         getMangaDetails(mangaId)
@@ -45,10 +51,6 @@ function MangaDetailPage() {
             setLoading(false)
           })
       })
-
-    getCommunityRating(mangaId)
-      .then((res) => setCommunityRating(res.data))
-      .catch(() => setCommunityRating(null))
   }, [mangaId])
 
   if (loading) {

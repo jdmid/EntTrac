@@ -6,7 +6,7 @@ import RatingCard from '../../components/RatingCard'
 import {
   getTvShow, getTvDetails, updateTvProgress, updateTvScore,
   updateTvStatus, refreshTvEpisodes, removeFromTvLibrary,
-  addTvToLibrary, getTvCommunityRating, updateTvNotes,
+  addTvToLibrary, enrichTvFromCache, updateTvNotes,
 } from '../../api/tvApi'
 import { themes } from '../../theme/themes'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
@@ -32,8 +32,11 @@ function TvDetailPage() {
         setShow(res.data)
         setScore(res.data.score ?? null)
         setLoading(false)
-        getTvCommunityRating(tvId)
-          .then((res) => setCommunityRating(res.data))
+        enrichTvFromCache(tvId)
+          .then((enriched) => {
+            setShow(enriched.data)
+            setCommunityRating(enriched.data.communityRating ?? null)
+          })
           .catch(() => setCommunityRating(null))
       })
       .catch(() => {

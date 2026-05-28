@@ -30,9 +30,6 @@ export const updateScore = (mangaId, score) =>
     params: { score },
   })
 
-export const getCommunityRating = (mangaId) =>
-  client.get(`/manga/library/${mangaId}/rating`)
-
 export const refreshLatestChapter = (mangaId) =>
   client.post(`/manga/library/${mangaId}/refresh`)
 
@@ -49,3 +46,6 @@ export const refreshAllManga = () =>
 
 export const refreshOngoingManga = () =>
   client.post('/manga/library/refresh-ongoing')
+
+export const enrichMangaFromCache = (mangaId) =>
+  client.post(`/manga/library/${mangaId}/enrich`)

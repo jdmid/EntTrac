@@ -99,8 +99,14 @@ public class AnimeService {
             item.setTotalEpisodes(details.getTotalEpisodes());
             item.setLastRefreshed(Instant.now().toString());
             item.setUpdatedAt(Instant.now().toString());
-            animeRepository.save(item);
+
         }
+
+        Double rating = animeMetadataClient.getCommunityRating(animeId);
+        if (rating != null) item.setCommunityRating(rating);
+
+        animeRepository.save(item);
+
         return item;
     }
 
@@ -214,5 +220,20 @@ public class AnimeService {
         if (status.equals("finished airing")) return "completed";
         if (status.equals("not yet aired")) return "upcoming";
         return null;
+    }
+
+    public AnimeItem enrichCommunityRating(String animeId) {
+        AnimeItem item = animeRepository.findById(animeId);
+        if (item == null) throw new NotFoundException("Anime not found: " + animeId);
+
+        if (item.getCommunityRating() == null) {
+            Double rating = animeMetadataClient.getCommunityRating(animeId);
+            if (rating != null) {
+                item.setCommunityRating(rating);
+                item.setUpdatedAt(Instant.now().toString());
+                animeRepository.save(item);
+            }
+        }
+        return item;
     }
 }

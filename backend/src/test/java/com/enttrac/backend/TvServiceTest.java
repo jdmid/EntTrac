@@ -331,17 +331,6 @@ public class TvServiceTest {
     }
 
     @Test
-    void refreshLatestEpisodes_ShouldSkipSaveWhenDetailsNull() {
-        when(tvRepository.findById("1396")).thenReturn(testItem);
-        when(tvMetadataClient.getDetails("1396")).thenReturn(null);
-
-        TvItem result = tvService.refreshLatestEpisodes("1396");
-
-        assertNotNull(result);
-        verify(tvRepository, never()).save(any());
-    }
-
-    @Test
     void refreshLatestEpisodes_ShouldHandleNullSeasonEpisodes() {
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396")
@@ -593,5 +582,73 @@ public class TvServiceTest {
         List<TvItem> result = tvService.refreshOngoing();
 
         assertNull(result.get(0).getSeriesStatus());
+    }
+
+    @Test
+    void enrichCommunityRating_ShouldFetchAndCacheWhenNull() {
+        testItem.setCommunityRating(null);
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
+
+        TvItem result = tvService.enrichCommunityRating("1396");
+
+        assertEquals(9.5, result.getCommunityRating());
+        verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichCommunityRating_ShouldSkipWhenAlreadyCached() {
+        testItem.setCommunityRating(9.5);
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+
+        TvItem result = tvService.enrichCommunityRating("1396");
+
+        assertEquals(9.5, result.getCommunityRating());
+        verify(tvMetadataClient, never()).getCommunityRating(any());
+        verify(tvRepository, never()).save(any());
+    }
+
+    @Test
+    void enrichCommunityRating_ShouldThrowWhenNotFound() {
+        when(tvRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                tvService.enrichCommunityRating("notreal"));
+
+        assertEquals("TV show not found: notreal", ex.getMessage());
+    }
+
+    @Test
+    void refreshLatestEpisodes_ShouldAlsoRefreshCommunityRating() {
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396")
+                .totalEpisodes(62)
+                .seasonEpisodes(List.of(7, 13, 13, 13, 16))
+                .status("Returning Series")
+                .numberOfSeasons(5)
+                .build();
+
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
+
+        TvItem result = tvService.refreshLatestEpisodes("1396");
+
+        assertEquals(62, result.getTotalEpisodes());
+        assertEquals(9.5, result.getCommunityRating());
+        verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void refreshLatestEpisodes_ShouldSaveEvenWhenDetailsNull() {
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvMetadataClient.getDetails("1396")).thenReturn(null);
+        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
+
+        TvItem result = tvService.refreshLatestEpisodes("1396");
+
+        assertNotNull(result);
+        assertEquals(9.5, result.getCommunityRating());
+        verify(tvRepository, times(1)).save(testItem);
     }
 }

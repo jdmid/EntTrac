@@ -36,9 +36,6 @@ export const removeAnimeFromLibrary = (animeId) =>
 export const getAnimeDetails = (animeId) =>
   client.get(`/anime/details/${animeId}`)
 
-export const getAnimeCommunityRating = (animeId) =>
-  client.get(`/anime/library/${animeId}/rating`)
-
 export const updateAnimeNotes = (animeId, notes) =>
   client.patch(`/anime/library/${animeId}/notes`, notes, {
     headers: { 'Content-Type': 'text/plain' }
@@ -49,3 +46,6 @@ export const updateAnimeNotes = (animeId, notes) =>
 
   export const refreshOngoingAnime = () =>
   client.post('/anime/library/refresh-ongoing')
+
+  export const enrichAnimeFromCache = (animeId) =>
+  client.post(`/anime/library/${animeId}/enrich`)

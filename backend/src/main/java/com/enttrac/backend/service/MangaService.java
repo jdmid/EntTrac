@@ -72,13 +72,19 @@ public class MangaService {
         if (item == null) {
             throw new NotFoundException("Manga not found: " + mangaId);
         }
+
         MangaSearchResult details = mangaMetadataClient.getDetails(mangaId);
         if (details != null && details.getLatestChapter() != null) {
             item.setLatestChapter(details.getLatestChapter());
             item.setLastRefreshed(Instant.now().toString());
             item.setUpdatedAt(Instant.now().toString());
-            mangaRepository.save(item);
         }
+
+        Double rating = mangaMetadataClient.getCommunityRating(mangaId);
+        if (rating != null) item.setCommunityRating(rating);
+
+        mangaRepository.save(item);
+
         return item;
     }
 
@@ -170,6 +176,21 @@ public class MangaService {
             }
         }
         return updated;
+    }
+
+    public MangaItem enrichCommunityRating(String mangaId) {
+        MangaItem item = mangaRepository.findById(mangaId);
+        if (item == null) throw new NotFoundException("Manga not found: " + mangaId);
+
+        if (item.getCommunityRating() == null) {
+            Double rating = mangaMetadataClient.getCommunityRating(mangaId);
+            if (rating != null) {
+                item.setCommunityRating(rating);
+                item.setUpdatedAt(Instant.now().toString());
+                mangaRepository.save(item);
+            }
+        }
+        return item;
     }
 
     public void removeFromLibrary(String mangaId) {

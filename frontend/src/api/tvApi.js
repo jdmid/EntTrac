@@ -41,11 +41,11 @@ export const removeFromTvLibrary = (tvId) =>
 export const getTvDetails = (tvId) =>
   client.get(`/tv/details/${tvId}`)
 
-export const getTvCommunityRating = (tvId) =>
-  client.get(`/tv/library/${tvId}/rating`)
-
 export const refreshAllTv = () =>
   client.post('/tv/library/refresh-all')
 
 export const refreshOngoingTv = () =>
   client.post('/tv/library/refresh-ongoing')
+
+export const enrichTvFromCache = (tvId) =>
+  client.post(`/tv/library/${tvId}/enrich`)

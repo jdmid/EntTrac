@@ -6,7 +6,7 @@ import RatingCard from '../../components/RatingCard'
 import {
   getAnime, getAnimeDetails, updateAnimeProgress, updateAnimeScore,
   updateAnimeStatus, refreshLatestEpisode, removeAnimeFromLibrary,
-  addAnimeToLibrary, getAnimeCommunityRating, updateAnimeNotes,
+  addAnimeToLibrary, enrichAnimeFromCache, updateAnimeNotes,
 } from '../../api/animeApi'
 import { themes } from '../../theme/themes'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
@@ -32,8 +32,11 @@ function AnimeDetailPage() {
         setAnime(res.data)
         setScore(res.data.score ?? null)
         setLoading(false)
-        getAnimeCommunityRating(animeId)
-          .then((res) => setCommunityRating(res.data))
+        enrichAnimeFromCache(animeId)
+          .then((enriched) => {
+            setAnime(enriched.data)
+            setCommunityRating(enriched.data.communityRating ?? null)
+          })
           .catch(() => setCommunityRating(null))
       })
       .catch(() => {
@@ -51,8 +54,6 @@ function AnimeDetailPage() {
           })
         }, 1000)
       })
-
-    
   }, [animeId])
 
   if (loading) {
