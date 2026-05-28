@@ -117,7 +117,7 @@ function DetailPageLayout({
               <button
                 onClick={onRefresh}
                 disabled={refreshing}
-                className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors"
+                className="w-full mt-2 py-1.5 text-[11px] rounded transition-colors flex items-center justify-center gap-1.5"
                 style={{
                   background: theme.accentBg,
                   border: `0.5px solid ${theme.accentBorder}`,
@@ -126,7 +126,18 @@ function DetailPageLayout({
                   opacity: refreshing ? 0.6 : 1,
                 }}
               >
-                {refreshing ? '↻ Refreshing…' : refreshLabel}
+                {refreshing ? (
+                  <>
+                    <span
+                      className="inline-block w-3 h-3 rounded-full animate-spin"
+                      style={{
+                        border: `2px solid ${theme.accent}33`,
+                        borderTopColor: theme.accent,
+                      }}
+                    />
+                    Refreshing…
+                  </>
+                ) : refreshLabel}
               </button>
             )}
 
