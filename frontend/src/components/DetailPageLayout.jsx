@@ -24,7 +24,7 @@ function DetailPageLayout({
   item,
   inLibrary,
   score,
-  ratingsSection = null,
+  ratingsSection,
 
   // Display
   theme,
