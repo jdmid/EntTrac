@@ -89,15 +89,6 @@ public class MovieController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/library/{movieId}/rating")
-    public ResponseEntity<Double> getCommunityRating(@PathVariable String movieId) {
-        Double rating = movieService.getCommunityRating(movieId);
-        if (rating == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(rating);
-    }
-
     @DeleteMapping("/library/{movieId}")
     public ResponseEntity<Void> removeFromLibrary(@PathVariable String movieId) {
         movieService.removeFromLibrary(movieId);

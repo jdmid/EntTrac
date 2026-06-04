@@ -102,16 +102,14 @@ public class AnimeService {
 
         }
 
-        Double rating = animeMetadataClient.getCommunityRating(animeId);
-        if (rating != null) item.setCommunityRating(rating);
+        if (item.getMalScore() == null) {
+            Double rating = animeMetadataClient.getCommunityRating(animeId);
+            if (rating != null) item.setMalScore(rating);
+        }
 
         animeRepository.save(item);
 
         return item;
-    }
-
-    public Double getCommunityRating(String animeId) {
-        return animeMetadataClient.getCommunityRating(animeId);
     }
 
     public void removeFromLibrary(String animeId) {
@@ -222,14 +220,14 @@ public class AnimeService {
         return null;
     }
 
-    public AnimeItem enrichCommunityRating(String animeId) {
+    public AnimeItem enrichMalScore(String animeId) {
         AnimeItem item = animeRepository.findById(animeId);
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
-        if (item.getCommunityRating() == null) {
+        if (item.getMalScore() == null) {
             Double rating = animeMetadataClient.getCommunityRating(animeId);
             if (rating != null) {
-                item.setCommunityRating(rating);
+                item.setMalScore(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 animeRepository.save(item);
             }

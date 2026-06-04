@@ -92,15 +92,6 @@ public class TvController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/library/{tvId}/rating")
-    public ResponseEntity<Double> getCommunityRating(@PathVariable String tvId) {
-        Double rating = tvService.getCommunityRating(tvId);
-        if (rating == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(rating);
-    }
-
     @DeleteMapping("/library/{tvId}")
     public ResponseEntity<Void> removeFromLibrary(@PathVariable String tvId) {
         tvService.removeFromLibrary(tvId);
@@ -119,6 +110,6 @@ public class TvController {
 
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<TvItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(tvService.enrichCommunityRating(id));
+        return ResponseEntity.ok(tvService.enrichTmdbScore(id));
     }
 }

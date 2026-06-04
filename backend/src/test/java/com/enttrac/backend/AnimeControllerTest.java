@@ -185,23 +185,6 @@ public class AnimeControllerTest {
     }
 
     @Test
-    void getCommunityRating_ShouldReturnRatingWhenAvailable() throws Exception {
-        when(animeService.getCommunityRating("21")).thenReturn(8.7);
-
-        mockMvc.perform(get("/api/anime/library/21/rating"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(8.7));
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturn204WhenUnavailable() throws Exception {
-        when(animeService.getCommunityRating("21")).thenReturn(null);
-
-        mockMvc.perform(get("/api/anime/library/21/rating"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
     void removeFromLibrary_ShouldReturn204() throws Exception {
         mockMvc.perform(delete("/api/anime/library/21"))
                 .andExpect(status().isNoContent());
@@ -263,12 +246,12 @@ public class AnimeControllerTest {
     void enrich_ShouldReturnEnrichedItem() throws Exception {
         AnimeItem item = new AnimeItem();
         item.setAnimeId("21");
-        item.setCommunityRating(8.7);
+        item.setMalScore(8.7);
 
-        when(animeService.enrichCommunityRating("21")).thenReturn(item);
+        when(animeService.enrichMalScore("21")).thenReturn(item);
 
         mockMvc.perform(post("/api/anime/library/21/enrich"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.communityRating").value(8.7));
+                .andExpect(jsonPath("$.malScore").value(8.7));
     }
 }

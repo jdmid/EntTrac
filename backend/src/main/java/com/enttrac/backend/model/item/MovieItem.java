@@ -21,4 +21,5 @@ public class MovieItem extends MediaItem {
     private Double imdbRating;
     private String rottenTomatoesRating;
     private String metacriticRating;
+    private Double tmdbScore;
 }

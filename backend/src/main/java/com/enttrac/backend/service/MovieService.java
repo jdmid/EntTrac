@@ -120,22 +120,25 @@ public class MovieService {
 
     public MovieItem enrichFromCache(String movieId) {
         MovieItem item = movieRepository.findById(movieId);
-        if (item == null) {
-            throw new NotFoundException("Movie not found: " + movieId);
-        }
+        if (item == null) throw new NotFoundException("Movie not found: " + movieId);
 
-        // Only call OMDB if scores are not already cached
         boolean hasCachedRatings = item.getImdbRating() != null
                 || item.getRottenTomatoesRating() != null
                 || item.getMetacriticRating() != null;
+        boolean hasTmdbScore = item.getTmdbScore() != null;
 
-        if (!hasCachedRatings) {
+        if (!hasCachedRatings || !hasTmdbScore) {
             MovieSearchResult details = tmdbMovieClient.getDetails(movieId);
-            if (details != null && details.getImdbId() != null) {
-                omdbClient.enrichWithRatings(details, details.getImdbId());
-                item.setImdbRating(details.getImdbRating());
-                item.setRottenTomatoesRating(details.getRottenTomatoesRating());
-                item.setMetacriticRating(details.getMetacriticRating());
+            if (details != null) {
+                if (!hasCachedRatings && details.getImdbId() != null) {
+                    omdbClient.enrichWithRatings(details, details.getImdbId());
+                    item.setImdbRating(details.getImdbRating());
+                    item.setRottenTomatoesRating(details.getRottenTomatoesRating());
+                    item.setMetacriticRating(details.getMetacriticRating());
+                }
+                if (!hasTmdbScore && details.getCommunityRating() != null) {
+                    item.setTmdbScore(details.getCommunityRating());
+                }
                 item.setUpdatedAt(Instant.now().toString());
                 movieRepository.save(item);
             }
@@ -146,10 +149,6 @@ public class MovieService {
 
     public void removeFromLibrary(String movieId) {
         movieRepository.delete(movieId);
-    }
-
-    public Double getCommunityRating(String movieId) {
-        return tmdbMovieClient.getCommunityRating(movieId);
     }
 
     private String normalizeMovieStatus(String rawStatus) {

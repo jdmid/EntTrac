@@ -212,23 +212,6 @@ public class TvControllerTest {
     }
 
     @Test
-    void getCommunityRating_ShouldReturnRatingWhenAvailable() throws Exception {
-        when(tvService.getCommunityRating("1396")).thenReturn(9.5);
-
-        mockMvc.perform(get("/api/tv/library/1396/rating"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(9.5));
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturn204WhenUnavailable() throws Exception {
-        when(tvService.getCommunityRating("1396")).thenReturn(null);
-
-        mockMvc.perform(get("/api/tv/library/1396/rating"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
     void removeFromLibrary_ShouldReturn204() throws Exception {
         mockMvc.perform(delete("/api/tv/library/1396"))
                 .andExpect(status().isNoContent());
@@ -266,12 +249,12 @@ public class TvControllerTest {
     void enrich_ShouldReturnEnrichedItem() throws Exception {
         TvItem item = new TvItem();
         item.setTvId("1396");
-        item.setCommunityRating(9.5);
+        item.setTmdbScore(9.5);
 
-        when(tvService.enrichCommunityRating("1396")).thenReturn(item);
+        when(tvService.enrichTmdbScore("1396")).thenReturn(item);
 
         mockMvc.perform(post("/api/tv/library/1396/enrich"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.communityRating").value(9.5));
+                .andExpect(jsonPath("$.tmdbScore").value(9.5));
     }
 }

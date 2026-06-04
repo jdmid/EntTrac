@@ -180,12 +180,14 @@ public class MovieControllerTest {
         MovieItem item = new MovieItem();
         item.setMovieId("550");
         item.setImdbRating(8.8);
+        item.setTmdbScore(7.8);
 
         when(movieService.enrichFromCache("550")).thenReturn(item);
 
         mockMvc.perform(post("/api/movies/library/550/enrich"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.imdbRating").value(8.8));
+                .andExpect(jsonPath("$.imdbRating").value(8.8))
+                .andExpect(jsonPath("$.tmdbScore").value(7.8));
     }
 
     @Test
@@ -212,23 +214,6 @@ public class MovieControllerTest {
 
         mockMvc.perform(get("/api/movies/details/notreal"))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturnRatingWhenAvailable() throws Exception {
-        when(movieService.getCommunityRating("550")).thenReturn(7.8);
-
-        mockMvc.perform(get("/api/movies/library/550/rating"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(7.8));
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturn204WhenUnavailable() throws Exception {
-        when(movieService.getCommunityRating("550")).thenReturn(null);
-
-        mockMvc.perform(get("/api/movies/library/550/rating"))
-                .andExpect(status().isNoContent());
     }
 
     @Test

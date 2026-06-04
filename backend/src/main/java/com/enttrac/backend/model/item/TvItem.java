@@ -29,6 +29,7 @@ public class TvItem extends MediaItem {
     private Integer totalEpisodes;
     private Integer currentSeason;
     private String nextEpisodeDate;
+    private Double tmdbScore;
 
     private List<Integer> seasonEpisodes;
 }

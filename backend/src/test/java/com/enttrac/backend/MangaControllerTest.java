@@ -232,23 +232,6 @@ public class MangaControllerTest {
     }
 
     @Test
-    void getCommunityRating_ShouldReturnRatingWhenAvailable() throws Exception {
-        when(mangaService.getCommunityRating("abc123")).thenReturn(9.6);
-
-        mockMvc.perform(get("/api/manga/library/abc123/rating"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(9.6));
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturn204WhenUnavailable() throws Exception {
-        when(mangaService.getCommunityRating("abc123")).thenReturn(null);
-
-        mockMvc.perform(get("/api/manga/library/abc123/rating"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
     void updateNotes_ShouldReturnUpdatedItem() throws Exception {
         MangaItem item = new MangaItem();
         item.setMangaId("abc123");
@@ -304,12 +287,12 @@ public class MangaControllerTest {
     void enrich_ShouldReturnEnrichedItem() throws Exception {
         MangaItem item = new MangaItem();
         item.setMangaId("abc123");
-        item.setCommunityRating(9.6);
+        item.setMangadexScore(9.6);
 
-        when(mangaService.enrichCommunityRating("abc123")).thenReturn(item);
+        when(mangaService.enrichMangadexScore("abc123")).thenReturn(item);
 
         mockMvc.perform(post("/api/manga/library/abc123/enrich"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.communityRating").value(9.6));
+                .andExpect(jsonPath("$.mangadexScore").value(9.6));
     }
 }
