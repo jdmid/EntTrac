@@ -1,6 +1,10 @@
 # EntTrac
 
 ![Backend Tests](https://github.com/jdmid/EntTrac/actions/workflows/backend-tests.yml/badge.svg)
+![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-green?logo=springboot)
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![AWS DynamoDB](https://img.shields.io/badge/AWS-DynamoDB-orange?logo=amazondynamodb)
 
 EntTrac is a personal entertainment tracker built to solve a real problem — life constantly shifts between busy and leisurely, and the entertainment you were enjoying often gets left behind. With so much still coming out and not always enough time to finish everything, EntTrac gives you a central place to track what you're consuming, where you left off, and what's waiting for you.
 

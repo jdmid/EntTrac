@@ -55,7 +55,7 @@ function AnimeSearchPage() {
       seriesStatus: normalizeSeriesStatus(anime.status, 'anime'),
       studio: anime.studio,
       season: anime.season,
-      communityRating: anime.communityRating,
+      malRating: anime.communityRating,
     })
       .then(() => {
         setAddedIds((prev) => new Set([...prev, anime.id]))

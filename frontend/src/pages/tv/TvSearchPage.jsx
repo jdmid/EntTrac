@@ -65,7 +65,7 @@ function TvSearchPage() {
         genres: full.genres ?? show.genres,
         firstAirYear: full.firstAirYear ?? show.firstAirYear,
         seriesType: full.seriesType ?? show.seriesType,
-        communityRating: full.communityRating ?? show.communityRating,
+        tmdbRating: full.communityRating ?? show.communityRating,
         nextEpisodeDate: full.nextEpisodeDate,
         })
         setAddedIds((prev) => new Set([...prev, show.id]))
