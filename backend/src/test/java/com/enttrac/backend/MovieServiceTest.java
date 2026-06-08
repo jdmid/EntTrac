@@ -212,6 +212,9 @@ public class MovieServiceTest {
 
         verify(movieRepository, times(1)).save(testItem);
         assertNotNull(result.getLastRefreshed());
+        assertEquals(8.8, result.getImdbRating());
+        assertEquals("89%", result.getRottenTomatoesRating());
+        assertEquals("79/100", result.getMetacriticRating());
     }
 
     @Test
