@@ -131,7 +131,7 @@ function AnimeDetailPage() {
       onRefresh={() => {
         setRefreshing(true)
         refreshLatestEpisode(animeId)
-          .then((res) => setShow(res.data))
+          .then((res) => setAnime(res.data))
           .finally(() => setRefreshing(false))
         }
       }

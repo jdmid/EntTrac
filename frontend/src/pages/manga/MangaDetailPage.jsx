@@ -126,7 +126,7 @@ function MangaDetailPage() {
       onRefresh={() => {
         setRefreshing(true)
         refreshLatestChapter(mangaId)
-          .then((res) => setShow(res.data))
+          .then((res) => setManga(res.data))
           .finally(() => setRefreshing(false))
         }
       }
