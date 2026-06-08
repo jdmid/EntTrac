@@ -103,7 +103,7 @@ public class MovieService {
         // Refresh TMDB metadata
         MovieSearchResult details = tmdbMovieClient.getDetails(movieId);
         if (details != null) {
-            // Refresh OMDB scores using imdbId from fresh TMDB call
+            // Refresh OMDB ratings using imdbId from fresh TMDB call
             if (details.getImdbId() != null) {
                 omdbClient.enrichWithRatings(details, details.getImdbId());
                 item.setImdbRating(details.getImdbRating());
@@ -120,22 +120,25 @@ public class MovieService {
 
     public MovieItem enrichFromCache(String movieId) {
         MovieItem item = movieRepository.findById(movieId);
-        if (item == null) {
-            throw new NotFoundException("Movie not found: " + movieId);
-        }
+        if (item == null) throw new NotFoundException("Movie not found: " + movieId);
 
-        // Only call OMDB if scores are not already cached
         boolean hasCachedRatings = item.getImdbRating() != null
                 || item.getRottenTomatoesRating() != null
                 || item.getMetacriticRating() != null;
+        boolean hasTmdbRating = item.getTmdbRating() != null;
 
-        if (!hasCachedRatings) {
+        if (!hasCachedRatings || !hasTmdbRating) {
             MovieSearchResult details = tmdbMovieClient.getDetails(movieId);
-            if (details != null && details.getImdbId() != null) {
-                omdbClient.enrichWithRatings(details, details.getImdbId());
-                item.setImdbRating(details.getImdbRating());
-                item.setRottenTomatoesRating(details.getRottenTomatoesRating());
-                item.setMetacriticRating(details.getMetacriticRating());
+            if (details != null) {
+                if (!hasCachedRatings && details.getImdbId() != null) {
+                    omdbClient.enrichWithRatings(details, details.getImdbId());
+                    item.setImdbRating(details.getImdbRating());
+                    item.setRottenTomatoesRating(details.getRottenTomatoesRating());
+                    item.setMetacriticRating(details.getMetacriticRating());
+                }
+                if (!hasTmdbRating && details.getCommunityRating() != null) {
+                    item.setTmdbRating(details.getCommunityRating());
+                }
                 item.setUpdatedAt(Instant.now().toString());
                 movieRepository.save(item);
             }
@@ -146,10 +149,6 @@ public class MovieService {
 
     public void removeFromLibrary(String movieId) {
         movieRepository.delete(movieId);
-    }
-
-    public Double getCommunityRating(String movieId) {
-        return tmdbMovieClient.getCommunityRating(movieId);
     }
 
     private String normalizeMovieStatus(String rawStatus) {

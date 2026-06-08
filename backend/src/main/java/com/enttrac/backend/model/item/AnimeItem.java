@@ -24,4 +24,5 @@ public class AnimeItem extends MediaItem {
 
     private Integer totalEpisodes;
     private Integer latestEpisode;
+    private Double malRating;
 }

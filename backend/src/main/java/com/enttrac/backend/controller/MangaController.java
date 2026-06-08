@@ -100,16 +100,6 @@ public class MangaController {
         return ResponseEntity.ok(result);
     }
 
-    // Get community ratings from API
-    @GetMapping("/library/{mangaId}/rating")
-    public ResponseEntity<Double> getCommunityRating(@PathVariable String mangaId) {
-        Double rating = mangaService.getCommunityRating(mangaId);
-        if (rating == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(rating);
-    }
-
     // Update notes on manga DB entry
     @PatchMapping("/library/{mangaId}/notes")
     public ResponseEntity<MangaItem> updateNotes(
@@ -131,6 +121,6 @@ public class MangaController {
 
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<MangaItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(mangaService.enrichCommunityRating(id));
+        return ResponseEntity.ok(mangaService.enrichMangadexRating(id));
     }
 }

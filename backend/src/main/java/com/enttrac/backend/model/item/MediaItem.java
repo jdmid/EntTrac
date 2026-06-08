@@ -42,7 +42,6 @@ public abstract class MediaItem {
     @Max(value = 10, message = "Score must be between 1 and 10")
     private Integer score;
 
-    private Double communityRating;
     private String lastRefreshed;
     private String updatedAt;
     private String createdAt;

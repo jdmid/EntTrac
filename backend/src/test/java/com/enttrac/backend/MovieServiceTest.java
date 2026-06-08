@@ -188,7 +188,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    void refreshRatings_ShouldUpdateScoresAndSave() {
+    void refreshRatings_ShouldUpdateRatingsAndSave() {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550")
                 .imdbId("tt0137523")
@@ -228,7 +228,7 @@ public class MovieServiceTest {
     void enrichFromCache_ShouldCallOmdbWhenNoRatingsCached() {
         when(movieRepository.findById("550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
-                .id("550").imdbId("tt0137523").build();
+                .id("550").imdbId("tt0137523").communityRating(7.8).build();
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
         movieService.enrichFromCache("550");
@@ -238,8 +238,22 @@ public class MovieServiceTest {
     }
 
     @Test
+    void enrichFromCache_ShouldCacheTmdbRatingWhenNull() {
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").imdbId("tt0137523").communityRating(7.8).build();
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.enrichFromCache("550");
+
+        assertEquals(7.8, result.getTmdbRating());
+        verify(movieRepository, times(1)).save(testItem);
+    }
+
+    @Test
     void enrichFromCache_ShouldSkipOmdbWhenRatingsCached() {
         testItem.setImdbRating(8.8);
+        testItem.setTmdbRating(7.8);
         when(movieRepository.findById("550")).thenReturn(testItem);
 
         movieService.enrichFromCache("550");
@@ -247,6 +261,20 @@ public class MovieServiceTest {
         verify(omdbClient, never()).enrichWithRatings(any(), any());
         verify(tmdbMovieClient, never()).getDetails(any());
         verify(movieRepository, never()).save(any());
+    }
+
+    @Test
+    void enrichFromCache_ShouldSkipTmdbRatingWhenAlreadyCached() {
+        testItem.setTmdbRating(7.8);
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        MovieSearchResult details = MovieSearchResult.builder()
+                .id("550").imdbId("tt0137523").build();
+        when(tmdbMovieClient.getDetails("550")).thenReturn(details);
+
+        MovieItem result = movieService.enrichFromCache("550");
+
+        assertEquals(7.8, result.getTmdbRating());
+        verify(omdbClient, times(1)).enrichWithRatings(any(), eq("tt0137523"));
     }
 
     @Test
@@ -264,25 +292,6 @@ public class MovieServiceTest {
         movieService.removeFromLibrary("550");
 
         verify(movieRepository, times(1)).delete("550");
-    }
-
-    @Test
-    void getCommunityRating_ShouldDelegateToClient() {
-        when(tmdbMovieClient.getCommunityRating("550")).thenReturn(7.8);
-
-        Double result = movieService.getCommunityRating("550");
-
-        assertEquals(7.8, result);
-        verify(tmdbMovieClient, times(1)).getCommunityRating("550");
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturnNullWhenUnavailable() {
-        when(tmdbMovieClient.getCommunityRating("550")).thenReturn(null);
-
-        Double result = movieService.getCommunityRating("550");
-
-        assertNull(result);
     }
 
     @Test

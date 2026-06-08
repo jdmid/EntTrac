@@ -23,7 +23,6 @@ function TvDetailPage() {
   const [error, setError] = useState(null)
   const [score, setScore] = useState(null)
   const [inLibrary, setInLibrary] = useState(true)
-  const [communityRating, setCommunityRating] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
@@ -33,11 +32,8 @@ function TvDetailPage() {
         setScore(res.data.score ?? null)
         setLoading(false)
         enrichTvFromCache(tvId)
-          .then((enriched) => {
-            setShow(enriched.data)
-            setCommunityRating(enriched.data.communityRating ?? null)
-          })
-          .catch(() => setCommunityRating(null))
+          .then((enriched) => setShow(enriched.data))
+          .catch((err) => console.error('Enrich failed:', err))
       })
       .catch(() => {
         getTvDetails(tvId)
@@ -46,7 +42,6 @@ function TvDetailPage() {
                 data.seriesStatus = normalizeSeriesStatus(data.status, 'tv')
                 setShow(data)
                 setInLibrary(false)
-                setCommunityRating(data.communityRating ?? null)
                 setLoading(false)
             })
           .catch(() => {
@@ -145,7 +140,7 @@ function TvDetailPage() {
       ratingsSection={
         <div className="flex gap-2 flex-wrap">
           <RatingCard
-            value={communityRating}
+            value={show.tmdbRating}
             label="TMDB"
             color="#01b4e4"
             theme={theme}
@@ -181,7 +176,7 @@ function TvDetailPage() {
           genres: show.genres,
           firstAirYear: show.firstAirYear,
           seriesType: show.seriesType,
-          communityRating: show.communityRating,
+          tmdbScore: show.tmdbScore,
           nextEpisodeDate: show.nextEpisodeDate,
         }).then(() => setInLibrary(true))
       }

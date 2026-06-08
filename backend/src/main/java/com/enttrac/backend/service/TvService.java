@@ -144,16 +144,14 @@ public class TvService {
 
         }
 
-        Double rating = tvMetadataClient.getCommunityRating(tvId);
-        if (rating != null) item.setCommunityRating(rating);
+        if (item.getTmdbRating() == null) {
+            Double rating = tvMetadataClient.getCommunityRating(tvId);
+            if (rating != null) item.setTmdbRating(rating);
+        }
 
         tvRepository.save(item);
 
         return item;
-    }
-
-    public Double getCommunityRating(String tvId) {
-        return tvMetadataClient.getCommunityRating(tvId);
     }
 
     public void removeFromLibrary(String tvId) {
@@ -274,14 +272,14 @@ public class TvService {
         return updated;
     }
 
-    public TvItem enrichCommunityRating(String mangaId) {
-        TvItem item = tvRepository.findById(mangaId);
-        if (item == null) throw new NotFoundException("TV show not found: " + mangaId);
+    public TvItem enrichTmdbRating(String tvId) {
+        TvItem item = tvRepository.findById(tvId);
+        if (item == null) throw new NotFoundException("TV show not found: " + tvId);
 
-        if (item.getCommunityRating() == null) {
-            Double rating = tvMetadataClient.getCommunityRating(mangaId);
+        if (item.getTmdbRating() == null) {
+            Double rating = tvMetadataClient.getCommunityRating(tvId);
             if (rating != null) {
-                item.setCommunityRating(rating);
+                item.setTmdbRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 tvRepository.save(item);
             }

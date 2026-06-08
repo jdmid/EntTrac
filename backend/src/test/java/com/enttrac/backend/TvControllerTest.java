@@ -1,5 +1,6 @@
-package com.enttrac.backend.controller;
+package com.enttrac.backend;
 
+import com.enttrac.backend.controller.TvController;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
 import com.enttrac.backend.service.TvService;
@@ -7,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,7 +24,7 @@ public class TvControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private TvService tvService;
 
     @Autowired
@@ -212,23 +213,6 @@ public class TvControllerTest {
     }
 
     @Test
-    void getCommunityRating_ShouldReturnRatingWhenAvailable() throws Exception {
-        when(tvService.getCommunityRating("1396")).thenReturn(9.5);
-
-        mockMvc.perform(get("/api/tv/library/1396/rating"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(9.5));
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturn204WhenUnavailable() throws Exception {
-        when(tvService.getCommunityRating("1396")).thenReturn(null);
-
-        mockMvc.perform(get("/api/tv/library/1396/rating"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
     void removeFromLibrary_ShouldReturn204() throws Exception {
         mockMvc.perform(delete("/api/tv/library/1396"))
                 .andExpect(status().isNoContent());
@@ -266,12 +250,12 @@ public class TvControllerTest {
     void enrich_ShouldReturnEnrichedItem() throws Exception {
         TvItem item = new TvItem();
         item.setTvId("1396");
-        item.setCommunityRating(9.5);
+        item.setTmdbRating(9.5);
 
-        when(tvService.enrichCommunityRating("1396")).thenReturn(item);
+        when(tvService.enrichTmdbRating("1396")).thenReturn(item);
 
         mockMvc.perform(post("/api/tv/library/1396/enrich"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.communityRating").value(9.5));
+                .andExpect(jsonPath("$.tmdbRating").value(9.5));
     }
 }

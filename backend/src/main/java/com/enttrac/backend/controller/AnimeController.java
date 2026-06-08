@@ -84,15 +84,6 @@ public class AnimeController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/library/{animeId}/rating")
-    public ResponseEntity<Double> getCommunityRating(@PathVariable String animeId) {
-        Double rating = animeService.getCommunityRating(animeId);
-        if (rating == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(rating);
-    }
-
     @DeleteMapping("/library/{animeId}")
     public ResponseEntity<Void> removeFromLibrary(@PathVariable String animeId) {
         animeService.removeFromLibrary(animeId);
@@ -118,6 +109,6 @@ public class AnimeController {
 
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<AnimeItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(animeService.enrichCommunityRating(id));
+        return ResponseEntity.ok(animeService.enrichMalRating(id));
     }
 }

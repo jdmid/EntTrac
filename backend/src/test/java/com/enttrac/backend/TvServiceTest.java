@@ -1,9 +1,10 @@
-package com.enttrac.backend.service;
+package com.enttrac.backend;
 
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
 import com.enttrac.backend.repository.TvRepository;
+import com.enttrac.backend.service.TvService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -195,25 +196,6 @@ public class TvServiceTest {
                 tvService.updateNotes("notreal", "notes"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
-    }
-
-    @Test
-    void getCommunityRating_ShouldDelegateToClient() {
-        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
-
-        Double result = tvService.getCommunityRating("1396");
-
-        assertEquals(9.5, result);
-        verify(tvMetadataClient, times(1)).getCommunityRating("1396");
-    }
-
-    @Test
-    void getCommunityRating_ShouldReturnNullWhenUnavailable() {
-        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(null);
-
-        Double result = tvService.getCommunityRating("1396");
-
-        assertNull(result);
     }
 
     @Test
@@ -585,41 +567,42 @@ public class TvServiceTest {
     }
 
     @Test
-    void enrichCommunityRating_ShouldFetchAndCacheWhenNull() {
-        testItem.setCommunityRating(null);
+    void enrichTmdbRating_ShouldFetchAndCacheWhenNull() {
+        testItem.setTmdbRating(null);
         when(tvRepository.findById("1396")).thenReturn(testItem);
         when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
 
-        TvItem result = tvService.enrichCommunityRating("1396");
+        TvItem result = tvService.enrichTmdbRating("1396");
 
-        assertEquals(9.5, result.getCommunityRating());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
     }
 
     @Test
-    void enrichCommunityRating_ShouldSkipWhenAlreadyCached() {
-        testItem.setCommunityRating(9.5);
+    void enrichTmdbRating_ShouldSkipWhenAlreadyCached() {
+        testItem.setTmdbRating(9.5);
         when(tvRepository.findById("1396")).thenReturn(testItem);
 
-        TvItem result = tvService.enrichCommunityRating("1396");
+        TvItem result = tvService.enrichTmdbRating("1396");
 
-        assertEquals(9.5, result.getCommunityRating());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvMetadataClient, never()).getCommunityRating(any());
         verify(tvRepository, never()).save(any());
     }
 
     @Test
-    void enrichCommunityRating_ShouldThrowWhenNotFound() {
+    void enrichTmdbRating_ShouldThrowWhenNotFound() {
         when(tvRepository.findById("notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.enrichCommunityRating("notreal"));
+                tvService.enrichTmdbRating("notreal"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
 
     @Test
-    void refreshLatestEpisodes_ShouldAlsoRefreshCommunityRating() {
+    void refreshLatestEpisodes_ShouldCacheTmdbRatingWhenNull() {
+        testItem.setTmdbRating(null);
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396")
                 .totalEpisodes(62)
@@ -635,12 +618,31 @@ public class TvServiceTest {
         TvItem result = tvService.refreshLatestEpisodes("1396");
 
         assertEquals(62, result.getTotalEpisodes());
-        assertEquals(9.5, result.getCommunityRating());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
     }
 
     @Test
+    void refreshLatestEpisodes_ShouldSkipTmdbRatingWhenAlreadyCached() {
+        testItem.setTmdbRating(9.5);
+        TvSearchResult details = TvSearchResult.builder()
+                .id("1396")
+                .totalEpisodes(62)
+                .status("Returning Series")
+                .build();
+
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvMetadataClient.getDetails("1396")).thenReturn(details);
+
+        TvItem result = tvService.refreshLatestEpisodes("1396");
+
+        assertEquals(9.5, result.getTmdbRating());
+        verify(tvMetadataClient, never()).getCommunityRating(any());
+    }
+
+    @Test
     void refreshLatestEpisodes_ShouldSaveEvenWhenDetailsNull() {
+        testItem.setTmdbRating(null);
         when(tvRepository.findById("1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(null);
         when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
@@ -648,7 +650,7 @@ public class TvServiceTest {
         TvItem result = tvService.refreshLatestEpisodes("1396");
 
         assertNotNull(result);
-        assertEquals(9.5, result.getCommunityRating());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
     }
 }
