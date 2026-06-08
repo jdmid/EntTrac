@@ -1,5 +1,7 @@
 # EntTrac
 
+![Backend Tests](https://github.com/jdmid/EntTrac/actions/workflows/backend-tests.yml/badge.svg)
+
 EntTrac is a personal entertainment tracker built to solve a real problem — life constantly shifts between busy and leisurely, and the entertainment you were enjoying often gets left behind. With so much still coming out and not always enough time to finish everything, EntTrac gives you a central place to track what you're consuming, where you left off, and what's waiting for you.
 
 The project started as a manga and anime tracker and is continuously growing to incorporate more media types and become the best tool it can be.
