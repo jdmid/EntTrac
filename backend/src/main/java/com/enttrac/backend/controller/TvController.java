@@ -110,6 +110,6 @@ public class TvController {
 
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<TvItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(tvService.enrichTmdbScore(id));
+        return ResponseEntity.ok(tvService.enrichTmdbRating(id));
     }
 }

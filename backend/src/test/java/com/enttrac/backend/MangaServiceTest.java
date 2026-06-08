@@ -393,42 +393,42 @@ public class MangaServiceTest {
     }
 
     @Test
-    void enrichMangadexScore_ShouldFetchAndCacheWhenNull() {
-        testItem.setMangadexScore(null);
+    void enrichMangadexRating_ShouldFetchAndCacheWhenNull() {
+        testItem.setMangadexRating(null);
         when(mangaRepository.findById("abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getCommunityRating("abc123")).thenReturn(9.6);
 
-        MangaItem result = mangaService.enrichMangadexScore("abc123");
+        MangaItem result = mangaService.enrichMangadexRating("abc123");
 
-        assertEquals(9.6, result.getMangadexScore());
+        assertEquals(9.6, result.getMangadexRating());
         verify(mangaRepository, times(1)).save(testItem);
     }
 
     @Test
-    void enrichMangadexScore_ShouldSkipWhenAlreadyCached() {
-        testItem.setMangadexScore(9.6);
+    void enrichMangadexRating_ShouldSkipWhenAlreadyCached() {
+        testItem.setMangadexRating(9.6);
         when(mangaRepository.findById("abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.enrichMangadexScore("abc123");
+        MangaItem result = mangaService.enrichMangadexRating("abc123");
 
-        assertEquals(9.6, result.getMangadexScore());
+        assertEquals(9.6, result.getMangadexRating());
         verify(mangaMetadataClient, never()).getCommunityRating(any());
         verify(mangaRepository, never()).save(any());
     }
 
     @Test
-    void enrichMangadexScore_ShouldThrowWhenNotFound() {
+    void enrichMangadexRating_ShouldThrowWhenNotFound() {
         when(mangaRepository.findById("notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                mangaService.enrichMangadexScore("notreal"));
+                mangaService.enrichMangadexRating("notreal"));
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
 
     @Test
-    void refreshLatestChapter_ShouldCacheMangadexScoreWhenNull() {
-        testItem.setMangadexScore(null);
+    void refreshLatestChapter_ShouldCacheMangadexRatingWhenNull() {
+        testItem.setMangadexRating(null);
         MangaSearchResult details = MangaSearchResult.builder()
                 .id("abc123").latestChapter(75).build();
 
@@ -439,13 +439,13 @@ public class MangaServiceTest {
         MangaItem result = mangaService.refreshLatestChapter("abc123");
 
         assertEquals(75, result.getLatestChapter());
-        assertEquals(9.6, result.getMangadexScore());
+        assertEquals(9.6, result.getMangadexRating());
         verify(mangaRepository, times(1)).save(testItem);
     }
 
     @Test
-    void refreshLatestChapter_ShouldSkipMangadexScoreWhenAlreadyCached() {
-        testItem.setMangadexScore(9.6);
+    void refreshLatestChapter_ShouldSkipMangadexRatingWhenAlreadyCached() {
+        testItem.setMangadexRating(9.6);
         MangaSearchResult details = MangaSearchResult.builder()
                 .id("abc123").latestChapter(75).build();
 
@@ -454,13 +454,13 @@ public class MangaServiceTest {
 
         MangaItem result = mangaService.refreshLatestChapter("abc123");
 
-        assertEquals(9.6, result.getMangadexScore());
+        assertEquals(9.6, result.getMangadexRating());
         verify(mangaMetadataClient, never()).getCommunityRating(any());
     }
 
     @Test
     void refreshLatestChapter_ShouldSaveEvenWhenDetailsNull() {
-        testItem.setMangadexScore(null);
+        testItem.setMangadexRating(null);
         when(mangaRepository.findById("abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(null);
         when(mangaMetadataClient.getCommunityRating("abc123")).thenReturn(9.6);
@@ -468,7 +468,7 @@ public class MangaServiceTest {
         MangaItem result = mangaService.refreshLatestChapter("abc123");
 
         assertNotNull(result);
-        assertEquals(9.6, result.getMangadexScore());
+        assertEquals(9.6, result.getMangadexRating());
         verify(mangaRepository, times(1)).save(testItem);
     }
 }

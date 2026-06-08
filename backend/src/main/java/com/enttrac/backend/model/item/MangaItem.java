@@ -24,5 +24,5 @@ public class MangaItem extends MediaItem {
 
     private Integer latestChapter;
     private Integer totalChapters;
-    private Double mangadexScore;
+    private Double mangadexRating;
 }

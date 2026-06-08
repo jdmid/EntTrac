@@ -23,7 +23,6 @@ function MangaDetailPage() {
   const [error, setError] = useState(null)
   const [score, setScore] = useState(null)
   const [inLibrary, setInLibrary] = useState(true)
-  const [communityRating, setCommunityRating] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
@@ -33,11 +32,8 @@ function MangaDetailPage() {
         setScore(res.data.score ?? null)
         setLoading(false)
         enrichMangaFromCache(mangaId)
-          .then((enriched) => {
-            setManga(enriched.data)
-            setCommunityRating(enriched.data.communityRating ?? null)
-          })
-          .catch(() => setCommunityRating(null))
+          .then((enriched) => setManga(enriched.data))
+          .catch((err) => console.error('Enrich failed:', err))
       })
       .catch(() => {
         getMangaDetails(mangaId)
@@ -120,7 +116,7 @@ function MangaDetailPage() {
       ratingsSection={
         <div className="flex gap-2 flex-wrap">
           <RatingCard
-            value={communityRating}
+            value={manga.mangadexRating}
             label="MangaDex"
             color="#f87c23"
             theme={theme}

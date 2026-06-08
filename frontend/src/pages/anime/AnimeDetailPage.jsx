@@ -23,7 +23,6 @@ function AnimeDetailPage() {
   const [error, setError] = useState(null)
   const [score, setScore] = useState(null)
   const [inLibrary, setInLibrary] = useState(true)
-  const [communityRating, setCommunityRating] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
@@ -33,11 +32,8 @@ function AnimeDetailPage() {
         setScore(res.data.score ?? null)
         setLoading(false)
         enrichAnimeFromCache(animeId)
-          .then((enriched) => {
-            setAnime(enriched.data)
-            setCommunityRating(enriched.data.communityRating ?? null)
-          })
-          .catch(() => setCommunityRating(null))
+          .then((enriched) => setAnime(enriched.data))
+          .catch((err) => console.error('Enrich failed:', err))
       })
       .catch(() => {
         setTimeout(() => {
@@ -45,7 +41,6 @@ function AnimeDetailPage() {
           .then((res) => {
             setAnime(res.data)
             setInLibrary(false)
-            setCommunityRating(res.data.communityRating ?? null)
             setLoading(false)
           })
           .catch(() => {
@@ -126,7 +121,7 @@ function AnimeDetailPage() {
       ratingsSection={
         <div className="flex gap-2 flex-wrap">
           <RatingCard
-            value={communityRating}
+            value={anime.malRating}
             label="MAL"
             color="#2e51a2"
             theme={theme}
@@ -157,7 +152,7 @@ function AnimeDetailPage() {
           seriesStatus: normalizeSeriesStatus(anime.status, 'anime'),
           studio: anime.studio,
           season: anime.season,
-          communityRating: anime.communityRating,
+          malScore: anime.malScore,
         }).then(() => setInLibrary(true))
       }
       onScoreSave={(n) =>

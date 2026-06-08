@@ -144,9 +144,9 @@ public class TvService {
 
         }
 
-        if (item.getTmdbScore() == null) {
+        if (item.getTmdbRating() == null) {
             Double rating = tvMetadataClient.getCommunityRating(tvId);
-            if (rating != null) item.setTmdbScore(rating);
+            if (rating != null) item.setTmdbRating(rating);
         }
 
         tvRepository.save(item);
@@ -272,14 +272,14 @@ public class TvService {
         return updated;
     }
 
-    public TvItem enrichTmdbScore(String tvId) {
+    public TvItem enrichTmdbRating(String tvId) {
         TvItem item = tvRepository.findById(tvId);
         if (item == null) throw new NotFoundException("TV show not found: " + tvId);
 
-        if (item.getTmdbScore() == null) {
+        if (item.getTmdbRating() == null) {
             Double rating = tvMetadataClient.getCommunityRating(tvId);
             if (rating != null) {
-                item.setTmdbScore(rating);
+                item.setTmdbRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 tvRepository.save(item);
             }

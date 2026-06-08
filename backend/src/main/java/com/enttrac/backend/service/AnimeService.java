@@ -102,9 +102,9 @@ public class AnimeService {
 
         }
 
-        if (item.getMalScore() == null) {
+        if (item.getMalRating() == null) {
             Double rating = animeMetadataClient.getCommunityRating(animeId);
-            if (rating != null) item.setMalScore(rating);
+            if (rating != null) item.setMalRating(rating);
         }
 
         animeRepository.save(item);
@@ -220,14 +220,14 @@ public class AnimeService {
         return null;
     }
 
-    public AnimeItem enrichMalScore(String animeId) {
+    public AnimeItem enrichMalRating(String animeId) {
         AnimeItem item = animeRepository.findById(animeId);
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
-        if (item.getMalScore() == null) {
+        if (item.getMalRating() == null) {
             Double rating = animeMetadataClient.getCommunityRating(animeId);
             if (rating != null) {
-                item.setMalScore(rating);
+                item.setMalRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 animeRepository.save(item);
             }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,7 +26,7 @@ public class MangaControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private MangaService mangaService;
 
     @Test
@@ -287,12 +287,12 @@ public class MangaControllerTest {
     void enrich_ShouldReturnEnrichedItem() throws Exception {
         MangaItem item = new MangaItem();
         item.setMangaId("abc123");
-        item.setMangadexScore(9.6);
+        item.setMangadexRating(9.6);
 
-        when(mangaService.enrichMangadexScore("abc123")).thenReturn(item);
+        when(mangaService.enrichMangadexRating("abc123")).thenReturn(item);
 
         mockMvc.perform(post("/api/manga/library/abc123/enrich"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.mangadexScore").value(9.6));
+                .andExpect(jsonPath("$.mangadexRating").value(9.6));
     }
 }

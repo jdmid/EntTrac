@@ -38,6 +38,3 @@ export const removeMovieFromLibrary = (movieId) =>
 
 export const getMovieDetails = (movieId) =>
   client.get(`/movies/details/${movieId}`)
-
-export const getMovieCommunityRating = (movieId) =>
-  client.get(`/movies/library/${movieId}/rating`)

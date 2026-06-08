@@ -79,8 +79,6 @@ function MovieDetailPage() {
       title={movie.title}
       item={movie}
       inLibrary={inLibrary}
-      communityRating={null}
-      communityRatingLabel={null}
       score={score}
       theme={theme}
       icon="🎬"
@@ -108,7 +106,7 @@ function MovieDetailPage() {
       progressSection={null}
       ratingsSection={
         <div className="flex gap-2 flex-wrap">
-          <RatingCard value={movie.communityRating} label="TMDB" color="#01b4e4" theme={theme} />
+          <RatingCard value={movie.tmdbRating} label="TMDB" color="#01b4e4" theme={theme} />
           <RatingCard value={movie.imdbRating} label="IMDb" color="#f5c518" theme={theme} />
           <RatingCard value={movie.rottenTomatoesRating} label="Rotten Tomatoes" color="#fa320a" theme={theme} />
           <RatingCard value={movie.metacriticRating} label="Metacritic" color="#66cc33" theme={theme} />
@@ -141,7 +139,7 @@ function MovieDetailPage() {
           imdbRating: movie.imdbRating ?? null,
           rottenTomatoesRating: movie.rottenTomatoesRating ?? null,
           metacriticRating: movie.metacriticRating ?? null,
-          communityRating: movie.communityRating,
+          tmdbScore: movie.tmdbScore,
         }).then(() => setInLibrary(true))
       }
       onScoreSave={(n) =>

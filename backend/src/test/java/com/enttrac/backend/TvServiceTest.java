@@ -1,9 +1,10 @@
-package com.enttrac.backend.service;
+package com.enttrac.backend;
 
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
 import com.enttrac.backend.repository.TvRepository;
+import com.enttrac.backend.service.TvService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -566,42 +567,42 @@ public class TvServiceTest {
     }
 
     @Test
-    void enrichTmdbScore_ShouldFetchAndCacheWhenNull() {
-        testItem.setTmdbScore(null);
+    void enrichTmdbRating_ShouldFetchAndCacheWhenNull() {
+        testItem.setTmdbRating(null);
         when(tvRepository.findById("1396")).thenReturn(testItem);
         when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
 
-        TvItem result = tvService.enrichTmdbScore("1396");
+        TvItem result = tvService.enrichTmdbRating("1396");
 
-        assertEquals(9.5, result.getTmdbScore());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
     }
 
     @Test
-    void enrichTmdbScore_ShouldSkipWhenAlreadyCached() {
-        testItem.setTmdbScore(9.5);
+    void enrichTmdbRating_ShouldSkipWhenAlreadyCached() {
+        testItem.setTmdbRating(9.5);
         when(tvRepository.findById("1396")).thenReturn(testItem);
 
-        TvItem result = tvService.enrichTmdbScore("1396");
+        TvItem result = tvService.enrichTmdbRating("1396");
 
-        assertEquals(9.5, result.getTmdbScore());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvMetadataClient, never()).getCommunityRating(any());
         verify(tvRepository, never()).save(any());
     }
 
     @Test
-    void enrichTmdbScore_ShouldThrowWhenNotFound() {
+    void enrichTmdbRating_ShouldThrowWhenNotFound() {
         when(tvRepository.findById("notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.enrichTmdbScore("notreal"));
+                tvService.enrichTmdbRating("notreal"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
 
     @Test
-    void refreshLatestEpisodes_ShouldCacheTmdbScoreWhenNull() {
-        testItem.setTmdbScore(null);
+    void refreshLatestEpisodes_ShouldCacheTmdbRatingWhenNull() {
+        testItem.setTmdbRating(null);
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396")
                 .totalEpisodes(62)
@@ -617,13 +618,13 @@ public class TvServiceTest {
         TvItem result = tvService.refreshLatestEpisodes("1396");
 
         assertEquals(62, result.getTotalEpisodes());
-        assertEquals(9.5, result.getTmdbScore());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
     }
 
     @Test
-    void refreshLatestEpisodes_ShouldSkipTmdbScoreWhenAlreadyCached() {
-        testItem.setTmdbScore(9.5);
+    void refreshLatestEpisodes_ShouldSkipTmdbRatingWhenAlreadyCached() {
+        testItem.setTmdbRating(9.5);
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396")
                 .totalEpisodes(62)
@@ -635,13 +636,13 @@ public class TvServiceTest {
 
         TvItem result = tvService.refreshLatestEpisodes("1396");
 
-        assertEquals(9.5, result.getTmdbScore());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvMetadataClient, never()).getCommunityRating(any());
     }
 
     @Test
     void refreshLatestEpisodes_ShouldSaveEvenWhenDetailsNull() {
-        testItem.setTmdbScore(null);
+        testItem.setTmdbRating(null);
         when(tvRepository.findById("1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(null);
         when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
@@ -649,7 +650,7 @@ public class TvServiceTest {
         TvItem result = tvService.refreshLatestEpisodes("1396");
 
         assertNotNull(result);
-        assertEquals(9.5, result.getTmdbScore());
+        assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
     }
 }

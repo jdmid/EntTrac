@@ -121,6 +121,6 @@ public class MangaController {
 
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<MangaItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(mangaService.enrichMangadexScore(id));
+        return ResponseEntity.ok(mangaService.enrichMangadexRating(id));
     }
 }

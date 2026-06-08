@@ -1,5 +1,6 @@
-package com.enttrac.backend.controller;
+package com.enttrac.backend;
 
+import com.enttrac.backend.controller.AnimeController;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.service.AnimeService;
@@ -7,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,7 +24,7 @@ public class AnimeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AnimeService animeService;
 
     @Autowired
@@ -246,12 +247,12 @@ public class AnimeControllerTest {
     void enrich_ShouldReturnEnrichedItem() throws Exception {
         AnimeItem item = new AnimeItem();
         item.setAnimeId("21");
-        item.setMalScore(8.7);
+        item.setMalRating(8.7);
 
-        when(animeService.enrichMalScore("21")).thenReturn(item);
+        when(animeService.enrichMalRating("21")).thenReturn(item);
 
         mockMvc.perform(post("/api/anime/library/21/enrich"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.malScore").value(8.7));
+                .andExpect(jsonPath("$.malRating").value(8.7));
     }
 }

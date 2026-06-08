@@ -80,9 +80,9 @@ public class MangaService {
             item.setUpdatedAt(Instant.now().toString());
         }
 
-        if (item.getMangadexScore() == null) {
+        if (item.getMangadexRating() == null) {
             Double rating = mangaMetadataClient.getCommunityRating(mangaId);
-            if (rating != null) item.setMangadexScore(rating);
+            if (rating != null) item.setMangadexRating(rating);
         }
 
         mangaRepository.save(item);
@@ -176,14 +176,14 @@ public class MangaService {
         return updated;
     }
 
-    public MangaItem enrichMangadexScore(String mangaId) {
+    public MangaItem enrichMangadexRating(String mangaId) {
         MangaItem item = mangaRepository.findById(mangaId);
         if (item == null) throw new NotFoundException("Manga not found: " + mangaId);
 
-        if (item.getMangadexScore() == null) {
+        if (item.getMangadexRating() == null) {
             Double rating = mangaMetadataClient.getCommunityRating(mangaId);
             if (rating != null) {
-                item.setMangadexScore(rating);
+                item.setMangadexRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 mangaRepository.save(item);
             }

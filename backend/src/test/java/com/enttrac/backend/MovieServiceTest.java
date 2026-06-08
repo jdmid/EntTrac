@@ -188,7 +188,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    void refreshRatings_ShouldUpdateScoresAndSave() {
+    void refreshRatings_ShouldUpdateRatingsAndSave() {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550")
                 .imdbId("tt0137523")
@@ -238,7 +238,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    void enrichFromCache_ShouldCacheTmdbScoreWhenNull() {
+    void enrichFromCache_ShouldCacheTmdbRatingWhenNull() {
         when(movieRepository.findById("550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").imdbId("tt0137523").communityRating(7.8).build();
@@ -246,14 +246,14 @@ public class MovieServiceTest {
 
         MovieItem result = movieService.enrichFromCache("550");
 
-        assertEquals(7.8, result.getTmdbScore());
+        assertEquals(7.8, result.getTmdbRating());
         verify(movieRepository, times(1)).save(testItem);
     }
 
     @Test
     void enrichFromCache_ShouldSkipOmdbWhenRatingsCached() {
         testItem.setImdbRating(8.8);
-        testItem.setTmdbScore(7.8);
+        testItem.setTmdbRating(7.8);
         when(movieRepository.findById("550")).thenReturn(testItem);
 
         movieService.enrichFromCache("550");
@@ -264,8 +264,8 @@ public class MovieServiceTest {
     }
 
     @Test
-    void enrichFromCache_ShouldSkipTmdbScoreWhenAlreadyCached() {
-        testItem.setTmdbScore(7.8);
+    void enrichFromCache_ShouldSkipTmdbRatingWhenAlreadyCached() {
+        testItem.setTmdbRating(7.8);
         when(movieRepository.findById("550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").imdbId("tt0137523").build();
@@ -273,7 +273,7 @@ public class MovieServiceTest {
 
         MovieItem result = movieService.enrichFromCache("550");
 
-        assertEquals(7.8, result.getTmdbScore());
+        assertEquals(7.8, result.getTmdbRating());
         verify(omdbClient, times(1)).enrichWithRatings(any(), eq("tt0137523"));
     }
 
