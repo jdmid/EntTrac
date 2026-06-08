@@ -41,6 +41,8 @@ The project started as a manga and anime tracker and is continuously growing to 
 - AWS DynamoDB (single-table design)
 - MangaDex API (manga metadata)
 - Jikan/MyAnimeList API (anime metadata)
+- TMDB API (TV and movie metadata)
+- OMDB API (movie ratings — IMDb, Rotten Tomatoes, Metacritic)
 
 ---
 
@@ -58,12 +60,13 @@ The project started as a manga and anime tracker and is continuously growing to 
 - **Unread/unwatched tracking** — see at a glance how many chapters or episodes you're behind
 - **User notes** - edit personal notes on any library item's detail page
 - **Refresh all** — bulk update chapter/episode counts from the API with progress indicator and rate limit cooldown
-- **TV shows tab** - search TMDB, add to library, track watching progress by episode
+- **TV shows tab** — search TMDB, add to library, track watching progress by episode
+- **Movies tab** — search TMDB, add to library, view ratings from TMDB, IMDb, Rotten Tomatoes, and Metacritic
+- **Source-specific ratings** — each media type displays ratings from its own source (MAL score for anime, MangaDex rating for manga, TMDB rating for TV and movies) cached lazily on first detail page visit
 
 ### Planned Features
 
 - Books tab
-- Movies tab
 - AniList as a second anime data source
 - Author/creator page (tap a creator name to see all their works)
 - Settings page for managing and reordering media tabs
@@ -74,8 +77,10 @@ The project started as a manga and anime tracker and is continuously growing to 
 ## Architecture Highlights
 
 - **Single-table DynamoDB design** — all media types stored in one table using `PK = USER#default` and `SK = MEDIA_TYPE#SOURCE#ID` (e.g. `MANGA#MANGADEX#abc123`)
-- **MediaItem superclass** — shared fields (title, status, score, description etc) live in one place; `MangaItem` and `AnimeItem` extend it with medium-specific fields
-- **Client interface pattern** — `MangaMetadataClient` and `AnimeMetadataClient` interfaces allow swapping or adding API sources without changing service or controller logic
+- **MediaItem superclass** — shared fields (title, status, score, description etc) live in one place; `AnimeItem`, `MangaItem`, `TvItem`, and `MovieItem` extend it with medium-specific fields
+- **Source-specific rating fields** — each subclass owns its own rating field (`malRating`, `mangadexRating`, `tmdbRating`, `imdbRating` etc) rather than a generic `communityRating`, making the data source explicit at the model level
+- **Lazy rating enrichment** — source ratings are fetched from external APIs on first detail page visit and cached to DynamoDB; subsequent visits skip the API call entirely
+- **Client interface pattern** — each media type has a `MediaMetadataClient` interface allowing API sources to be swapped or extended without changing service or controller logic
 - **Status normalization** — raw API status values (e.g. "Finished Airing", "ongoing") are normalized to a consistent set on save, keeping filters consistent across API sources
 - **Universal status enums** — `CONSUMING`, `PLANNED`, `FINISHED`, `DROPPED` work across all media types; display labels ("Reading", "Watching") are mapped per medium on the frontend
 
