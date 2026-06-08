@@ -106,7 +106,6 @@ function MovieDetailPage() {
       progressSection={null}
       ratingsSection={
         <div className="flex gap-2 flex-wrap">
-          <RatingCard value={movie.tmdbRating} label="TMDB" color="#01b4e4" theme={theme} />
           <RatingCard value={movie.imdbRating} label="IMDb" color="#f5c518" theme={theme} />
           <RatingCard value={movie.rottenTomatoesRating} label="Rotten Tomatoes" color="#fa320a" theme={theme} />
           <RatingCard value={movie.metacriticRating} label="Metacritic" color="#66cc33" theme={theme} />
