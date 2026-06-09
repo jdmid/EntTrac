@@ -258,4 +258,18 @@ public class TvControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tmdbRating").value(9.5));
     }
+
+    @Test
+    void getWorksByCreator_ShouldReturnResults() throws Exception {
+        TvSearchResult result = TvSearchResult.builder()
+                .id("1396")
+                .title("Breaking Bad")
+                .build();
+
+        when(tvService.getWorksByCreator("66633")).thenReturn(List.of(result));
+
+        mockMvc.perform(get("/api/tv/creator/66633"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Breaking Bad"));
+    }
 }

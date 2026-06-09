@@ -123,4 +123,11 @@ public class MangaController {
     public ResponseEntity<MangaItem> enrich(@PathVariable String id) {
         return ResponseEntity.ok(mangaService.enrichMangadexRating(id));
     }
+
+    @GetMapping("/creator/{authorId}")
+    public ResponseEntity<List<MangaSearchResult>> getWorksByAuthor(
+            @PathVariable String authorId) {
+        List<MangaSearchResult> results = mangaService.getWorksByAuthor(authorId);
+        return ResponseEntity.ok(results);
+    }
 }

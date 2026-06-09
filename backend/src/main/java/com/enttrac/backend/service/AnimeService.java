@@ -1,5 +1,6 @@
 package com.enttrac.backend.service;
 
+import com.enttrac.backend.client.JikanClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.AnimeItem;
@@ -233,5 +234,10 @@ public class AnimeService {
             }
         }
         return item;
+    }
+
+    public JikanClient.PagedResult<AnimeSearchResult> getWorksByProducer(
+            String producerId, int page) {
+        return ((JikanClient) animeMetadataClient).getWorksByProducer(producerId, page);
     }
 }

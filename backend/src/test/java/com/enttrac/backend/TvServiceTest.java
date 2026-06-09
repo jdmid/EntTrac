@@ -42,6 +42,8 @@ public class TvServiceTest {
         testItem.setCurrentSeason(1);
         testItem.setTotalEpisodes(62);
         testItem.setSeasonEpisodes(null);
+        testItem.setCreatorName("Vince Gilligan");
+        testItem.setCreatorId("66633");
     }
 
     @Test
@@ -105,6 +107,8 @@ public class TvServiceTest {
         verify(tvRepository, times(1)).save(testItem);
         assertEquals("USER#default", result.getPk());
         assertEquals("TV#TMDB#1396", result.getSk());
+        assertEquals("Vince Gilligan", result.getCreatorName());
+        assertEquals("66633", result.getCreatorId());
     }
 
     @Test
@@ -652,5 +656,20 @@ public class TvServiceTest {
         assertNotNull(result);
         assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void getWorksByCreator_ShouldDelegateToClient() {
+        TvSearchResult result = TvSearchResult.builder()
+                .id("1396")
+                .title("Breaking Bad")
+                .build();
+        when(tvMetadataClient.getWorksByCreator("66633")).thenReturn(List.of(result));
+
+        List<TvSearchResult> results = tvService.getWorksByCreator("66633");
+
+        assertEquals(1, results.size());
+        assertEquals("Breaking Bad", results.get(0).getTitle());
+        verify(tvMetadataClient, times(1)).getWorksByCreator("66633");
     }
 }

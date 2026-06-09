@@ -295,4 +295,18 @@ public class MangaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.mangadexRating").value(9.6));
     }
+
+    @Test
+    void getWorksByAuthor_ShouldReturnResults() throws Exception {
+        MangaSearchResult result = MangaSearchResult.builder()
+                .id("xyz456")
+                .title("Wanted!")
+                .build();
+
+        when(mangaService.getWorksByAuthor("author-uuid-1")).thenReturn(List.of(result));
+
+        mockMvc.perform(get("/api/manga/creator/author-uuid-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Wanted!"));
+    }
 }

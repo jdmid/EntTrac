@@ -112,11 +112,14 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
             status = anime.get("status").asText();
         }
 
-        // Studio — first studio in producers list
+        // Studio — first studio in producers list + StudioId
         String studio = null;
+        String studioId = null;
         if (anime.has("studios") && anime.get("studios").isArray()
                 && anime.get("studios").size() > 0) {
-            studio = anime.get("studios").get(0).get("name").asText();
+            JsonNode firstStudio = anime.get("studios").get(0);
+            studio = firstStudio.get("name").asText();
+            studioId = firstStudio.get("mal_id").asText();
         }
 
         // Season
@@ -144,7 +147,41 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
                 .status(status)
                 .studio(studio)
                 .season(season)
+                .studioId(studioId)
                 .communityRating(communityRating)
                 .build();
     }
+
+    public PagedResult<AnimeSearchResult> getWorksByProducer(String producerId, int page) {
+        JsonNode response = restClient.get()
+                .uri("/producers/{id}/anime?limit=25&page={page}", producerId, page)
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<AnimeSearchResult> results = new ArrayList<>();
+
+        if (response != null && response.has("data")) {
+            for (JsonNode anime : response.get("data")) {
+                results.add(mapToSearchResult(anime));
+            }
+        }
+
+        boolean hasNextPage = false;
+        if (response != null && response.has("pagination")) {
+            hasNextPage = response.get("pagination").path("has_next_page").asBoolean(false);
+        }
+
+        return new PagedResult<>(results, hasNextPage);
+    }
+
+    public static class PagedResult<T> {
+        public final List<T> items;
+        public final boolean hasNextPage;
+
+        public PagedResult(List<T> items, boolean hasNextPage) {
+            this.items = items;
+            this.hasNextPage = hasNextPage;
+        }
+    }
 }
+

@@ -1,5 +1,6 @@
 package com.enttrac.backend.controller;
 
+import com.enttrac.backend.client.JikanClient;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.service.AnimeService;
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/anime")
@@ -110,5 +112,17 @@ public class AnimeController {
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<AnimeItem> enrich(@PathVariable String id) {
         return ResponseEntity.ok(animeService.enrichMalRating(id));
+    }
+
+    @GetMapping("/creator/{producerId}")
+    public ResponseEntity<Map<String, Object>> getWorksByProducer(
+            @PathVariable String producerId,
+            @RequestParam(defaultValue = "1") int page) {
+        JikanClient.PagedResult<AnimeSearchResult> result =
+                animeService.getWorksByProducer(producerId, page);
+        return ResponseEntity.ok(Map.of(
+                "items", result.items,
+                "hasNextPage", result.hasNextPage
+        ));
     }
 }

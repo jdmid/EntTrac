@@ -39,6 +39,8 @@ public class MangaServiceTest {
         testItem.setStatus("CONSUMING");
         testItem.setChaptersRead(10);
         testItem.setLatestChapter(50);
+        testItem.setAuthorId("author-uuid-1");
+        testItem.setArtistId("artist-uuid-1");
     }
 
     @Test
@@ -47,6 +49,8 @@ public class MangaServiceTest {
 
         assertEquals("USER#default", result.getPk());
         assertEquals("MANGA#MANGADEX#abc123", result.getSk());
+        assertEquals("author-uuid-1", result.getAuthorId());
+        assertEquals("artist-uuid-1", result.getArtistId());
         verify(mangaRepository, times(1)).save(testItem);
     }
 
@@ -470,5 +474,21 @@ public class MangaServiceTest {
         assertNotNull(result);
         assertEquals(9.6, result.getMangadexRating());
         verify(mangaRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void getWorksByAuthor_ShouldDelegateToClient() {
+        MangaSearchResult result = MangaSearchResult.builder()
+                .id("xyz456")
+                .title("Wanted!")
+                .build();
+        when(mangaMetadataClient.getWorksByCreator("author-uuid-1"))
+                .thenReturn(List.of(result));
+
+        List<MangaSearchResult> results = mangaService.getWorksByAuthor("author-uuid-1");
+
+        assertEquals(1, results.size());
+        assertEquals("Wanted!", results.get(0).getTitle());
+        verify(mangaMetadataClient, times(1)).getWorksByCreator("author-uuid-1");
     }
 }

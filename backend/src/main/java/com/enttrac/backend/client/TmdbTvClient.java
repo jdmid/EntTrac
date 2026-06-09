@@ -8,7 +8,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component("tmdbTvClient")
 public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
@@ -82,6 +84,15 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
                                 + (episodeName.isEmpty() ? "" : " · \"" + episodeName + "\"")
                                 + " · " + airDate
                 );
+            }
+        }
+
+        if (response.has("created_by") && response.get("created_by").isArray()
+                && response.get("created_by").size() > 0) {
+            JsonNode firstCreator = response.get("created_by").get(0);
+            if (firstCreator.has("name") && !firstCreator.get("name").isNull()) {
+                result.setCreatorName(firstCreator.get("name").asText());
+                result.setCreatorId(firstCreator.get("id").asText());
             }
         }
 
@@ -231,5 +242,32 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
                 .communityRating(communityRating)
                 .numberOfSeasons(numberOfSeasons)
                 .build();
+    }
+
+    @Override
+    public List<TvSearchResult> getWorksByCreator(String creatorId) {
+        JsonNode response = restClient.get()
+                .uri("/person/{id}/tv_credits?language=en-US&api_key={apiKey}",
+                        creatorId, apiKey)
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<TvSearchResult> results = new ArrayList<>();
+
+        if (response != null && response.has("crew")) {
+            Set<String> seenIds = new HashSet<>();
+            for (JsonNode show : response.get("crew")) {
+                String job = show.path("job").asText();
+                if ("Creator".equals(job) || "Executive Producer".equals(job)
+                        || "Writer".equals(job)) {
+                    String id = show.path("id").asText();
+                    if (seenIds.add(id)) {
+                        results.add(mapToSearchResult(show));
+                    }
+                }
+            }
+        }
+
+        return results;
     }
 }

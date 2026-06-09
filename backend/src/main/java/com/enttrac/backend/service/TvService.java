@@ -1,6 +1,7 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.MediaMetadataClient;
+import com.enttrac.backend.client.TmdbTvClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
@@ -285,5 +286,9 @@ public class TvService {
             }
         }
         return item;
+    }
+
+    public List<TvSearchResult> getWorksByCreator(String personId) {
+        return tvMetadataClient.getWorksByCreator(personId);
     }
 }

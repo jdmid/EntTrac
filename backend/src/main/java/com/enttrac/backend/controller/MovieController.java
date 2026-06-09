@@ -94,4 +94,10 @@ public class MovieController {
         movieService.removeFromLibrary(movieId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/creator/{personId}")
+    public ResponseEntity<List<MovieSearchResult>> getWorksByPerson(
+            @PathVariable String personId) {
+        return ResponseEntity.ok(movieService.getWorksByPerson(personId));
+    }
 }

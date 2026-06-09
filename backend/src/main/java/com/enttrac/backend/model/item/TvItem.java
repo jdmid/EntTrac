@@ -30,6 +30,8 @@ public class TvItem extends MediaItem {
     private Integer currentSeason;
     private String nextEpisodeDate;
     private Double tmdbRating;
+    private String creatorName;
+    private String creatorId;
 
     private List<Integer> seasonEpisodes;
 }

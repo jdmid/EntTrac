@@ -1,5 +1,6 @@
 package com.enttrac.backend;
 
+import com.enttrac.backend.client.JikanClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
@@ -37,6 +38,7 @@ public class AnimeServiceTest {
         testItem.setAnimeId("21");
         testItem.setTitle("One Piece");
         testItem.setStatus("PLANNED");
+        testItem.setStudioId("1");
     }
 
     @Test
@@ -100,6 +102,7 @@ public class AnimeServiceTest {
         verify(animeRepository, times(1)).save(testItem);
         assertEquals("USER#default", result.getPk());
         assertEquals("ANIME#JIKAN#21", result.getSk());
+        assertEquals("1", result.getStudioId());
     }
 
     @Test
@@ -459,5 +462,30 @@ public class AnimeServiceTest {
         assertNotNull(result);
         assertEquals(8.7, result.getMalRating());
         verify(animeRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void getWorksByProducer_ShouldDelegateToClient() {
+        JikanClient.PagedResult<AnimeSearchResult> pagedResult =
+                new JikanClient.PagedResult<>(
+                        List.of(AnimeSearchResult.builder()
+                                .id("21")
+                                .title("One Piece")
+                                .build()),
+                        false
+                );
+
+        AnimeRepository animeRepository = mock(AnimeRepository.class);
+        JikanClient jikanClient = mock(JikanClient.class);
+        when(jikanClient.getWorksByProducer("1", 1)).thenReturn(pagedResult);
+
+        AnimeService serviceWithJikan = new AnimeService(animeRepository, jikanClient);
+        JikanClient.PagedResult<AnimeSearchResult> result =
+                serviceWithJikan.getWorksByProducer("1", 1);
+
+        assertEquals(1, result.items.size());
+        assertEquals("One Piece", result.items.get(0).getTitle());
+        assertFalse(result.hasNextPage);
+        verify(jikanClient, times(1)).getWorksByProducer("1", 1);
     }
 }

@@ -16,12 +16,14 @@ public class AnimeSearchResult extends MediaSearchResult {
     private Integer latestEpisode;
     private String studio;
     private String season;
+    private String studioId;
+
 
     @lombok.Builder
     public AnimeSearchResult(String id, String title, String description,
                              String coverUrl, String status, Double communityRating,
                              Integer totalEpisodes, Integer latestEpisode,
-                             String studio, String season) {
+                             String studio, String season, String studioId) {
         super();
         setId(id);
         setTitle(title);
@@ -33,5 +35,6 @@ public class AnimeSearchResult extends MediaSearchResult {
         this.latestEpisode = latestEpisode;
         this.studio = studio;
         this.season = season;
+        this.studioId = studioId;
     }
 }

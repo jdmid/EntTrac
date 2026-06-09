@@ -112,4 +112,10 @@ public class TvController {
     public ResponseEntity<TvItem> enrich(@PathVariable String id) {
         return ResponseEntity.ok(tvService.enrichTmdbRating(id));
     }
+
+    @GetMapping("/creator/{personId}")
+    public ResponseEntity<List<TvSearchResult>> getWorksByCreator(
+            @PathVariable String personId) {
+        return ResponseEntity.ok(tvService.getWorksByCreator(personId));
+    }
 }

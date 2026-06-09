@@ -191,6 +191,10 @@ public class MangaService {
         return item;
     }
 
+    public List<MangaSearchResult> getWorksByAuthor(String authorId) {
+        return mangaMetadataClient.getWorksByCreator(authorId);
+    }
+
     public void removeFromLibrary(String mangaId) {
         mangaRepository.delete(mangaId);
     }

@@ -41,6 +41,7 @@ public class MovieServiceTest {
         testItem.setMovieId("550");
         testItem.setTitle("Fight Club");
         testItem.setStatus("PLANNED");
+        testItem.setDirectorId("525");
     }
 
     @Test
@@ -115,6 +116,7 @@ public class MovieServiceTest {
         verify(movieRepository, times(1)).save(testItem);
         assertEquals("USER#default", result.getPk());
         assertEquals("MOVIE#TMDB#550", result.getSk());
+        assertEquals("525", result.getDirectorId());
     }
 
     @Test
@@ -373,5 +375,20 @@ public class MovieServiceTest {
         MovieItem result = movieService.refreshRatings("550");
 
         assertEquals("cancelled", result.getSeriesStatus());
+    }
+
+    @Test
+    void getWorksByPerson_ShouldDelegateToClient() {
+        MovieSearchResult result = MovieSearchResult.builder()
+                .id("490132")
+                .title("The Grand Budapest Hotel")
+                .build();
+        when(tmdbMovieClient.getWorksByCreator("525")).thenReturn(List.of(result));
+
+        List<MovieSearchResult> results = movieService.getWorksByPerson("525");
+
+        assertEquals(1, results.size());
+        assertEquals("The Grand Budapest Hotel", results.get(0).getTitle());
+        verify(tmdbMovieClient, times(1)).getWorksByCreator("525");
     }
 }

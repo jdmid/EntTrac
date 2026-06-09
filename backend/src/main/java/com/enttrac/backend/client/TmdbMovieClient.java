@@ -62,6 +62,7 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
             for (JsonNode member : response.get("credits").get("crew")) {
                 if ("Director".equals(member.path("job").asText())) {
                     result.setDirector(member.path("name").asText());
+                    result.setDirectorId(member.path("id").asText());
                     break;
                 }
             }
@@ -157,5 +158,25 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
                 .genres(genres)
                 .communityRating(communityRating)
                 .build();
+    }
+
+    @Override
+    public List<MovieSearchResult> getWorksByCreator(String creatorId) {        JsonNode response = restClient.get()
+                .uri("/person/{id}/movie_credits?language=en-US&api_key={apiKey}",
+                        creatorId, apiKey)
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<MovieSearchResult> results = new ArrayList<>();
+
+        if (response != null && response.has("crew")) {
+            for (JsonNode movie : response.get("crew")) {
+                if ("Director".equals(movie.path("job").asText())) {
+                    results.add(mapToSearchResult(movie));
+                }
+            }
+        }
+
+        return results;
     }
 }

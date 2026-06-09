@@ -144,17 +144,21 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
             }
         }
 
-        // Get author and artist
+        // Get author, authorId, artist, artistId
         String author = null;
         String artist = null;
+        String authorId = null;
+        String artistId = null;
         if (relationships != null) {
             for (JsonNode rel : relationships) {
                 String relType = rel.get("type").asText();
                 if ("author".equals(relType) && rel.has("attributes")) {
                     author = rel.get("attributes").get("name").asText();
+                    authorId = rel.get("id").asText();
                 }
                 if ("artist".equals(relType) && rel.has("attributes")) {
                     artist = rel.get("attributes").get("name").asText();
+                    artistId = rel.get("id").asText();
                 }
             }
         }
@@ -168,6 +172,8 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
                 .coverUrl(coverUrl)
                 .author(author)
                 .artist(artist)
+                .artistId(artistId)
+                .authorId(authorId)
                 .build();
     }
 
@@ -204,5 +210,64 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
             // fall through
         }
         return null;
+    }
+
+    @Override
+    public List<MangaSearchResult> getWorksByCreator(String creatorId) {
+        JsonNode response = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/author/{id}")
+                        .queryParam("includes[]", "manga")
+                        .build(creatorId))
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<MangaSearchResult> results = new ArrayList<>();
+
+        if (response != null && response.has("data")) {
+            JsonNode data = response.get("data");
+            if (data.has("relationships")) {
+                for (JsonNode rel : data.get("relationships")) {
+                    if ("manga".equals(rel.path("type").asText()) && rel.has("attributes")) {
+                        results.add(mapAuthorWorkToSearchResult(rel));
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    private MangaSearchResult mapAuthorWorkToSearchResult(JsonNode manga) {
+        String id = manga.get("id").asText();
+
+        JsonNode titles = manga.path("attributes").path("title");
+        String title = null;
+        if (titles.has("en")) {
+            title = titles.get("en").asText();
+        } else if (titles.fields().hasNext()) {
+            title = titles.fields().next().getValue().asText();
+        }
+        if (title == null) title = "Unknown title";
+
+        String status = manga.path("attributes").path("status").asText(null);
+
+        String coverUrl = null;
+        if (manga.has("relationships")) {
+            for (JsonNode rel : manga.get("relationships")) {
+                if ("cover_art".equals(rel.path("type").asText()) && rel.has("attributes")) {
+                    String fileName = rel.get("attributes").path("fileName").asText();
+                    coverUrl = "https://uploads.mangadex.org/covers/" + id + "/" + fileName;
+                    break;
+                }
+            }
+        }
+
+        return MangaSearchResult.builder()
+                .id(id)
+                .title(title)
+                .status(status)
+                .coverUrl(coverUrl)
+                .build();
     }
 }

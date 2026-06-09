@@ -21,13 +21,16 @@ public class TvSearchResult extends MediaSearchResult {
     private List<Integer> seasonEpisodes;
     private String nextEpisodeDate;
     private Integer numberOfSeasons;
+    private String creatorName;
+    private String creatorId;
 
     @lombok.Builder
     public TvSearchResult(String id, String title, String description,
                           String coverUrl, String status, Double communityRating,
                           String network, String genres, String firstAirYear,
                           String seriesType, Integer totalEpisodes,
-                          List<Integer> seasonEpisodes, String nextEpisodeDate, Integer numberOfSeasons) {
+                          List<Integer> seasonEpisodes, String nextEpisodeDate, Integer numberOfSeasons,
+                          String creatorName, String creatorId) {
         super();
         setId(id);
         setTitle(title);
@@ -43,5 +46,7 @@ public class TvSearchResult extends MediaSearchResult {
         this.seasonEpisodes = seasonEpisodes;
         this.nextEpisodeDate = nextEpisodeDate;
         this.numberOfSeasons = numberOfSeasons;
+        this.creatorName = creatorName;
+        this.creatorId = creatorId;
     }
 }

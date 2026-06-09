@@ -16,6 +16,7 @@ public class MovieItem extends MediaItem {
     private String runtime;
     private String genres;
     private String director;
+    private String directorId;
 
     // Scores from multiple sources
     private Double imdbRating;

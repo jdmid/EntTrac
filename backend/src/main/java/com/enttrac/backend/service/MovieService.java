@@ -162,4 +162,8 @@ public class MovieService {
         if (status.equals("canceled")) return "cancelled";
         return null;
     }
+
+    public List<MovieSearchResult> getWorksByPerson(String personId) {
+        return tmdbMovieClient.getWorksByCreator(personId);
+    }
 }

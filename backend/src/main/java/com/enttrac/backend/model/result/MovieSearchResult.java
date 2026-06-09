@@ -17,6 +17,8 @@ public class MovieSearchResult extends MediaSearchResult {
     private String runtime;
     private String genres;
     private String director;
+    private String directorId;
+
 
     // Supplementary scores populated by OmdbClient
     private Double imdbRating;
@@ -28,7 +30,7 @@ public class MovieSearchResult extends MediaSearchResult {
     public MovieSearchResult(String id, String title, String description,
                              String coverUrl, String status, Double communityRating,
                              String releaseYear, String runtime, String genres,
-                             String director, Double imdbRating,
+                             String director, String directorId, Double imdbRating,
                              String rottenTomatoesRating, String metacriticRating,
                              String imdbId) {
         super();
@@ -42,6 +44,7 @@ public class MovieSearchResult extends MediaSearchResult {
         this.runtime = runtime;
         this.genres = genres;
         this.director = director;
+        this.directorId = directorId;
         this.imdbRating = imdbRating;
         this.rottenTomatoesRating = rottenTomatoesRating;
         this.metacriticRating = metacriticRating;

@@ -223,4 +223,18 @@ public class MovieControllerTest {
 
         verify(movieService, times(1)).removeFromLibrary("550");
     }
+
+    @Test
+    void getWorksByPerson_ShouldReturnResults() throws Exception {
+        MovieSearchResult result = MovieSearchResult.builder()
+                .id("490132")
+                .title("The Grand Budapest Hotel")
+                .build();
+
+        when(movieService.getWorksByPerson("525")).thenReturn(List.of(result));
+
+        mockMvc.perform(get("/api/movies/creator/525"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("The Grand Budapest Hotel"));
+    }
 }

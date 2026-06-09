@@ -18,6 +18,7 @@ public class AnimeItem extends MediaItem {
 
     private String studio;
     private String season;
+    private String studioId;
 
     @Min(value = 0, message = "Episodes watched cannot be negative")
     private int episodesWatched;
