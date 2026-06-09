@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/manga")
@@ -129,5 +130,10 @@ public class MangaController {
             @PathVariable String authorId) {
         List<MangaSearchResult> results = mangaService.getWorksByAuthor(authorId);
         return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/author-search")
+    public ResponseEntity<List<Map<String, String>>> searchAuthors(@RequestParam String name) {
+        return ResponseEntity.ok(mangaService.searchAuthors(name));
     }
 }

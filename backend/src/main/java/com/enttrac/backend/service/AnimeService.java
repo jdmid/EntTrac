@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 // TODO: refactor into shared MediaService when adding third medium
@@ -237,7 +238,11 @@ public class AnimeService {
     }
 
     public JikanClient.PagedResult<AnimeSearchResult> getWorksByProducer(
-            String producerId, int page) {
-        return ((JikanClient) animeMetadataClient).getWorksByProducer(producerId, page);
+            String producerId, int page, String name) {
+        return ((JikanClient) animeMetadataClient).getWorksByProducer(producerId, page, name);
+    }
+
+    public List<Map<String, String>> searchProducers(String name) {
+        return animeMetadataClient.searchCreators(name);
     }
 }

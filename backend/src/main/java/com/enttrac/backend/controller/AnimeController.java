@@ -117,12 +117,18 @@ public class AnimeController {
     @GetMapping("/creator/{producerId}")
     public ResponseEntity<Map<String, Object>> getWorksByProducer(
             @PathVariable String producerId,
-            @RequestParam(defaultValue = "1") int page) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false) String name) {
         JikanClient.PagedResult<AnimeSearchResult> result =
-                animeService.getWorksByProducer(producerId, page);
+                animeService.getWorksByProducer(producerId, page, name);
         return ResponseEntity.ok(Map.of(
                 "items", result.items,
                 "hasNextPage", result.hasNextPage
         ));
+    }
+
+    @GetMapping("/producer-search")
+    public ResponseEntity<List<Map<String, String>>> searchProducers(@RequestParam String name) {
+        return ResponseEntity.ok(animeService.searchProducers(name));
     }
 }

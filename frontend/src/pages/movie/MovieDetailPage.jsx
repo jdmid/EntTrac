@@ -98,7 +98,22 @@ function MovieDetailPage() {
           {movie.director && (
             <p className="text-[12px] text-[#555566] m-0 mb-3">
               Directed by{' '}
-              <span style={{ color: theme.accent }}>{movie.director}</span>
+              <span
+                className="cursor-pointer inline-flex items-center gap-1"
+                style={{ color: theme.accent }}
+                onClick={() => navigate(
+                  `/movie/search?tab=creator&creatorId=${movie.directorId}&creatorName=${encodeURIComponent(movie.director)}`
+                )}
+              >
+                {movie.director}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                  strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </span>
             </p>
           )}
         </div>
@@ -139,6 +154,7 @@ function MovieDetailPage() {
           rottenTomatoesRating: movie.rottenTomatoesRating ?? null,
           metacriticRating: movie.metacriticRating ?? null,
           tmdbScore: movie.tmdbScore,
+          directorId: movie.directorId ?? null,
         }).then(() => setInLibrary(true))
       }
       onScoreSave={(n) =>

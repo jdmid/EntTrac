@@ -118,9 +118,25 @@ function TvDetailPage() {
               .filter(Boolean)
               .join(' · ')}
           </p>
-          {show.network && (
+          {show.creatorName && (
             <p className="text-[12px] text-[#555566] m-0 mb-3">
-              <span style={{ color: theme.accent }}>{show.network}</span>
+              Created by{' '}
+              <span
+                className="cursor-pointer inline-flex items-center gap-1"
+                style={{ color: theme.accent }}
+                onClick={() => navigate(
+                  `/tv/search?tab=creator&creatorId=${show.creatorId}&creatorName=${encodeURIComponent(show.creatorName)}`
+                )}
+              >
+                {show.creatorName}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                  strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </span>
             </p>
           )}
         </div>
@@ -178,6 +194,8 @@ function TvDetailPage() {
           seriesType: show.seriesType,
           tmdbScore: show.tmdbScore,
           nextEpisodeDate: show.nextEpisodeDate,
+          creatorName: show.creatorName ?? null,
+          creatorId: show.creatorId ?? null,
         }).then(() => setInLibrary(true))
       }
       onScoreSave={(n) =>

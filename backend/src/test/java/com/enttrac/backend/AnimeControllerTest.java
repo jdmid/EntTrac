@@ -268,9 +268,11 @@ public class AnimeControllerTest {
                         false
                 );
 
-        when(animeService.getWorksByProducer("1", 1)).thenReturn(pagedResult);
+        when(animeService.getWorksByProducer("1", 1, "name")).thenReturn(pagedResult);
 
-        mockMvc.perform(get("/api/anime/creator/1").param("page", "1"))
+        mockMvc.perform(get("/api/anime/creator/1")
+                        .param("page", "1")
+                        .param("name", "name"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].title").value("One Piece"))
                 .andExpect(jsonPath("$.hasNextPage").value(false));

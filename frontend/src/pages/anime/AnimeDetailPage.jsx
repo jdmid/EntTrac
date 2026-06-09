@@ -47,7 +47,7 @@ function AnimeDetailPage() {
             setError('Failed to load anime.')
             setLoading(false)
           })
-        }, 1000)
+        }, 300)
       })
   }, [animeId])
 
@@ -89,19 +89,26 @@ function AnimeDetailPage() {
             {anime.seriesStatus ?? 'Unknown status'}
             {anime.totalEpisodes != null ? ` · Ep. ${anime.totalEpisodes}` : ''}
           </p>
-          {(anime.studio || anime.season) && (
-            <p className="text-[12px] text-[#555566] m-0 mb-3">
-              {anime.studio && (
-                <span>
-                  By{' '}
-                  <span style={{ color: theme.accent }}>{anime.studio}</span>
-                </span>
-              )}
-              {anime.studio && anime.season && <span> · </span>}
-              {anime.season && (
-                <span style={{ color: theme.accent }}>{anime.season}</span>
-              )}
-            </p>
+          {anime.studio && (
+            <span>
+              By{' '}
+              <span
+                className="cursor-pointer inline-flex items-center gap-1"
+                style={{ color: theme.accent }}
+                onClick={() => navigate(
+                  `/anime/search?tab=creator&creatorId=${anime.studioId}&creatorName=${encodeURIComponent(anime.studio)}`
+                )}
+              >
+                {anime.studio}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                  strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </span>
+            </span>
           )}
         </div>
       }
@@ -153,6 +160,7 @@ function AnimeDetailPage() {
           studio: anime.studio,
           season: anime.season,
           malScore: anime.malScore,
+          studioId: anime.studioId ?? null,
         }).then(() => setInLibrary(true))
       }
       onScoreSave={(n) =>

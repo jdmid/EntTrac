@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component("mangaDexClient")
 public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
@@ -212,7 +213,6 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
         return null;
     }
 
-    @Override
     public List<MangaSearchResult> getWorksByCreator(String creatorId) {
         JsonNode response = restClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -222,16 +222,41 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
                 .retrieve()
                 .body(JsonNode.class);
 
-        List<MangaSearchResult> results = new ArrayList<>();
+        List<String> mangaIds = new ArrayList<>();
 
         if (response != null && response.has("data")) {
             JsonNode data = response.get("data");
             if (data.has("relationships")) {
                 for (JsonNode rel : data.get("relationships")) {
-                    if ("manga".equals(rel.path("type").asText()) && rel.has("attributes")) {
-                        results.add(mapAuthorWorkToSearchResult(rel));
+                    if ("manga".equals(rel.path("type").asText())) {
+                        mangaIds.add(rel.get("id").asText());
                     }
                 }
+            }
+        }
+
+        if (mangaIds.isEmpty()) return List.of();
+
+        JsonNode batchResponse = restClient.get()
+                .uri(uriBuilder -> {
+                    var builder = uriBuilder
+                            .path("/manga")
+                            .queryParam("limit", 100)
+                            .queryParam("includes[]", "cover_art", "author", "artist")
+                            .queryParam("contentRating[]", "safe", "suggestive");
+                    for (String id : mangaIds) {
+                        builder = builder.queryParam("ids[]", id);
+                    }
+                    return builder.build();
+                })
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<MangaSearchResult> results = new ArrayList<>();
+
+        if (batchResponse != null && batchResponse.has("data")) {
+            for (JsonNode manga : batchResponse.get("data")) {
+                results.add(mapToSearchResult(manga));
             }
         }
 
@@ -269,5 +294,31 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
                 .status(status)
                 .coverUrl(coverUrl)
                 .build();
+    }
+
+    @Override
+    public List<Map<String, String>> searchCreators(String name) {
+        JsonNode response = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/author")
+                        .queryParam("name", name)
+                        .queryParam("limit", 10)
+                        .build())
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<Map<String, String>> results = new ArrayList<>();
+
+        if (response != null && response.has("data")) {
+            for (JsonNode author : response.get("data")) {
+                String id = author.get("id").asText();
+                String authorName = author.path("attributes").path("name").asText();
+                if (!id.isBlank() && !authorName.isBlank()) {
+                    results.add(Map.of("id", id, "name", authorName));
+                }
+            }
+        }
+
+        return results;
     }
 }

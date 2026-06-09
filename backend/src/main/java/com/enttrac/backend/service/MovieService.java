@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MovieService {
@@ -165,5 +166,9 @@ public class MovieService {
 
     public List<MovieSearchResult> getWorksByPerson(String personId) {
         return tmdbMovieClient.getWorksByCreator(personId);
+    }
+
+    public List<Map<String, String>> searchPeople(String name) {
+        return tmdbMovieClient.searchCreators(name);
     }
 }

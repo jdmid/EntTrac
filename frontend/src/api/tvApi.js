@@ -49,3 +49,9 @@ export const refreshOngoingTv = () =>
 
 export const enrichTvFromCache = (tvId) =>
   client.post(`/tv/library/${tvId}/enrich`)
+
+export const getWorksByCreator = (creatorId) =>
+  client.get(`/tv/creator/${creatorId}`)
+
+export const searchPeople = (name) =>
+  client.get('/tv/person-search', { params: { name } })

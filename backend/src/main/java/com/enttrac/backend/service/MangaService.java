@@ -1,5 +1,6 @@
 package com.enttrac.backend.service;
 
+import com.enttrac.backend.client.MangaDexClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.MangaItem;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 // TODO: refactor into shared MediaService when adding third medium
 @Service
@@ -193,6 +195,10 @@ public class MangaService {
 
     public List<MangaSearchResult> getWorksByAuthor(String authorId) {
         return mangaMetadataClient.getWorksByCreator(authorId);
+    }
+
+    public List<Map<String, String>> searchAuthors(String name) {
+        return mangaMetadataClient.searchCreators(name);
     }
 
     public void removeFromLibrary(String mangaId) {

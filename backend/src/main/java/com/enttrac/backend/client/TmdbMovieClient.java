@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component("tmdbMovieClient")
 public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
@@ -173,6 +174,29 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
             for (JsonNode movie : response.get("crew")) {
                 if ("Director".equals(movie.path("job").asText())) {
                     results.add(mapToSearchResult(movie));
+                }
+            }
+        }
+
+        return results;
+    }
+
+    @Override
+    public List<Map<String, String>> searchCreators(String name) {
+        JsonNode response = restClient.get()
+                .uri("/search/person?query={name}&language=en-US&api_key={apiKey}",
+                        name, apiKey)
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<Map<String, String>> results = new ArrayList<>();
+
+        if (response != null && response.has("results")) {
+            for (JsonNode person : response.get("results")) {
+                String id = person.path("id").asText();
+                String personName = person.path("name").asText();
+                if (!id.isBlank() && !personName.isBlank()) {
+                    results.add(Map.of("id", id, "name", personName));
                 }
             }
         }

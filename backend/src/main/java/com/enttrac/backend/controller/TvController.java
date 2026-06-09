@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tv")
@@ -117,5 +118,10 @@ public class TvController {
     public ResponseEntity<List<TvSearchResult>> getWorksByCreator(
             @PathVariable String personId) {
         return ResponseEntity.ok(tvService.getWorksByCreator(personId));
+    }
+
+    @GetMapping("/person-search")
+    public ResponseEntity<List<Map<String, String>>> searchPeople(@RequestParam String name) {
+        return ResponseEntity.ok(tvService.searchPeople(name));
     }
 }

@@ -38,3 +38,9 @@ export const removeMovieFromLibrary = (movieId) =>
 
 export const getMovieDetails = (movieId) =>
   client.get(`/movies/details/${movieId}`)
+
+export const getWorksByDirector = (directorId) =>
+  client.get(`/movies/creator/${directorId}`)
+
+export const searchPeople = (name) =>
+  client.get('/movies/person-search', { params: { name } })

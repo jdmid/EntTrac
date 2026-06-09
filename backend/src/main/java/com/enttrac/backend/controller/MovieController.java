@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -99,5 +100,10 @@ public class MovieController {
     public ResponseEntity<List<MovieSearchResult>> getWorksByPerson(
             @PathVariable String personId) {
         return ResponseEntity.ok(movieService.getWorksByPerson(personId));
+    }
+
+    @GetMapping("/person-search")
+    public ResponseEntity<List<Map<String, String>>> searchPeople(@RequestParam String name) {
+        return ResponseEntity.ok(movieService.searchPeople(name));
     }
 }

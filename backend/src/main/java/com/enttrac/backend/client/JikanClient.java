@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component("jikanClient")
 public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
@@ -152,13 +153,20 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
                 .build();
     }
 
-    public PagedResult<AnimeSearchResult> getWorksByProducer(String producerId, int page) {
-        JsonNode response = restClient.get()
-                .uri("/producers/{id}/anime?limit=25&page={page}", producerId, page)
-                .retrieve()
-                .body(JsonNode.class);
+    public PagedResult<AnimeSearchResult> getWorksByProducer(
+            String producerId, int page, String name) {
+        JsonNode response;
+        try {
+            response = restClient.get()
+                    .uri("/producers/{id}/anime?limit=25&page={page}", producerId, page)
+                    .retrieve()
+                    .body(JsonNode.class);
+        } catch (Exception e) {
+            response = null;
+        }
 
         List<AnimeSearchResult> results = new ArrayList<>();
+        boolean hasNextPage = false;
 
         if (response != null && response.has("data")) {
             for (JsonNode anime : response.get("data")) {
@@ -166,12 +174,64 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
             }
         }
 
-        boolean hasNextPage = false;
         if (response != null && response.has("pagination")) {
-            hasNextPage = response.get("pagination").path("has_next_page").asBoolean(false);
+            hasNextPage = response.get("pagination")
+                    .path("has_next_page").asBoolean(false);
+        }
+
+        if (results.isEmpty() && name != null && !name.isBlank()) {
+            try {
+                JsonNode searchResponse = restClient.get()
+                        .uri("/anime?q={name}&limit=25&page={page}&sfw", name, page)
+                        .retrieve()
+                        .body(JsonNode.class);
+
+                if (searchResponse != null && searchResponse.has("data")) {
+                    for (JsonNode anime : searchResponse.get("data")) {
+                        results.add(mapToSearchResult(anime));
+                    }
+                }
+
+                if (searchResponse != null && searchResponse.has("pagination")) {
+                    hasNextPage = searchResponse.get("pagination")
+                            .path("has_next_page").asBoolean(false);
+                }
+            } catch (Exception e) {
+                // fall through with empty results
+            }
         }
 
         return new PagedResult<>(results, hasNextPage);
+    }
+
+    @Override
+    public List<Map<String, String>> searchCreators(String name) {
+        try {
+            JsonNode response = restClient.get()
+                    .uri("/producers?q={name}&limit=10", name)
+                    .retrieve()
+                    .body(JsonNode.class);
+
+
+            List<Map<String, String>> results = new ArrayList<>();
+
+            if (response != null && response.has("data")) {
+                for (JsonNode producer : response.get("data")) {
+                    String id = producer.path("mal_id").asText();
+                    JsonNode titlesNode = producer.path("titles");
+                    String producerName = (titlesNode.isArray() && !titlesNode.isEmpty())
+                            ? titlesNode.get(0).path("title").asText()
+                            : producer.path("name").asText();
+                    if (!id.isBlank() && !producerName.isBlank()) {
+                        results.add(Map.of("id", id, "name", producerName));
+                    }
+                }
+            }
+
+            return results;
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public static class PagedResult<T> {

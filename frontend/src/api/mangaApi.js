@@ -49,3 +49,12 @@ export const refreshOngoingManga = () =>
 
 export const enrichMangaFromCache = (mangaId) =>
   client.post(`/manga/library/${mangaId}/enrich`)
+
+export const getWorksByAuthor = (authorId) =>
+  client.get(`/manga/creator/${authorId}`)
+
+export const getWorksByArtist = (artistId) =>
+  client.get(`/manga/creator/${artistId}`)
+
+export const searchAuthors = (name) =>
+  client.get('/manga/author-search', { params: { name } })

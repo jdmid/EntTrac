@@ -477,15 +477,15 @@ public class AnimeServiceTest {
 
         AnimeRepository animeRepository = mock(AnimeRepository.class);
         JikanClient jikanClient = mock(JikanClient.class);
-        when(jikanClient.getWorksByProducer("1", 1)).thenReturn(pagedResult);
+        when(jikanClient.getWorksByProducer("1", 1, "name")).thenReturn(pagedResult);
 
         AnimeService serviceWithJikan = new AnimeService(animeRepository, jikanClient);
         JikanClient.PagedResult<AnimeSearchResult> result =
-                serviceWithJikan.getWorksByProducer("1", 1);
+                serviceWithJikan.getWorksByProducer("1", 1, "name");
 
         assertEquals(1, result.items.size());
         assertEquals("One Piece", result.items.get(0).getTitle());
         assertFalse(result.hasNextPage);
-        verify(jikanClient, times(1)).getWorksByProducer("1", 1);
+        verify(jikanClient, times(1)).getWorksByProducer("1", 1, "name");
     }
 }

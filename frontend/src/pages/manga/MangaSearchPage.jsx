@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import SearchPageLayout from '../../components/SearchPageLayout'
 import SearchMediaCard from '../../components/SearchMediaCard'
-import AttributionFooter from '../../components/AttributionFooter'
-import { searchManga, addToLibrary, getLibrary } from '../../api/mangaApi'
+import { searchManga, addToLibrary, getLibrary, getWorksByAuthor, searchAuthors } from '../../api/mangaApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
 
 function MangaSearchPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const theme = themes.manga
 
   const [query, setQuery] = useState('')
@@ -17,6 +17,12 @@ function MangaSearchPage() {
   const [error, setError] = useState(null)
   const [addedIds, setAddedIds] = useState(new Set())
 
+  const [creatorTab, setCreatorTab] = useState(false)
+  const [creatorResults, setCreatorResults] = useState([])
+  const [creatorLoading, setCreatorLoading] = useState(false)
+  const [creatorName, setCreatorName] = useState('')
+  const [authorMatches, setAuthorMatches] = useState([])
+
   useEffect(() => {
     getLibrary().then((res) => {
       const ids = new Set(res.data.map((m) => m.mangaId))
@@ -24,13 +30,29 @@ function MangaSearchPage() {
     }).catch(console.error)
   }, [])
 
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    const creatorId = searchParams.get('creatorId')
+    const name = searchParams.get('creatorName')
+
+    if (tab === 'creator' && creatorId) {
+      setCreatorTab(true)
+      setCreatorName(name ?? '')
+      setCreatorLoading(true)
+      getWorksByAuthor(creatorId)
+        .then((res) => {
+          setCreatorResults(res.data)
+          setCreatorLoading(false)
+        })
+        .catch(() => setCreatorLoading(false))
+    }
+  }, [])
+
   function handleSearch(e) {
     e.preventDefault()
     if (!query.trim()) return
-
     setLoading(true)
     setError(null)
-
     searchManga(query)
       .then((res) => {
         setResults(res.data)
@@ -41,6 +63,40 @@ function MangaSearchPage() {
         setError('Search failed. Is the backend running?')
         setLoading(false)
       })
+  }
+
+  function handleCreatorSearch(e) {
+    e.preventDefault()
+    if (!creatorName.trim()) return
+    setCreatorLoading(true)
+    setAuthorMatches([])
+    setCreatorResults([])
+    searchAuthors(creatorName)
+      .then((res) => {
+        const matches = res.data
+        if (matches.length === 1) {
+          return getWorksByAuthor(matches[0].id)
+            .then((worksRes) => {
+              setCreatorResults(worksRes.data)
+              setCreatorLoading(false)
+            })
+        }
+        setAuthorMatches(matches)
+        setCreatorLoading(false)
+      })
+      .catch(() => setCreatorLoading(false))
+  }
+
+  function handleCreatorMatchSelect(match) {
+    setCreatorLoading(true)
+    setAuthorMatches([])
+    getWorksByAuthor(match.id)
+      .then((res) => {
+        setCreatorResults(res.data)
+        setCreatorName(match.name)
+        setCreatorLoading(false)
+      })
+      .catch(() => setCreatorLoading(false))
   }
 
   function handleAdd(manga) {
@@ -55,115 +111,54 @@ function MangaSearchPage() {
       artist: manga.artist,
       description: manga.description,
       seriesStatus: normalizeSeriesStatus(manga.status, 'manga'),
+      authorId: manga.authorId ?? null,
+      artistId: manga.artistId ?? null,
     })
-      .then(() => {
-        setAddedIds((prev) => new Set([...prev, manga.id]))
-      })
-      .catch((err) => {
-        console.error(err)
-      })
+      .then(() => setAddedIds((prev) => new Set([...prev, manga.id])))
+      .catch(console.error)
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: theme.background }}
-    >
-      <Navbar activeMedia="manga" />
-
-      <div className="p-5">
-        {/* Header */}
-        <div className="flex items-baseline gap-2.5 mb-4">
-          <h1 className="text-[18px] font-medium text-[#e2e2f0] m-0">
-            Search Manga
-          </h1>
-          <p className="text-[13px] text-[#555566] m-0">
-            Find and add titles to your library
-          </p>
-        </div>
-
-        {/* Search input */}
-        <form onSubmit={handleSearch} className="flex gap-2 mb-6">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for manga..."
-            className="flex-1 px-3 py-2 text-[13px] text-[#e2e2f0] rounded-lg outline-none"
-            style={{
-              background: theme.topBar,
-              border: `0.5px solid ${theme.cardBorder}`,
-            }}
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 text-[13px] font-medium rounded-lg transition-colors"
-            style={{
-              background: theme.accent,
-              color: '#ffffff',
-            }}
-          >
-            Search
-          </button>
-        </form>
-
-        {/* Loading */}
-        {loading && (
-          <div className="text-[13px] text-[#555566] text-center py-12">
-            Searching…
-          </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div className="text-[13px] text-[#f87171] text-center py-12">
-            {error}
-          </div>
-        )}
-
-        {/* No results */}
-        {!loading && !error && results.length === 0 && query && (
-          <div className="text-[13px] text-[#555566] text-center py-12">
-            No results found for "{query}"
-          </div>
-        )}
-
-        {/* Results grid */}
-        {!loading && results.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
-            {results.map((manga) => (
-              <SearchMediaCard 
-                key={manga.id}
-                title={manga.title}
-                creator={manga.author}
-                seriesStatus={manga.status}
-                coverUrl={manga.coverUrl}
-                theme={theme}
-                icon="📖"
-                isAdded={addedIds.has(manga.id)}
-                onAdd={() => handleAdd(manga)}
-                onClick={() => navigate(`/manga/library/${manga.id}`, { state: { from: 'search' } })}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Already added indicator */}
-        {addedIds.size > 0 && (
-          <p className="text-[11px] text-[#555566] text-center mt-4">
-            {addedIds.size} title{addedIds.size !== 1 ? 's' : ''} added —{' '}
-            <span
-              className="cursor-pointer"
-              style={{ color: theme.accent }}
-              onClick={() => navigate('/manga/library')}
-            >
-              go to library
-            </span>
-          </p>
-        )}
-        <AttributionFooter />
-      </div>
-    </div>
+    <SearchPageLayout
+      activeMedia="manga"
+      pageTitle="Search Manga"
+      pageSubtitle="Find and add titles to your library"
+      creatorTabLabel="By creator"
+      titlePlaceholder="Search for manga..."
+      creatorPlaceholder="Search by author or artist name..."
+      results={results}
+      loading={loading}
+      error={error}
+      query={query}
+      onQueryChange={setQuery}
+      onTitleSearch={handleSearch}
+      creatorTab={creatorTab}
+      onCreatorTabChange={setCreatorTab}
+      creatorName={creatorName}
+      onCreatorNameChange={setCreatorName}
+      creatorResults={creatorResults}
+      creatorLoading={creatorLoading}
+      creatorMatches={authorMatches}
+      onCreatorSearch={handleCreatorSearch}
+      onCreatorMatchSelect={handleCreatorMatchSelect}
+      disambiguationLabel="Multiple authors found — select one"
+      renderCard={(item) => (
+        <SearchMediaCard
+          key={item.id}
+          title={item.title}
+          creator={item.author}
+          seriesStatus={item.status}
+          coverUrl={item.coverUrl}
+          theme={theme}
+          icon="📖"
+          isAdded={addedIds.has(item.id)}
+          onAdd={() => handleAdd(item)}
+          onClick={() => navigate(`/manga/library/${item.id}`, { state: { from: 'search' } })}
+        />
+      )}
+      addedCount={addedIds.size}
+      onGoToLibrary={() => navigate('/manga/library')}
+    />
   )
 }
 

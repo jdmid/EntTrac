@@ -49,3 +49,9 @@ export const updateAnimeNotes = (animeId, notes) =>
 
   export const enrichAnimeFromCache = (animeId) =>
   client.post(`/anime/library/${animeId}/enrich`)
+
+  export const getWorksByProducer = (studioId, page = 1, name = null) =>
+  client.get(`/anime/creator/${studioId}`, { params: { page, ...(name && { name }) } })
+
+  export const searchProducers = (name) =>
+  client.get('/anime/producer-search', { params: { name } })

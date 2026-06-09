@@ -90,11 +90,47 @@ function MangaDetailPage() {
           {(manga.author || manga.artist) && (
             <p className="text-[12px] text-[#555566] m-0 mb-3">
               {manga.author && (
-                <span>By <span style={{ color: theme.accent }}>{manga.author}</span></span>
+                <span>
+                  By{' '}
+                  <span
+                    className="cursor-pointer inline-flex items-center gap-1"
+                    style={{ color: theme.accent }}
+                    onClick={() => navigate(
+                      `/manga/search?tab=creator&creatorId=${manga.authorId}&creatorName=${encodeURIComponent(manga.author)}`
+                    )}
+                  >
+                    {manga.author}
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                      strokeLinejoin="round" aria-hidden="true">
+                      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                  </span>
+                </span>
               )}
               {manga.author && manga.artist && <span> · </span>}
               {manga.artist && (
-                <span>Art by <span style={{ color: theme.accent }}>{manga.artist}</span></span>
+                <span>
+                  Art by{' '}
+                  <span
+                    className="cursor-pointer inline-flex items-center gap-1"
+                    style={{ color: theme.accent }}
+                    onClick={() => navigate(
+                      `/manga/search?tab=creator&creatorId=${manga.artistId}&creatorName=${encodeURIComponent(manga.artist)}`
+                    )}
+                  >
+                    {manga.artist}
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                      strokeLinejoin="round" aria-hidden="true">
+                      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                  </span>
+                </span>
               )}
             </p>
           )}
@@ -147,6 +183,8 @@ function MangaDetailPage() {
           artist: manga.artist,
           description: manga.description,
           seriesStatus: normalizeSeriesStatus(manga.status, 'manga'),
+          authorId: manga.authorId ?? null,
+          artistId: manga.artistId ?? null,
         }).then(() => setInLibrary(true))
       }
       onScoreSave={(n) =>

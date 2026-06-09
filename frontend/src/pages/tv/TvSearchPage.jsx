@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import SearchPageLayout from '../../components/SearchPageLayout'
 import SearchMediaCard from '../../components/SearchMediaCard'
-import AttributionFooter from '../../components/AttributionFooter'
-import { searchTv, addTvToLibrary, getTvLibrary, getTvDetails  } from '../../api/tvApi'
+import { searchTv, addTvToLibrary, getTvLibrary, getTvDetails, getWorksByCreator, searchPeople } from '../../api/tvApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
 
 function TvSearchPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const theme = themes.tv
 
   const [query, setQuery] = useState('')
@@ -16,6 +16,12 @@ function TvSearchPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [addedIds, setAddedIds] = useState(new Set())
+
+  const [creatorTab, setCreatorTab] = useState(false)
+  const [creatorResults, setCreatorResults] = useState([])
+  const [creatorLoading, setCreatorLoading] = useState(false)
+  const [creatorName, setCreatorName] = useState('')
+  const [creatorMatches, setCreatorMatches] = useState([])
 
   useEffect(() => {
     getTvLibrary()
@@ -26,13 +32,29 @@ function TvSearchPage() {
       .catch(console.error)
   }, [])
 
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    const creatorId = searchParams.get('creatorId')
+    const name = searchParams.get('creatorName')
+
+    if (tab === 'creator' && creatorId) {
+      setCreatorTab(true)
+      setCreatorName(name ?? '')
+      setCreatorLoading(true)
+      getWorksByCreator(creatorId)
+        .then((res) => {
+          setCreatorResults(res.data)
+          setCreatorLoading(false)
+        })
+        .catch(() => setCreatorLoading(false))
+    }
+  }, [])
+
   function handleSearch(e) {
     e.preventDefault()
     if (!query.trim()) return
-
     setLoading(true)
     setError(null)
-
     searchTv(query)
       .then((res) => {
         setResults(res.data)
@@ -45,11 +67,45 @@ function TvSearchPage() {
       })
   }
 
+  function handleCreatorSearch(e) {
+    e.preventDefault()
+    if (!creatorName.trim()) return
+    setCreatorLoading(true)
+    setCreatorMatches([])
+    setCreatorResults([])
+    searchPeople(creatorName)
+      .then((res) => {
+        const matches = res.data
+        if (matches.length === 1) {
+          return getWorksByCreator(matches[0].id)
+            .then((worksRes) => {
+              setCreatorResults(worksRes.data)
+              setCreatorLoading(false)
+            })
+        }
+        setCreatorMatches(matches)
+        setCreatorLoading(false)
+      })
+      .catch(() => setCreatorLoading(false))
+  }
+
+  function handleCreatorMatchSelect(match) {
+    setCreatorLoading(true)
+    setCreatorMatches([])
+    getWorksByCreator(match.id)
+      .then((res) => {
+        setCreatorResults(res.data)
+        setCreatorName(match.name)
+        setCreatorLoading(false)
+      })
+      .catch(() => setCreatorLoading(false))
+  }
+
   async function handleAdd(show) {
     try {
-        const detailRes = await getTvDetails(show.id)
-        const full = detailRes.data
-        await addTvToLibrary({
+      const detailRes = await getTvDetails(show.id)
+      const full = detailRes.data
+      await addTvToLibrary({
         tvId: full.id ?? show.id,
         title: full.title ?? show.title,
         status: 'PLANNED',
@@ -67,117 +123,59 @@ function TvSearchPage() {
         seriesType: full.seriesType ?? show.seriesType,
         tmdbRating: full.communityRating ?? show.communityRating,
         nextEpisodeDate: full.nextEpisodeDate,
-        })
-        setAddedIds((prev) => new Set([...prev, show.id]))
+        creatorName: full.creatorName ?? null,
+        creatorId: full.creatorId ?? null,
+      })
+      setAddedIds((prev) => new Set([...prev, show.id]))
     } catch (err) {
-        console.error(err)
+      console.error(err)
     }
   }
 
   return (
-    <div className="min-h-screen" style={{ background: theme.background }}>
-      <Navbar activeMedia="tv" />
-
-      <div className="p-5">
-        <div className="flex items-baseline gap-2.5 mb-4">
-          <h1 className="text-[18px] font-medium text-[#e2e2f0] m-0">
-            Search TV Shows
-          </h1>
-          <p className="text-[13px] text-[#555566] m-0">
-            Find and add titles to your library
-          </p>
-        </div>
-
-        <form onSubmit={handleSearch} className="flex gap-2 mb-6">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for TV shows..."
-            className="flex-1 px-3 py-2 text-[13px] text-[#e2e2f0] rounded-lg outline-none"
-            style={{
-              background: theme.topBar,
-              border: `0.5px solid ${theme.cardBorder}`,
-            }}
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 text-[13px] font-medium rounded-lg transition-colors"
-            style={{
-              background: theme.accent,
-              color: '#ffffff',
-            }}
-          >
-            Search
-          </button>
-        </form>
-
-        {loading && (
-          <div className="text-[13px] text-[#555566] text-center py-12">
-            Searching…
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="text-[13px] text-[#f87171] text-center py-12">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && results.length === 0 && query && (
-          <div className="text-[13px] text-[#555566] text-center py-12">
-            No results found for "{query}"
-          </div>
-        )}
-
-        {!loading && results.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
-            {results.map((show) => (
-              <SearchMediaCard 
-                key={show.id}
-                title={show.title}
-                creator={(() => {
-                    const parts = [
-                        show.seriesType ?? null,
-                        show.firstAirYear ?? null,
-                        show.numberOfSeasons
-                        ? `${show.numberOfSeasons} season${show.numberOfSeasons !== 1 ? 's' : ''}`
-                        : null,
-                    ].filter(Boolean)
-                    if (parts.length > 0) return parts.join(' · ')
-                    if (show.status) return show.status
-                    return 'TBD'
-                })()}
-                seriesStatus={show.status}
-                coverUrl={show.coverUrl}
-                theme={theme}
-                icon="📺"
-                medium="tv"
-                isAdded={addedIds.has(show.id)}
-                onAdd={() => handleAdd(show)}
-                onClick={() => navigate(`/tv/library/${show.id}`, {
-                  state: { from: 'search' }
-                })}
-              />
-            ))}
-          </div>
-        )}
-
-        {addedIds.size > 0 && (
-          <p className="text-[11px] text-[#555566] text-center mt-4">
-            {addedIds.size} title{addedIds.size !== 1 ? 's' : ''} added —{' '}
-            <span
-              className="cursor-pointer"
-              style={{ color: theme.accent }}
-              onClick={() => navigate('/tv/library')}
-            >
-              go to library
-            </span>
-          </p>
-        )}
-        <AttributionFooter />
-      </div>
-    </div>
+    <SearchPageLayout
+      activeMedia="tv"
+      pageTitle="Search TV Shows"
+      pageSubtitle="Find and add titles to your library"
+      creatorTabLabel="By creator"
+      titlePlaceholder="Search for TV shows..."
+      creatorPlaceholder="Search by creator name..."
+      results={results}
+      loading={loading}
+      error={error}
+      query={query}
+      onQueryChange={setQuery}
+      onTitleSearch={handleSearch}
+      creatorTab={creatorTab}
+      onCreatorTabChange={setCreatorTab}
+      creatorName={creatorName}
+      onCreatorNameChange={setCreatorName}
+      creatorResults={creatorResults}
+      creatorLoading={creatorLoading}
+      creatorMatches={creatorMatches}
+      onCreatorSearch={handleCreatorSearch}
+      onCreatorMatchSelect={handleCreatorMatchSelect}
+      disambiguationLabel="Multiple creators found — select one"
+      renderCard={(item) => (
+        <SearchMediaCard
+          key={item.id}
+          title={item.title}
+          creator={(() => {
+            const parts = [item.seriesType, item.firstAirYear].filter(Boolean)
+            return parts.length > 0 ? parts.join(' · ') : null
+          })()}
+          seriesStatus={item.status}
+          coverUrl={item.coverUrl}
+          theme={theme}
+          icon="📺"
+          isAdded={addedIds.has(item.id)}
+          onAdd={() => handleAdd(item)}
+          onClick={() => navigate(`/tv/library/${item.id}`, { state: { from: 'search' } })}
+        />
+      )}
+      addedCount={addedIds.size}
+      onGoToLibrary={() => navigate('/tv/library')}
+    />
   )
 }
 
