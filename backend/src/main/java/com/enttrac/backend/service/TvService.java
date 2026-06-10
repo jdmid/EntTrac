@@ -16,15 +16,30 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
-public class TvService {
+public class TvService extends MediaService<TvItem, TvSearchResult> {
 
-    private final TvRepository tvRepository;
     private final MediaMetadataClient<TvSearchResult> tvMetadataClient;
 
     public TvService(TvRepository tvRepository,
                      @Qualifier("tmdbTvClient") MediaMetadataClient<TvSearchResult> tvMetadataClient) {
-        this.tvRepository = tvRepository;
+        super(tvRepository);
         this.tvMetadataClient = tvMetadataClient;
+    }
+
+    @Override
+    protected String getEntityId(TvItem item) { return item.getTvId(); }
+
+    @Override
+    protected String buildSortKey(TvItem item) { return "TV#TMDB#" + item.getTvId(); }
+
+    @Override
+    protected String getNotFoundMessage(String id) { return "TV show not found: " + id; }
+
+    @Override
+    protected void beforeSave(TvItem item) {
+        if (item.getSeasonEpisodes() != null) {
+            item.getSeasonEpisodes().removeIf(ep -> ep == null);
+        }
     }
 
     public List<TvSearchResult> search(String query) {
@@ -35,41 +50,19 @@ public class TvService {
         return tvMetadataClient.getDetails(id);
     }
 
-    public List<TvItem> getLibrary() {
-        return tvRepository.findAll();
-    }
-
     public TvItem getTvShow(String tvId) {
-        return tvRepository.findById(tvId);
-    }
-
-    public TvItem addToLibrary(TvItem item) {
-        TvItem existing = tvRepository.findById(item.getTvId());
-        if (existing != null) {
-            return existing;
-        }
-        item.setPk("USER#default");
-        item.setSk("TV#TMDB#" + item.getTvId());
-        String now = Instant.now().toString();
-        item.setCreatedAt(now);
-        item.setUpdatedAt(now);
-        // Guard against null values in seasonEpisodes list
-        if (item.getSeasonEpisodes() != null) {
-            item.getSeasonEpisodes().removeIf(ep -> ep == null);
-        }
-        tvRepository.save(item);
-        return item;
+        return repository.findById(tvId);
     }
 
     public TvItem updateProgress(String tvId, int episodesWatched, int currentSeason) {
-        TvItem item = tvRepository.findById(tvId);
+        TvItem item = repository.findById(tvId);
         if (item == null) {
             throw new NotFoundException("TV show not found: " + tvId);
         }
         item.setEpisodesWatched(episodesWatched);
         item.setCurrentSeason(currentSeason);
         item.setUpdatedAt(Instant.now().toString());
-        tvRepository.save(item);
+        repository.save(item);
         return item;
     }
     private String normalizeSeriesStatus(String rawStatus) {
@@ -84,41 +77,8 @@ public class TvService {
         return null;
     }
 
-    public TvItem updateScore(String tvId, int score) {
-        TvItem item = tvRepository.findById(tvId);
-        if (item == null) {
-            throw new NotFoundException("TV show not found: " + tvId);
-        }
-        item.setScore(score);
-        item.setUpdatedAt(Instant.now().toString());
-        tvRepository.save(item);
-        return item;
-    }
-
-    public TvItem updateStatus(String tvId, String status) {
-        TvItem item = tvRepository.findById(tvId);
-        if (item == null) {
-            throw new NotFoundException("TV show not found: " + tvId);
-        }
-        item.setStatus(status);
-        item.setUpdatedAt(Instant.now().toString());
-        tvRepository.save(item);
-        return item;
-    }
-
-    public TvItem updateNotes(String tvId, String notes) {
-        TvItem item = tvRepository.findById(tvId);
-        if (item == null) {
-            throw new NotFoundException("TV show not found: " + tvId);
-        }
-        item.setNotes(notes);
-        item.setUpdatedAt(Instant.now().toString());
-        tvRepository.save(item);
-        return item;
-    }
-
     public TvItem refreshLatestEpisodes(String tvId) {
-        TvItem item = tvRepository.findById(tvId);
+        TvItem item = repository.findById(tvId);
         if (item == null) {
             throw new NotFoundException("TV show not found: " + tvId);
         }
@@ -151,17 +111,13 @@ public class TvService {
             if (rating != null) item.setTmdbRating(rating);
         }
 
-        tvRepository.save(item);
+        repository.save(item);
 
         return item;
     }
 
-    public void removeFromLibrary(String tvId) {
-        tvRepository.delete(tvId);
-    }
-
     public List<TvItem> refreshAll() {
-        List<TvItem> library = tvRepository.findAll();
+        List<TvItem> library = repository.findAll();
         List<TvItem> updated = new ArrayList<>();
 
         for (TvItem item : library) {
@@ -203,7 +159,7 @@ public class TvService {
 
                     item.setLastRefreshed(Instant.now().toString());
                     if (changed) item.setUpdatedAt(Instant.now().toString());
-                    tvRepository.save(item);
+                    repository.save(item);
                 }
                 updated.add(item);
             } catch (Exception e) {
@@ -215,7 +171,7 @@ public class TvService {
     }
 
     public List<TvItem> refreshOngoing() {
-        List<TvItem> library = tvRepository.findAll();
+        List<TvItem> library = repository.findAll();
         List<TvItem> updated = new ArrayList<>();
 
         for (TvItem item : library) {
@@ -264,7 +220,7 @@ public class TvService {
 
                     item.setLastRefreshed(Instant.now().toString());
                     if (changed) item.setUpdatedAt(Instant.now().toString());
-                    tvRepository.save(item);
+                    repository.save(item);
                 }
                 updated.add(item);
             } catch (Exception e) {
@@ -275,7 +231,7 @@ public class TvService {
     }
 
     public TvItem enrichTmdbRating(String tvId) {
-        TvItem item = tvRepository.findById(tvId);
+        TvItem item = repository.findById(tvId);
         if (item == null) throw new NotFoundException("TV show not found: " + tvId);
 
         if (item.getTmdbRating() == null) {
@@ -283,7 +239,7 @@ public class TvService {
             if (rating != null) {
                 item.setTmdbRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
-                tvRepository.save(item);
+                repository.save(item);
             }
         }
         return item;

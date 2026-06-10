@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class MangaRepository {
+public class MangaRepository implements MediaRepository<MangaItem> {
 
     private static final String TABLE_NAME = "EntTrac";
     private static final String USER_PK = "USER#default";

@@ -15,18 +15,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-// TODO: refactor into shared MediaService when adding third medium
 @Service
-public class AnimeService {
+public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
-    private final AnimeRepository animeRepository;
     private final MediaMetadataClient<AnimeSearchResult> animeMetadataClient;
 
     public AnimeService(AnimeRepository animeRepository,
                         @Qualifier("jikanClient") MediaMetadataClient<AnimeSearchResult> animeMetadataClient) {
-        this.animeRepository = animeRepository;
+        super(animeRepository);
         this.animeMetadataClient = animeMetadataClient;
     }
+
+    @Override
+    protected String getEntityId(AnimeItem item) { return item.getAnimeId(); }
+
+    @Override
+    protected String buildSortKey(AnimeItem item) { return "ANIME#JIKAN#" + item.getAnimeId(); }
+
+    @Override
+    protected String getNotFoundMessage(String id) { return "Anime not found: " + id; }
 
     public List<AnimeSearchResult> search(String query) {
         return animeMetadataClient.search(query);
@@ -36,63 +43,25 @@ public class AnimeService {
         return animeMetadataClient.getDetails(id);
     }
 
-    public List<AnimeItem> getLibrary() {
-        return animeRepository.findAll();
-    }
 
     public AnimeItem getAnime(String animeId) {
-        return animeRepository.findById(animeId);
+        return repository.findById(animeId);
     }
 
-    public AnimeItem addToLibrary(AnimeItem item) {
-        AnimeItem existing = animeRepository.findById(item.getAnimeId());
-        if (existing != null) {
-            return existing;
-        }
-        item.setPk("USER#default");
-        item.setSk("ANIME#JIKAN#" + item.getAnimeId());
-        String now = Instant.now().toString();
-        item.setCreatedAt(now);
-        item.setUpdatedAt(now);
-        animeRepository.save(item);
-        return item;
-    }
 
     public AnimeItem updateProgress(String animeId, int episodesWatched) {
-        AnimeItem item = animeRepository.findById(animeId);
+        AnimeItem item = repository.findById(animeId);
         if (item == null) {
             throw new NotFoundException("Anime not found: " + animeId);
         }
         item.setEpisodesWatched(episodesWatched);
         item.setUpdatedAt(Instant.now().toString());
-        animeRepository.save(item);
-        return item;
-    }
-
-    public AnimeItem updateScore(String animeId, int score) {
-        AnimeItem item = animeRepository.findById(animeId);
-        if (item == null) {
-            throw new NotFoundException("Anime not found: " + animeId);
-        }
-        item.setScore(score);
-        item.setUpdatedAt(Instant.now().toString());
-        animeRepository.save(item);
-        return item;
-    }
-
-    public AnimeItem updateStatus(String animeId, String status) {
-        AnimeItem item = animeRepository.findById(animeId);
-        if (item == null) {
-            throw new NotFoundException("Anime not found: " + animeId);
-        }
-        item.setStatus(status);
-        item.setUpdatedAt(Instant.now().toString());
-        animeRepository.save(item);
+        repository.save(item);
         return item;
     }
 
     public AnimeItem refreshLatestEpisode(String animeId) {
-        AnimeItem item = animeRepository.findById(animeId);
+        AnimeItem item = repository.findById(animeId);
         if (item == null) {
             throw new NotFoundException("Anime not found: " + animeId);
         }
@@ -109,28 +78,13 @@ public class AnimeService {
             if (rating != null) item.setMalRating(rating);
         }
 
-        animeRepository.save(item);
+        repository.save(item);
 
-        return item;
-    }
-
-    public void removeFromLibrary(String animeId) {
-        animeRepository.delete(animeId);
-    }
-
-    public AnimeItem updateNotes(String animeId, String notes) {
-        AnimeItem item = animeRepository.findById(animeId);
-        if (item == null) {
-            throw new NotFoundException("Anime not found: " + animeId);
-        }
-        item.setNotes(notes);
-        item.setUpdatedAt(Instant.now().toString());
-        animeRepository.save(item);
         return item;
     }
 
     public List<AnimeItem> refreshAll() {
-        List<AnimeItem> library = animeRepository.findAll();
+        List<AnimeItem> library = repository.findAll();
         List<AnimeItem> updated = new ArrayList<>();
 
         for (AnimeItem item : library) {
@@ -160,7 +114,7 @@ public class AnimeService {
                     if (changed) {
                         item.setLastRefreshed(Instant.now().toString());
                         item.setUpdatedAt(Instant.now().toString());
-                        animeRepository.save(item);
+                        repository.save(item);
                     }
                 }
                 updated.add(item);
@@ -172,7 +126,7 @@ public class AnimeService {
     }
 
     public List<AnimeItem> refreshOngoing() {
-        List<AnimeItem> library = animeRepository.findAll();
+        List<AnimeItem> library = repository.findAll();
         List<AnimeItem> updated = new ArrayList<>();
 
         for (AnimeItem item : library) {
@@ -202,7 +156,7 @@ public class AnimeService {
                     if (changed) {
                         item.setLastRefreshed(Instant.now().toString());
                         item.setUpdatedAt(Instant.now().toString());
-                        animeRepository.save(item);
+                        repository.save(item);
                     }
                 }
                 updated.add(item);
@@ -223,7 +177,7 @@ public class AnimeService {
     }
 
     public AnimeItem enrichMalRating(String animeId) {
-        AnimeItem item = animeRepository.findById(animeId);
+        AnimeItem item = repository.findById(animeId);
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
         if (item.getMalRating() == null) {
@@ -231,7 +185,7 @@ public class AnimeService {
             if (rating != null) {
                 item.setMalRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
-                animeRepository.save(item);
+                repository.save(item);
             }
         }
         return item;
