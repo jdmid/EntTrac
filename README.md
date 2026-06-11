@@ -69,13 +69,14 @@ The project started as a manga and anime tracker and is continuously growing to 
 - **TV shows tab** — search TMDB, add to library, track watching progress by episode
 - **Movies tab** — search TMDB, add to library, view ratings from TMDB, IMDb, Rotten Tomatoes, and Metacritic
 - **Source-specific ratings** — each media type displays ratings from its own source (MAL score for anime, MangaDex rating for manga, TMDB rating for TV and movies) cached lazily on first detail page visit
+- **Author/creator search page** - search creators using APIs to see their all of their works
+- **Settings page** - manage and reorder media tabs
 
 ### Planned Features
 
+- Games tab
 - Books tab
 - AniList as a second anime data source
-- Author/creator page (tap a creator name to see all their works)
-- Settings page for managing and reordering media tabs
 - Multi-user support
 
 ---
