@@ -12,8 +12,12 @@ function AttributionFooter() {
         <a href="https://mangadex.org" target="_blank" rel="noreferrer"
           style={{ color: '#444455' }}>MangaDex</a>
         {' · '}
+        {' · '}
         <a href="https://jikan.moe" target="_blank" rel="noreferrer"
           style={{ color: '#444455' }}>Jikan</a>
+        {' · '}
+        <a href="https://openlibrary.org" target="_blank" rel="noreferrer"
+          style={{ color: '#444455' }}>Open Library</a>
       </p>
     </div>
   )

@@ -104,4 +104,9 @@ public class BookController {
     public ResponseEntity<List<Map<String, String>>> searchAuthors(@RequestParam String name) {
         return ResponseEntity.ok(bookService.searchAuthors(name));
     }
+
+    @DeleteMapping("/library/{bookId}/progress")
+    public ResponseEntity<BookItem> resetProgress(@PathVariable String bookId) {
+        return ResponseEntity.ok(bookService.resetProgress(bookId));
+    }
 }

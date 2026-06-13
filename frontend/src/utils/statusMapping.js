@@ -39,11 +39,10 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
     if (status === 'canceled') return 'cancelled'
   }
  
-  // TODO: Books — add mapping once API is chosen (Open Library / Google Books)
-  // if (medium === 'books') { ... }
+ // Books have no seriesStatus — normalizeSeriesStatus returns null for 'book' medium
+// Forthcoming titles may need mapping when Google Books is added (see issue #25)
  
   // TODO: Games — add mapping once API is chosen (IGDB / RAWG)
-  // if (medium === 'games') { ... }
  
   return null
 }
@@ -78,12 +77,13 @@ export const SERIES_STATUS_FILTERS = {
     { value: 'upcoming',       label: 'Upcoming' },
     { value: 'cancelled',      label: 'Cancelled' },
   ],
-  // TODO: Books — add filters once API is chosen
-  books: [
+  // Books have no seriesStatus — no additional filters needed
+  // Forthcoming/announced titles may add filters when Google Books is added (see issue #25)
+  book: [
     { value: 'ALL', label: 'All' },
   ],
   // TODO: Games — add filters once API is chosen
-  games: [
+  game: [
     { value: 'ALL', label: 'All' },
   ],
 }
@@ -124,8 +124,8 @@ export const SORT_OPTIONS = {
     { value: 'RECENTLY_UPDATED', label: 'Recently updated' },
     { value: 'RECENTLY_ADDED',   label: 'Recently added' },
   ],
-  // TODO: Books — refine once API is chosen
-  books: [
+  // TODO: Book — refine once API is chosen
+  book: [
     { value: 'ALPHA_AZ',         label: 'Alphabetical A–Z' },
     { value: 'ALPHA_ZA',         label: 'Alphabetical Z–A' },
     { value: 'SCORE_HIGH',       label: 'Score (high to low)' },
@@ -134,7 +134,7 @@ export const SORT_OPTIONS = {
     { value: 'RECENTLY_ADDED',   label: 'Recently added' },
   ],
   // TODO: Games — refine once API is chosen
-  games: [
+  game: [
     { value: 'ALPHA_AZ',         label: 'Alphabetical A–Z' },
     { value: 'ALPHA_ZA',         label: 'Alphabetical Z–A' },
     { value: 'SCORE_HIGH',       label: 'Score (high to low)' },

@@ -73,4 +73,15 @@ public class BookService extends MediaService<BookItem, BookSearchResult> {
         log.info("Searching authors for: {}", name);
         return bookMetadataClient.searchCreators(name);
     }
+
+    public BookItem resetProgress(String bookId) {
+        log.info("Resetting progress for book: {}", bookId);
+        BookItem item = repository.findById(bookId);
+        if (item == null) throw new NotFoundException("Book not found: " + bookId);
+        item.setCurrentChapter(null);
+        item.setCurrentPage(null);
+        item.setUpdatedAt(Instant.now().toString());
+        repository.save(item);
+        return item;
+    }
 }

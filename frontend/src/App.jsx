@@ -11,6 +11,9 @@ import TvDetailPage from './pages/tv/TvDetailPage'
 import MovieLibraryPage from './pages/movie/MovieLibraryPage'
 import MovieSearchPage from './pages/movie/MovieSearchPage'
 import MovieDetailPage from './pages/movie/MovieDetailPage'
+import BookLibraryPage from './pages/book/BookLibraryPage'
+import BookSearchPage from './pages/book/BookSearchPage'
+import BookDetailPage from './pages/book/BookDetailPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import { useSettings } from './context/SettingsContext'
 
@@ -44,6 +47,10 @@ function App() {
         <Route path="/movie/library" element={<TabGuard tabId="movie"><MovieLibraryPage /></TabGuard>} />
         <Route path="/movie/search" element={<TabGuard tabId="movie"><MovieSearchPage /></TabGuard>} />
         <Route path="/movie/library/:movieId" element={<TabGuard tabId="movie"><MovieDetailPage /></TabGuard>} />
+
+        <Route path="/book/library" element={<TabGuard tabId="book"><BookLibraryPage /></TabGuard>} />
+        <Route path="/book/search" element={<TabGuard tabId="book"><BookSearchPage /></TabGuard>} />
+        <Route path="/book/library/:bookId" element={<TabGuard tabId="book"><BookDetailPage /></TabGuard>} />
 
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>

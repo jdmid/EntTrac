@@ -55,7 +55,7 @@ export const themes = {
     unreadBadge: '#f43f5e33',
     name: 'Movies',
   },
-  books: {
+  book: {
     accent: '#84cc16',
     accentBg: '#84cc1618',
     accentBorder: '#84cc1655',
@@ -69,7 +69,7 @@ export const themes = {
     unreadBadge: '#84cc1633',
     name: 'Books',
   },
-  games: {
+  game: {
     accent: '#3b82f6',
     accentBg: '#3b82f618',
     accentBorder: '#3b82f655',
@@ -145,13 +145,13 @@ export const statusLabels = {
     FINISHED: 'Watched',
     DROPPED: 'Dropped',
   },
-  books: {
+  book: {
     CONSUMING: 'Reading',
     PLANNED: 'Plan to Read',
     FINISHED: 'Finished',
     DROPPED: 'Dropped',
   },
-  games: {
+  game: {
     CONSUMING: 'Playing',
     PLANNED: 'Plan to Play',
     FINISHED: 'Finished',
