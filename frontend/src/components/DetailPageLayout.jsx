@@ -303,6 +303,7 @@ function DetailPageLayout({
           currentProgress={item?.chaptersRead ?? item?.episodesWatched}
           progressLabel={notesProgressLabel}
           onSave={onNotesSave}
+          theme={theme}
         />
       )}
       <AttributionFooter />

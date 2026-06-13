@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function NotesDialog({ isOpen, onClose, title, initialNotes, currentProgress, progressLabel, onSave }) {
+function NotesDialog({ isOpen, onClose, title, initialNotes, currentProgress, progressLabel, onSave, theme }) {
   const [notes, setNotes] = useState(initialNotes ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -38,14 +38,14 @@ function NotesDialog({ isOpen, onClose, title, initialNotes, currentProgress, pr
       <div
         className="w-full max-w-[480px] mx-4 rounded-xl p-6"
         style={{
-          background: '#130f1f',
-          border: '0.5px solid #2a1f4a',
+          background: theme.topBar,
+          border: `0.5px solid ${theme.cardBorder}`,
         }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span style={{ fontSize: 16, color: '#9d7cff' }}>📝</span>
+            <span style={{ fontSize: 16, color: theme.accent }}>📝</span>
             <span className="text-[15px] font-medium text-[#e2e2f0]">
               Notes
             </span>
@@ -74,8 +74,8 @@ function NotesDialog({ isOpen, onClose, title, initialNotes, currentProgress, pr
           placeholder="Write anything — reactions, characters to remember, things to look up, where you left off..."
           className="w-full text-[13px] text-[#e2e2f0] rounded-lg p-3 outline-none resize-none leading-relaxed"
           style={{
-            background: '#0d0b14',
-            border: '0.5px solid #2a1f4a',
+            background: theme.background,
+            border: `0.5px solid ${theme.cardBorder}`,
             minHeight: '160px',
             fontFamily: 'inherit',
           }}
@@ -91,8 +91,8 @@ function NotesDialog({ isOpen, onClose, title, initialNotes, currentProgress, pr
             disabled={saving}
             className="px-4 py-1.5 text-[12px] font-medium rounded-lg transition-colors"
             style={{
-              background: saved ? '#1f4a32' : '#9d7cff',
-              color: saved ? '#4ade80' : '#fff',
+              background: saved ? '#1f4a32' : theme.accent,
+              color: saved ? '#4ade80' : '#000000',
               border: 'none',
               cursor: saving ? 'not-allowed' : 'pointer',
               opacity: saving ? 0.7 : 1,
