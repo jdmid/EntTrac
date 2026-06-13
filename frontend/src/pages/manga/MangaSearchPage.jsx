@@ -147,7 +147,7 @@ function MangaSearchPage() {
           key={item.id}
           title={item.title}
           creator={item.author}
-          seriesStatus={item.status}
+          badge={item.status}
           coverUrl={item.coverUrl}
           theme={theme}
           icon="📖"

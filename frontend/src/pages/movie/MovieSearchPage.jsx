@@ -157,7 +157,7 @@ function MovieSearchPage() {
           key={item.id}
           title={item.title}
           creator={item.releaseYear}
-          seriesStatus={item.status}
+          badge={item.status}
           coverUrl={item.coverUrl}
           theme={theme}
           icon="🎬"

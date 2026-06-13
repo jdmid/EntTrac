@@ -172,7 +172,7 @@ function AnimeSearchPage() {
           key={item.id}
           title={item.title}
           creator={item.studio}
-          seriesStatus={item.status}
+          badge={item.status}
           coverUrl={item.coverUrl}
           theme={theme}
           icon="🎞️"

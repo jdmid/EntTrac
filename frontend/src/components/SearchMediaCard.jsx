@@ -3,7 +3,7 @@ import { statusStyles } from '../theme/themes'
 function SearchMediaCard({
   title,
   creator,
-  seriesStatus,
+  badge,
   coverUrl,
   theme,
   icon,
@@ -48,7 +48,7 @@ function SearchMediaCard({
             </p>
         )}
 
-        {seriesStatus && seriesStatus.trim() !== '' && (
+        {badge && badge.trim() !== '' && (
             <span
             className="inline-block text-[10px] px-[7px] py-[2px] rounded-full mb-[6px] self-start"
             style={{
@@ -57,7 +57,7 @@ function SearchMediaCard({
                 color: theme.accent,
             }}
             >
-            {seriesStatus}
+            {badge}
             </span>
         )}
 

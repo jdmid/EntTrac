@@ -142,7 +142,7 @@ function BookSearchPage() {
           key={item.id}
           title={item.title}
           creator={item.authors?.map((a) => a.name).join(', ')}
-          seriesStatus={item.firstPublishYear}
+          badge={item.firstPublishYear}
           coverUrl={item.coverUrl}
           theme={theme}
           icon="📚"

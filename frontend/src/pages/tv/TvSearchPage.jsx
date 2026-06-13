@@ -164,7 +164,7 @@ function TvSearchPage() {
             const parts = [item.seriesType, item.firstAirYear].filter(Boolean)
             return parts.length > 0 ? parts.join(' · ') : null
           })()}
-          seriesStatus={item.status}
+          badge={item.status}
           coverUrl={item.coverUrl}
           theme={theme}
           icon="📺"
