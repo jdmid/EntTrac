@@ -1,3 +1,5 @@
 spring.application.name=backend
 tmdb.api.key=YOUR_TMDB_API_KEY_HERE
 omdb.api.key=YOUR_OMDB_API_KEY_HERE
+igdb.client.id=YOUR_IGDB_CLIENT_ID_HERE
+igdb.client.secret=YOUR_IGDB_CLIENT_SECRET_HERE
