@@ -87,7 +87,6 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
                        status,summary, category;
                 search "%s";
                 limit 25;
-                where category != 1;
                 """.formatted(query);
 
         JsonNode response = postQuery("/games", body);
@@ -95,6 +94,10 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
         List<GameSearchResult> results = new ArrayList<>();
         if (response != null && response.isArray()) {
             for (JsonNode game : response) {
+                // Filter out DLC (category 1) on the Java side
+                // search keyword doesn't support where filters in IGDB
+                int cat = game.has("category") ? game.get("category").asInt(-1) : -1;
+                if (cat == 1) continue;
                 results.add(mapToSearchResult(game));
             }
         }
@@ -126,11 +129,7 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
 
     private List<GameSearchResult> fetchDlc(String parentId) {
         try {
-            String body = """
-                fields name,cover.url,status,summary,first_release_date;
-                where parent_game = %s & category = 1;
-                limit 25;
-                """.formatted(parentId);
+            String body = "fields name,cover.url,status,summary,first_release_date,category;where parent_game = %s;limit 25;".formatted(parentId);
 
             JsonNode response = postQuery("/games", body);
 
@@ -296,9 +295,24 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
         }
 
         // Status — normalize IGDB integer status to our vocabulary
-        String status = normalizeStatus(
-                game.has("status") ? game.get("status").asInt(-1) : -1
-        );
+        String status = null;
+        if (game.has("status") && !game.get("status").isNull()
+                && !game.get("status").asText().isBlank()) {
+            status = normalizeStatus(game.get("status").asInt(-1));
+        } else {
+            // IGDB omits status field — infer from release date
+            if (game.has("first_release_date") && !game.get("first_release_date").isNull()) {
+                long epochSeconds = game.get("first_release_date").asLong();
+                if (java.time.Instant.ofEpochSecond(epochSeconds).isAfter(java.time.Instant.now())) {
+                    status = "upcoming";
+                } else {
+                    status = "released";
+                }
+            } else {
+                // No status, no release date — default to released
+                status = "released";
+            }
+        }
 
         // Ratings
         Double igdbRating = null;
@@ -339,7 +353,6 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
     private String normalizeStatus(int igdbStatus) {
         return switch (igdbStatus) {
             case 0 -> "released";
-            case 2, 3, 4 -> "early access";
             case 6 -> "cancelled";
             case 7, 8 -> "upcoming";
             default -> null;
