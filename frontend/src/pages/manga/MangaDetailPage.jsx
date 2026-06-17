@@ -80,7 +80,7 @@ function MangaDetailPage() {
       score={score}
       theme={theme}
       icon="📖"
-      refreshLabel="↻ Refresh chapters"
+      refreshLabel="Refresh chapters"
       metaLine={
         <div>
           <p className="text-[12px] text-[#555566] m-0 mb-1 capitalize">
@@ -150,15 +150,13 @@ function MangaDetailPage() {
       notesProgressLabel="Ch."
       refreshing={refreshing}
       ratingsSection={
-        <div className="flex gap-2 flex-wrap">
           <RatingCard
             value={manga.mangadexRating}
             label="MangaDex"
             color="#f87c23"
             theme={theme}
           />
-        </div>
-      }
+        }
       onRefresh={() => {
         setRefreshing(true)
         refreshLatestChapter(mangaId)

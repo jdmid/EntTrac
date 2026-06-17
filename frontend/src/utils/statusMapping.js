@@ -40,12 +40,16 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
   }
  
  // Books have no seriesStatus — normalizeSeriesStatus returns null for 'book' medium
-// Forthcoming titles may need mapping when Google Books is added (see issue #25)
+ // Forthcoming titles may need mapping when Google Books is added (see issue #25)
  
-  // TODO: Games — add mapping once API is chosen (IGDB / RAWG)
- 
-  return null
-}
+  if (medium === 'game') {
+    if (status === 'released') return 'released'
+    if (status === 'upcoming') return 'upcoming'
+    if (status === 'cancelled') return 'cancelled'
+  }
+  
+    return null
+  }
  
 // Labels for the filter chips per medium
 export const SERIES_STATUS_FILTERS = {
@@ -82,9 +86,12 @@ export const SERIES_STATUS_FILTERS = {
   book: [
     { value: 'ALL', label: 'All' },
   ],
-  // TODO: Games — add filters once API is chosen
+
   game: [
-    { value: 'ALL', label: 'All' },
+    { value: 'ALL',          label: 'All' },
+    { value: 'released',     label: 'Released' },
+    { value: 'upcoming',     label: 'Upcoming' },
+    { value: 'cancelled',    label: 'Cancelled' },
   ],
 }
  

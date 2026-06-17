@@ -1,0 +1,181 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import SearchPageLayout from '../../components/SearchPageLayout'
+import SearchMediaCard from '../../components/SearchMediaCard'
+import {
+  searchGames, addGameToLibrary, getGameLibrary,
+  getGameDetails, getWorksByDeveloper, searchDevelopers,
+} from '../../api/gameApi'
+import { normalizeSeriesStatus } from '../../utils/statusMapping'
+import { themes } from '../../theme/themes'
+
+function GameSearchPage() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const theme = themes.game
+
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [addedIds, setAddedIds] = useState(new Set())
+
+  const [creatorTab, setCreatorTab] = useState(false)
+  const [creatorResults, setCreatorResults] = useState([])
+  const [creatorLoading, setCreatorLoading] = useState(false)
+  const [creatorName, setCreatorName] = useState('')
+  const [developerMatches, setDeveloperMatches] = useState([])
+
+  useEffect(() => {
+    getGameLibrary()
+      .then((res) => {
+        const ids = new Set(res.data.map((g) => g.gameId))
+        setAddedIds(ids)
+      })
+      .catch(console.error)
+  }, [])
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    const creatorId = searchParams.get('creatorId')
+    const name = searchParams.get('creatorName')
+
+    if (tab === 'creator' && creatorId) {
+      setCreatorTab(true)
+      setCreatorName(name ?? '')
+      setCreatorLoading(true)
+      getWorksByDeveloper(creatorId)
+        .then((res) => {
+          setCreatorResults(res.data)
+          setCreatorLoading(false)
+        })
+        .catch(() => setCreatorLoading(false))
+    }
+  }, [])
+
+  function handleSearch(e) {
+    e.preventDefault()
+    if (!query.trim()) return
+    setLoading(true)
+    setError(null)
+    searchGames(query)
+      .then((res) => {
+        setResults(res.data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error(err)
+        setError('Search failed. Is the backend running?')
+        setLoading(false)
+      })
+  }
+
+  function handleCreatorSearch(e) {
+    e.preventDefault()
+    if (!creatorName.trim()) return
+    setCreatorLoading(true)
+    setDeveloperMatches([])
+    setCreatorResults([])
+    searchDevelopers(creatorName)
+      .then((res) => {
+        const matches = res.data
+        if (matches.length === 1) {
+          return getWorksByDeveloper(matches[0].id)
+            .then((worksRes) => {
+              setCreatorResults(worksRes.data)
+              setCreatorLoading(false)
+            })
+        }
+        setDeveloperMatches(matches)
+        setCreatorLoading(false)
+      })
+      .catch(() => setCreatorLoading(false))
+  }
+
+  function handleCreatorMatchSelect(match) {
+    setCreatorLoading(true)
+    setDeveloperMatches([])
+    getWorksByDeveloper(match.id)
+      .then((res) => {
+        setCreatorResults(res.data)
+        setCreatorName(match.name)
+        setCreatorLoading(false)
+      })
+      .catch(() => setCreatorLoading(false))
+  }
+
+  async function handleAdd(game) {
+    try {
+      const detailRes = await getGameDetails(game.id)
+      const full = detailRes.data
+      await addGameToLibrary({
+        gameId: full.id ?? game.id,
+        title: full.title ?? game.title,
+        status: 'PLANNED',
+        hoursPlayed: 0,
+        coverUrl: full.coverUrl ?? game.coverUrl,
+        description: full.description ?? game.description,
+        seriesStatus: normalizeSeriesStatus(full.status ?? game.status, 'game'),
+        releaseYear: full.releaseYear ?? game.releaseYear,
+        genres: full.genres ?? game.genres,
+        developer: full.developer ?? game.developer,
+        developerId: full.developerId ?? game.developerId ?? null,
+        platforms: full.platforms ?? game.platforms ?? [],
+        igdbRating: full.igdbRating ?? null,
+        igdbCriticRating: full.igdbCriticRating ?? null,
+      })
+      setAddedIds((prev) => new Set([...prev, game.id]))
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return (
+    <SearchPageLayout
+      activeMedia="game"
+      pageTitle="Search Games"
+      pageSubtitle="Find and add titles to your library"
+      creatorTabLabel="By developer"
+      titlePlaceholder="Search for games..."
+      creatorPlaceholder="Search by developer name..."
+      results={results}
+      loading={loading}
+      error={error}
+      query={query}
+      onQueryChange={setQuery}
+      onTitleSearch={handleSearch}
+      creatorTab={creatorTab}
+      onCreatorTabChange={setCreatorTab}
+      creatorName={creatorName}
+      onCreatorNameChange={setCreatorName}
+      creatorResults={creatorResults}
+      creatorLoading={creatorLoading}
+      creatorMatches={developerMatches}
+      onCreatorSearch={handleCreatorSearch}
+      onCreatorMatchSelect={handleCreatorMatchSelect}
+      disambiguationLabel="Multiple developers found — select one"
+      renderCard={(item) => (
+        <SearchMediaCard
+          key={item.id}
+          title={item.title}
+          creator={[item.developer, item.releaseYear]
+            .filter(Boolean)
+            .join(' · ')}
+          seriesStatus={item.category}
+          coverUrl={item.coverUrl}
+          theme={theme}
+          icon="🎮"
+          isAdded={addedIds.has(item.id)}
+          onAdd={() => handleAdd(item)}
+          onClick={() =>
+            navigate(`/game/library/${item.id}`, { state: { from: 'search' } })
+          }
+        />
+      )}
+      addedCount={addedIds.size}
+      onGoToLibrary={() => navigate('/game/library')}
+    />
+  )
+}
+
+export default GameSearchPage

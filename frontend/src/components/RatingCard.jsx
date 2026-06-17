@@ -3,11 +3,12 @@ function RatingCard({ value, label, color, theme }) {
 
   return (
     <div
-      className="rounded-lg p-3 text-center"
+      className="rounded-lg p-3 text-center flex flex-col justify-center"
       style={{
         background: theme.topBar,
         border: `0.5px solid ${theme.cardBorder}`,
         minWidth: '80px',
+        alignSelf: 'stretch',
       }}
     >
       <p className="text-[20px] font-medium m-0 mb-0.5"

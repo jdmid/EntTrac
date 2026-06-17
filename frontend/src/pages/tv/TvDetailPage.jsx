@@ -89,7 +89,7 @@ function TvDetailPage() {
       score={score}
       theme={theme}
       icon="📺"
-      refreshLabel="↻ Refresh episodes"
+      refreshLabel="Refresh episodes"
       metaLine={
         <div>
           {badgeText && (
@@ -154,14 +154,12 @@ function TvDetailPage() {
       notesProgressLabel="Ep."
       refreshing={refreshing}
       ratingsSection={
-        <div className="flex gap-2 flex-wrap">
           <RatingCard
             value={show.tmdbRating}
             label="TMDB"
             color="#01b4e4"
             theme={theme}
           />
-        </div>
       }
       onRefresh={() => {
         setRefreshing(true)

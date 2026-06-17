@@ -7,6 +7,7 @@ const DEFAULT_TABS = [
   { id: 'tv',     label: 'TV',     visible: true },
   { id: 'movie',  label: 'Movies', visible: true },
   { id: 'book',   label: 'Books',  visible: true },
+  { id: 'game', label: 'Games', visible: true },
 ]
 
 const STORAGE_KEY = 'enttrac-settings'

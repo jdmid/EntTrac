@@ -18,6 +18,9 @@ function AttributionFooter() {
         {' · '}
         <a href="https://openlibrary.org" target="_blank" rel="noreferrer"
           style={{ color: '#444455' }}>Open Library</a>
+        {' · '}
+        <a href="https://www.igdb.com" target="_blank" rel="noreferrer"
+          style={{ color: '#444455' }}>IGDB</a>
       </p>
     </div>
   )

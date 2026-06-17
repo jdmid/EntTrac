@@ -11,6 +11,9 @@ import TvDetailPage from './pages/tv/TvDetailPage'
 import MovieLibraryPage from './pages/movie/MovieLibraryPage'
 import MovieSearchPage from './pages/movie/MovieSearchPage'
 import MovieDetailPage from './pages/movie/MovieDetailPage'
+import GameLibraryPage from './pages/game/GameLibraryPage'
+import GameSearchPage from './pages/game/GameSearchPage'
+import GameDetailPage from './pages/game/GameDetailPage'
 import BookLibraryPage from './pages/book/BookLibraryPage'
 import BookSearchPage from './pages/book/BookSearchPage'
 import BookDetailPage from './pages/book/BookDetailPage'
@@ -52,6 +55,11 @@ function App() {
         <Route path="/book/search" element={<TabGuard tabId="book"><BookSearchPage /></TabGuard>} />
         <Route path="/book/library/:bookId" element={<TabGuard tabId="book"><BookDetailPage /></TabGuard>} />
 
+        <Route path="/game/library" element={<TabGuard tabId="game"><GameLibraryPage /></TabGuard>} />
+        <Route path="/game/search" element={<TabGuard tabId="game"><GameSearchPage /></TabGuard>} />
+        <Route path="/game/library/:gameId" element={<TabGuard tabId="game"><GameDetailPage /></TabGuard>} />
+        <Route path="/game/dlc/:dlcId" element={<TabGuard tabId="game"><GameDetailPage /></TabGuard>} />
+        
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </BrowserRouter>

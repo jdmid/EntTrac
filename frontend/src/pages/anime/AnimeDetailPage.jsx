@@ -126,14 +126,12 @@ function AnimeDetailPage() {
       notesProgressLabel="Ep."
       refreshing={refreshing}
       ratingsSection={
-        <div className="flex gap-2 flex-wrap">
           <RatingCard
             value={anime.malRating}
             label="MAL"
             color="#2e51a2"
             theme={theme}
           />
-        </div>
       }
       onRefresh={() => {
         setRefreshing(true)
