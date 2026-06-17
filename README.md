@@ -49,6 +49,8 @@ The project started as a manga and anime tracker and is continuously growing to 
 - Jikan/MyAnimeList API (anime metadata)
 - TMDB API (TV and movie metadata)
 - OMDB API (movie ratings — IMDb, Rotten Tomatoes, Metacritic)
+- Open Library API (book metadata)
+- IGDB API (game metadata, requires Twitch OAuth)
 
 ---
 
@@ -71,11 +73,11 @@ The project started as a manga and anime tracker and is continuously growing to 
 - **Source-specific ratings** — each media type displays ratings from its own source (MAL score for anime, MangaDex rating for manga, TMDB rating for TV and movies) cached lazily on first detail page visit
 - **Author/creator search page** - search creators using APIs to see their all of their works
 - **Settings page** - manage and reorder media tabs
+- **Games tab** — search IGDB, add to library, track hours played, platform tracking, DLC ownership checklist, IGDB and critic ratings
+- **Books tab** - search Open Library, add to library, track ch and page number
 
 ### Planned Features
 
-- Games tab
-- Books tab
 - AniList as a second anime data source
 - Multi-user support
 
@@ -84,12 +86,13 @@ The project started as a manga and anime tracker and is continuously growing to 
 ## Architecture Highlights
 
 - **Single-table DynamoDB design** — all media types stored in one table using `PK = USER#default` and `SK = MEDIA_TYPE#SOURCE#ID` (e.g. `MANGA#MANGADEX#abc123`)
-- **MediaItem superclass** — shared fields (title, status, score, description etc) live in one place; `AnimeItem`, `MangaItem`, `TvItem`, and `MovieItem` extend it with medium-specific fields
+- **MediaItem superclass** — shared fields (title, status, score, description etc) live in one place; `AnimeItem`, `MangaItem`, `TvItem`, `GameItem`, `BookItem`, and `MovieItem` extend it with medium-specific fields
 - **Source-specific rating fields** — each subclass owns its own rating field (`malRating`, `mangadexRating`, `tmdbRating`, `imdbRating` etc) rather than a generic `communityRating`, making the data source explicit at the model level
 - **Lazy rating enrichment** — source ratings are fetched from external APIs on first detail page visit and cached to DynamoDB; subsequent visits skip the API call entirely
 - **Client interface pattern** — each media type has a `MediaMetadataClient` interface allowing API sources to be swapped or extended without changing service or controller logic
 - **Status normalization** — raw API status values (e.g. "Finished Airing", "ongoing") are normalized to a consistent set on save, keeping filters consistent across API sources
 - **Universal status enums** — `CONSUMING`, `PLANNED`, `FINISHED`, `DROPPED` work across all media types; display labels ("Reading", "Watching") are mapped per medium on the frontend
+- **OAuth client credentials token caching** — IGDB requires Twitch OAuth; the access token is cached in the `IgdbClient` Spring bean with lazy refresh on expiry, requiring no scheduled jobs or manual intervention
 
 ---
 
