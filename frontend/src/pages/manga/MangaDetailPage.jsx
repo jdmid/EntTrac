@@ -183,7 +183,11 @@ function MangaDetailPage() {
           seriesStatus: normalizeSeriesStatus(manga.status, 'manga'),
           authorId: manga.authorId ?? null,
           artistId: manga.artistId ?? null,
-        }).then(() => setInLibrary(true))
+        }).then((res) => {
+          console.log('=== ADD RESPONSE ===', res.data)
+          setManga(res.data)
+          setInLibrary(true)
+        })
       }
       onScoreSave={(n) =>
         updateScore(mangaId, n).then((res) => {

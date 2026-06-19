@@ -194,7 +194,10 @@ function TvDetailPage() {
           nextEpisodeDate: show.nextEpisodeDate,
           creatorName: show.creatorName ?? null,
           creatorId: show.creatorId ?? null,
-        }).then(() => setInLibrary(true))
+        }).then((res) => {
+          setShow(res.data)
+          setInLibrary(true)
+        })
       }
       onScoreSave={(n) =>
         updateTvScore(tvId, n).then((res) => {

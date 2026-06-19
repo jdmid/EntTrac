@@ -155,7 +155,10 @@ function MovieDetailPage() {
           metacriticRating: movie.metacriticRating ?? null,
           tmdbScore: movie.tmdbScore,
           directorId: movie.directorId ?? null,
-        }).then(() => setInLibrary(true))
+        }).then((res) => {
+          setMovie(res.data)
+          setInLibrary(true)
+        })
       }
       onScoreSave={(n) =>
         updateMovieScore(movieId, n).then((res) => {

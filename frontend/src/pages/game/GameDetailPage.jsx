@@ -363,7 +363,10 @@ function GameDetailPage() {
         platforms: game.platforms ?? [],
         igdbRating: game.igdbRating ?? null,
         igdbCriticRating: game.igdbCriticRating ?? null,
-      }).then(() => setInLibrary(true))
+      }).then((res) => {
+          setGame(res.data)
+          setInLibrary(true)
+        })
       : null}
       onScoreSave={inLibrary ? (n) =>
       updateGameScore(gameId, n).then((res) => {

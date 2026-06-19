@@ -159,7 +159,10 @@ function AnimeDetailPage() {
           season: anime.season,
           malScore: anime.malScore,
           studioId: anime.studioId ?? null,
-        }).then(() => setInLibrary(true))
+        }).then((res) => {
+          setAnime(res.data)
+          setInLibrary(true)
+        })
       }
       onScoreSave={(n) =>
         updateAnimeScore(animeId, n).then((res) => {

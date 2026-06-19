@@ -233,60 +233,60 @@ function DetailPageLayout({
               </div>
             )}
 
-         {/* Score + Ratings inline */}
-{inLibrary && item?.status !== 'PLANNED' && (
-  <div className="mb-4">
-    <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
-      Score
-    </p>
-    <div className="flex gap-2 flex-wrap items-start">
-      <div className="rounded-lg p-3 text-center w-fit"
-        style={{
-          background: theme.topBar,
-          border: `0.5px solid ${theme.cardBorder}`,
-        }}
-      >
-        <p className="text-[28px] font-medium m-0 mb-0.5"
-          style={{ color: theme.accent }}>
-          {score ?? '—'}
-        </p>
-        <p className="text-[11px] text-[#555566] m-0">Your score</p>
-        <div className="flex justify-center gap-1 mt-2">
-          {[1,2,3,4,5,6,7,8,9,10].map((n) => (
-            <span
-              key={n}
-              onClick={() => onScoreSave(n)}
-              className="cursor-pointer text-[16px] transition-colors"
-              style={{
-                color: score != null && n <= score
-                  ? theme.accent : '#333344'
-              }}
-              title={`Score ${n}`}
-            >
-              ★
-            </span>
-          ))}
-        </div>
-      </div>
-      {ratingsSection}
-    </div>
-  </div>
-)}
+            {/* Score + Ratings inline */}
+            {inLibrary && item?.status !== 'PLANNED' && (
+              <div className="mb-4">
+                <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
+                  Score
+                </p>
+                <div className="flex gap-2 flex-wrap items-start">
+                  <div className="rounded-lg p-3 text-center w-fit"
+                    style={{
+                      background: theme.topBar,
+                      border: `0.5px solid ${theme.cardBorder}`,
+                    }}
+                  >
+                    <p className="text-[28px] font-medium m-0 mb-0.5"
+                      style={{ color: theme.accent }}>
+                      {score ?? '—'}
+                    </p>
+                    <p className="text-[11px] text-[#555566] m-0">Your score</p>
+                    <div className="flex justify-center gap-1 mt-2">
+                      {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                        <span
+                          key={n}
+                          onClick={() => onScoreSave(n)}
+                          className="cursor-pointer text-[16px] transition-colors"
+                          style={{
+                            color: score != null && n <= score
+                              ? theme.accent : '#333344'
+                          }}
+                          title={`Score ${n}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {ratingsSection}
+                </div>
+              </div>
+            )}
 
-{/* Ratings for PLANNED items — no score card */}
-{inLibrary && item?.status === 'PLANNED' && ratingsSection && (
-  <div className="mb-4">
-    <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
-      Ratings
-    </p>
-    <div className="flex gap-2 flex-wrap items-start">
-      {ratingsSection}
-    </div>
-  </div>
-)}
+            {/* Ratings for PLANNED items — no score card */}
+            {inLibrary && item?.status !== 'PLANNED' && ratingsSection && (
+              <div className="mb-4">
+                <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
+                  Ratings
+                </p>
+                <div className="flex gap-2 flex-wrap items-start">
+                  {ratingsSection}
+                </div>
+              </div>
+            )}
 
             {/* Progress slot */}
-            {inLibrary && progressSection && (
+            {inLibrary && item?.status !== 'PLANNED' && progressSection && (
               <div className="mb-4">
                 <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                   Progress
@@ -296,7 +296,7 @@ function DetailPageLayout({
             )}
 
             {/* Platform slot — games only */}
-            {inLibrary && platformSection && (
+            {inLibrary && item?.status !== 'PLANNED' && platformSection && (
               <div className="mb-4">
                 <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                   Your platform
@@ -306,7 +306,7 @@ function DetailPageLayout({
             )}
 
             {/* DLC slot — games only */}
-            {inLibrary && dlcSection && (
+            {inLibrary && item?.status !== 'PLANNED' && dlcSection && (
               <div className="mb-4">
                 <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
                   DLC
