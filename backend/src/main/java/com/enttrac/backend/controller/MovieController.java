@@ -82,6 +82,13 @@ public class MovieController {
         return ResponseEntity.ok(movieService.enrichFromCache(movieId));
     }
 
+    @PostMapping("/library/{movieId}/watch-providers")
+    public ResponseEntity<MovieItem> enrichWatchProviders(
+            @PathVariable String movieId,
+            @RequestParam(defaultValue = "US") String region) {
+        return ResponseEntity.ok(movieService.enrichWatchProviders(movieId, region));
+    }
+
     @GetMapping("/details/{movieId}")
     public ResponseEntity<MovieSearchResult> getDetails(@PathVariable String movieId) {
         MovieSearchResult result = movieService.getDetails(movieId);

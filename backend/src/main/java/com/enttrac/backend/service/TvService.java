@@ -1,6 +1,7 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.MediaMetadataClient;
+import com.enttrac.backend.client.TmdbTvClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
@@ -9,11 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 
 @Slf4j
 @Service
@@ -264,5 +267,29 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
 
     public List<Map<String, String>> searchPeople(String name) {
         return tvMetadataClient.searchCreators(name);
+    }
+
+    public TvItem enrichWatchProviders(String tvId, String region) {
+        TvItem item = repository.findById(tvId);
+        if (item == null) throw new NotFoundException("TV show not found: " + tvId);
+
+        boolean needsRefresh = item.getWatchProvidersRefreshedAt() == null
+                || Instant.now().isAfter(
+                Instant.parse(item.getWatchProvidersRefreshedAt())
+                        .plus(Duration.ofDays(7)));
+
+        if (needsRefresh) {
+            List<String> providers =
+                    // Cast required — getWatchProviders is not on MediaMetadataClient interface
+                    ((TmdbTvClient) tvMetadataClient).getWatchProviders(tvId, region);
+            item.setWatchProviders(providers);
+            item.setWatchProvidersRefreshedAt(Instant.now().toString());
+            item.setUpdatedAt(Instant.now().toString());
+            repository.save(item);
+            log.info("Enriched TV show {} with {} watch providers for region {}",
+                    tvId, providers.size(), region);
+        }
+
+        return item;
     }
 }

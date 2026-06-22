@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -181,5 +182,28 @@ public class MovieService {
 
     public List<Map<String, String>> searchPeople(String name) {
         return tmdbMovieClient.searchCreators(name);
+    }
+
+    public MovieItem enrichWatchProviders(String movieId, String region) {
+        MovieItem item = movieRepository.findById(movieId);
+        if (item == null) throw new NotFoundException("Movie not found: " + movieId);
+
+        boolean needsRefresh = item.getWatchProvidersRefreshedAt() == null
+                || Instant.now().isAfter(
+                Instant.parse(item.getWatchProvidersRefreshedAt())
+                        .plus(Duration.ofDays(7)));
+
+        if (needsRefresh) {
+            List<String> providers =
+                    tmdbMovieClient.getWatchProviders(movieId, region);
+            item.setWatchProviders(providers);
+            item.setWatchProvidersRefreshedAt(Instant.now().toString());
+            item.setUpdatedAt(Instant.now().toString());
+            movieRepository.save(item);
+            log.info("Enriched movie {} with {} watch providers for region {}",
+                    movieId, providers.size(), region);
+        }
+
+        return item;
     }
 }

@@ -115,6 +115,13 @@ public class TvController {
         return ResponseEntity.ok(tvService.enrichTmdbRating(id));
     }
 
+    @PostMapping("/library/{id}/watch-providers")
+    public ResponseEntity<TvItem> enrichWatchProviders(
+            @PathVariable String id,
+            @RequestParam(defaultValue = "US") String region) {
+        return ResponseEntity.ok(tvService.enrichWatchProviders(id, region));
+    }
+
     @GetMapping("/creator/{personId}")
     public ResponseEntity<List<TvSearchResult>> getWorksByCreator(
             @PathVariable String personId) {

@@ -1,6 +1,5 @@
 package com.enttrac.backend.service;
 
-import com.enttrac.backend.client.IgdbClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.GameItem;
@@ -109,7 +108,7 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
     }
 
     public List<GameSearchResult> getWorksByDeveloper(String companyId) {
-        return ((IgdbClient) gameMetadataClient).getWorksByCreator(companyId);
+        return gameMetadataClient.getWorksByCreator(companyId);
     }
 
     public List<Map<String, String>> searchDevelopers(String name) {
