@@ -18,7 +18,7 @@ public class MovieItem extends MediaItem {
 
     @NotBlank(message = "Movie ID is required")
     private String movieId;
-    
+
     private String releaseYear;
     private String runtime;
     private String genres;

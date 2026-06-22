@@ -26,9 +26,15 @@ The project started as a manga and anime tracker and is continuously growing to 
 
 ![Detail Page](docs/screenshots/detail.png)
 
+### Settings
+
+![Settings](docs/screenshots/settings.png)
+
 ### Mobile
 
 ![Mobile](docs/screenshots/mobile.png)
+
+
 
 ---
 
