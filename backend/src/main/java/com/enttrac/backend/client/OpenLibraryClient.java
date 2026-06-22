@@ -2,8 +2,7 @@ package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.BookSearchResult;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -12,10 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component("openLibraryClient")
 public class OpenLibraryClient implements MediaMetadataClient<BookSearchResult> {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenLibraryClient.class);
     private static final String BASE_URL = "https://openlibrary.org";
     private static final String COVER_BASE = "https://covers.openlibrary.org/b/id/";
 

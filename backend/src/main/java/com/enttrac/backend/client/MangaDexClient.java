@@ -1,6 +1,7 @@
 package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.MangaSearchResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component("mangaDexClient")
 public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
 
@@ -42,6 +44,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
             }
         }
 
+        log.info("MangaDex search for '{}' returned {} results", query, results.size());
         return results;
     }
 
@@ -68,6 +71,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
                 // lastChapter from manga object is source of truth for completed series
                 // only fall back to feed if it came back null or 0
                 if (result.getLatestChapter() == null || result.getLatestChapter() == 0) {
+                    log.debug("Completed manga {} has no lastChapter on manga object, falling back to feed", id);
                     Integer feedChapter = fetchLatestChapterFromFeed(id);
                     if (feedChapter != null) result.setLatestChapter(feedChapter);
                 }
@@ -79,6 +83,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
 
             return result;
         }
+        log.warn("MangaDex returned no data for manga id: {}", id);
         return null;
     }
 
@@ -98,7 +103,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
                 }
             }
         } catch (Exception e) {
-            // rating unavailable
+            log.debug("Failed to fetch MangaDex rating for manga {}: {}", id, e.getMessage());
         }
         return null;
     }
@@ -208,7 +213,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
                 if (maxChapter >= 0) return (int) maxChapter;
             }
         } catch (Exception e) {
-            // fall through
+            log.debug("Failed to fetch chapter feed for manga {}: {}", mangaId, e.getMessage());
         }
         return null;
     }
@@ -235,7 +240,10 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
             }
         }
 
-        if (mangaIds.isEmpty()) return List.of();
+        if (mangaIds.isEmpty()){
+            log.info("No manga found for author: {}", creatorId);
+            return List.of();
+        }
 
         JsonNode batchResponse = restClient.get()
                 .uri(uriBuilder -> {
@@ -260,6 +268,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
             }
         }
 
+        log.info("Fetched {} works for author: {}", results.size(), creatorId);
         return results;
     }
 
@@ -298,27 +307,32 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
 
     @Override
     public List<Map<String, String>> searchCreators(String name) {
-        JsonNode response = restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/author")
-                        .queryParam("name", name)
-                        .queryParam("limit", 10)
-                        .build())
-                .retrieve()
-                .body(JsonNode.class);
+        try {
+            JsonNode response = restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/author")
+                            .queryParam("name", name)
+                            .queryParam("limit", 10)
+                            .build())
+                    .retrieve()
+                    .body(JsonNode.class);
 
-        List<Map<String, String>> results = new ArrayList<>();
+            List<Map<String, String>> results = new ArrayList<>();
 
-        if (response != null && response.has("data")) {
-            for (JsonNode author : response.get("data")) {
-                String id = author.get("id").asText();
-                String authorName = author.path("attributes").path("name").asText();
-                if (!id.isBlank() && !authorName.isBlank()) {
-                    results.add(Map.of("id", id, "name", authorName));
+            if (response != null && response.has("data")) {
+                for (JsonNode author : response.get("data")) {
+                    String id = author.get("id").asText();
+                    String authorName = author.path("attributes").path("name").asText();
+                    if (!id.isBlank() && !authorName.isBlank()) {
+                        results.add(Map.of("id", id, "name", authorName));
+                    }
                 }
             }
-        }
 
-        return results;
+            return results;
+        } catch (Exception e) {
+            log.debug("Author search failed for '{}': {}", name, e.getMessage());
+            return List.of();
+        }
     }
 }

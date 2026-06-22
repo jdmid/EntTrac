@@ -1,6 +1,7 @@
 package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.MovieSearchResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component("tmdbMovieClient")
 public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
 
@@ -43,6 +45,7 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
             }
         }
 
+        log.info("TMDB movie search for '{}' returned {} results", query, results.size());
         return results;
     }
 
@@ -54,7 +57,10 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
                 .retrieve()
                 .body(JsonNode.class);
 
-        if (response == null) return null;
+        if (response == null) {
+            log.warn("TMDB returned no data for movie id: {}", id);
+            return null;
+        }
 
         MovieSearchResult result = mapToSearchResult(response);
 
@@ -96,7 +102,7 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
                 return Math.round(rating * 10.0) / 10.0;
             }
         } catch (Exception e) {
-            // rating unavailable
+            log.debug("Failed to fetch TMDB community rating for movie {}: {}", id, e.getMessage());
         }
         return null;
     }
@@ -178,6 +184,7 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
             }
         }
 
+        log.info("Fetched {} directed movies for person: {}", results.size(), creatorId);
         return results;
     }
 

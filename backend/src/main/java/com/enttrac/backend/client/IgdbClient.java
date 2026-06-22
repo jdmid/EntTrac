@@ -2,6 +2,7 @@ package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.GameSearchResult;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+@Slf4j
 @Component("igdbClient")
 public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
 
@@ -43,6 +45,7 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
 
     private synchronized String getToken() {
         if (accessToken == null || Instant.now().isAfter(tokenExpiry)) {
+            log.info("IGDB token missing or expired, fetching new token");
             fetchNewToken();
         }
         return accessToken;
@@ -61,6 +64,7 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
         long expiresIn = response.get("expires_in").asLong();
         // Subtract 60s buffer so we never use an about-to-expire token
         this.tokenExpiry = Instant.now().plusSeconds(expiresIn - 60);
+        log.info("Fetched new IGDB token, expires in {}s", expiresIn - 60);
     }
 
     // --- Shared query helper ---
@@ -101,6 +105,7 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
                 results.add(mapToSearchResult(game));
             }
         }
+        log.info("IGDB search for '{}' returned {} results", query, results.size());
         return results;
     }
 
@@ -116,13 +121,17 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
 
         JsonNode response = postQuery("/games", body);
 
-        if (response == null || !response.isArray() || response.isEmpty()) return null;
+        if (response == null || !response.isArray() || response.isEmpty()){
+            log.warn("IGDB returned no data for game id: {}", id);
+            return null;
+        }
 
         GameSearchResult result = mapToSearchResult(response.get(0));
 
         // Fetch DLC for this game
         List<GameSearchResult> dlc = fetchDlc(id);
         result.setDlc(dlc.isEmpty() ? null : dlc);
+        log.info("Fetched game details for id {}: {} DLC entries", id, dlc.size());
 
         return result;
     }
@@ -141,6 +150,7 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
             }
             return results;
         } catch (Exception e) {
+            log.debug("Failed to fetch DLC for game {}: {}", parentId, e.getMessage());
             return List.of();
         }
     }
@@ -163,7 +173,7 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
                 }
             }
         } catch (Exception e) {
-            // rating unavailable
+            log.debug("Failed to fetch IGDB community rating for game {}: {}", id, e.getMessage());
         }
         return null;
     }
@@ -188,7 +198,12 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
             }
         }
 
-        if (gameIds.isEmpty()) return List.of();
+        if (gameIds.isEmpty()){
+            log.info("No games found for company: {}", companyId);
+            return List.of();
+        }
+
+        log.info("Found {} game IDs for company {}, fetching details", gameIds.size(), companyId);
 
         // Step 2: fetch those games
         String idsJoined = gameIds.stream().collect(Collectors.joining(",", "(", ")"));
@@ -207,6 +222,7 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
                 results.add(mapToSearchResult(game));
             }
         }
+        log.info("Fetched {} games for company: {}", results.size(), companyId);
         return results;
     }
 

@@ -1,11 +1,13 @@
 package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.MovieSearchResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 
+@Slf4j
 @Component("omdbClient")
 public class OmdbClient {
 
@@ -30,8 +32,14 @@ public class OmdbClient {
                     .retrieve()
                     .body(JsonNode.class);
 
-            if (response == null) return;
-            if ("False".equals(response.path("Response").asText())) return;
+            if (response == null){
+                log.warn("OMDB returned no response for imdbId: {}", imdbId);
+                return;
+            }
+            if ("False".equals(response.path("Response").asText())) {
+                log.debug("OMDB returned Response=False for imdbId: {}", imdbId);
+                return;
+            }
 
             // IMDb rating
             if (response.has("imdbRating")
@@ -41,7 +49,7 @@ public class OmdbClient {
                     result.setImdbRating(
                             Double.parseDouble(response.get("imdbRating").asText()));
                 } catch (NumberFormatException e) {
-                    // leave null
+                    log.debug("Failed to parse IMDb rating for imdbId {}: {}", imdbId, e.getMessage());
                 }
             }
 
@@ -59,9 +67,11 @@ public class OmdbClient {
                     }
                 }
             }
+            log.info("Enriched movie {} with OMDB ratings", imdbId);
 
         } catch (Exception e) {
             // Ratings unavailable — result still valid without them
+            log.debug("Failed to fetch OMDB ratings for imdbId {}: {}", imdbId, e.getMessage());
         }
     }
 }

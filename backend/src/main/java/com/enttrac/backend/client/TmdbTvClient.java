@@ -1,6 +1,7 @@
 package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.TvSearchResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
 @Component("tmdbTvClient")
 public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
 
@@ -41,6 +43,7 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
             }
         }
 
+        log.info("TMDB TV search for '{}' returned {} results", query, results.size());
         return results;
     }
 
@@ -51,11 +54,16 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
                 .retrieve()
                 .body(JsonNode.class);
 
-        if (response == null) return null;
+        if (response == null){
+            log.warn("TMDB returned no data for TV show id: {}", id);
+            return null;
+        }
 
         TvSearchResult result = mapToSearchResult(response);
 
         // Build season episode array using only aired episodes
+        int seasonCount = response.has("seasons") ? response.get("seasons").size() : 0;
+        log.info("Fetching season details for TV show {}: {} seasons", id, seasonCount);
         List<Integer> seasonEpisodes = buildSeasonEpisodeArray(response, id);
         result.setSeasonEpisodes(seasonEpisodes);
 
@@ -110,7 +118,7 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
                 return Math.round(rating * 10.0) / 10.0;
             }
         } catch (Exception e) {
-            // rating unavailable
+            log.debug("Failed to fetch TMDB community rating for TV show {}: {}", id, e.getMessage());
         }
         return null;
     }
@@ -136,6 +144,7 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
                     .body(JsonNode.class);
 
             if (seasonDetails == null || !seasonDetails.has("episodes")) {
+                log.debug("No episode data returned for show {} season {}, defaulting to 0", showId, seasonNum);
                 seasonEpisodes.add(0);
                 continue;
             }
@@ -265,6 +274,7 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
             }
         }
 
+        log.info("Fetched {} TV works for person: {}", results.size(), creatorId);
         return results;
     }
     @Override

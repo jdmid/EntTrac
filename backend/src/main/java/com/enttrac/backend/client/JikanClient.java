@@ -1,6 +1,7 @@
 package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.AnimeSearchResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component("jikanClient")
 public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
 
@@ -36,6 +38,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
             }
         }
 
+        log.info("Jikan search for '{}' returned {} results", query, results.size());
         return results;
     }
 
@@ -50,6 +53,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
             return mapToSearchResult(response.get("data"));
         }
 
+        log.warn("Jikan returned no data for anime id: {}", id);
         return null;
     }
 
@@ -69,7 +73,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
                 }
             }
         } catch (Exception e) {
-            // rating unavailable
+            log.debug("Failed to fetch MAL rating for anime {}: {}", id, e.getMessage());
         }
         return null;
     }
@@ -162,6 +166,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
                     .retrieve()
                     .body(JsonNode.class);
         } catch (Exception e) {
+            log.debug("Producer anime lookup failed for producer {}: {}", producerId, e.getMessage());
             response = null;
         }
 
@@ -180,6 +185,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
         }
 
         if (results.isEmpty() && name != null && !name.isBlank()) {
+            log.debug("Producer endpoint returned no results for {}, falling back to name search: {}", producerId, name);
             try {
                 JsonNode searchResponse = restClient.get()
                         .uri("/anime?q={name}&limit=25&page={page}&sfw", name, page)
@@ -197,7 +203,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
                             .path("has_next_page").asBoolean(false);
                 }
             } catch (Exception e) {
-                // fall through with empty results
+                log.debug("Fallback name search also failed for producer {} / name {}: {}", producerId, name, e.getMessage());
             }
         }
 
@@ -230,6 +236,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
 
             return results;
         } catch (Exception e) {
+            log.debug("Producer search failed for '{}': {}", name, e.getMessage());
             return List.of();
         }
     }
