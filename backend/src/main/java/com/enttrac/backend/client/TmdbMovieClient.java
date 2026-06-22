@@ -210,4 +210,44 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
 
         return results;
     }
+
+    public List<String> getWatchProviders(String id, String region) {
+        try {
+            JsonNode response = restClient.get()
+                    .uri("/movie/{id}/watch/providers?api_key={apiKey}", id, apiKey)
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (response == null || !response.has("results")) {
+                log.debug("No watch provider results for movie {} in region {}", id, region);
+                return List.of();
+            }
+
+            JsonNode regionNode = response.get("results").get(region);
+            if (regionNode == null) {
+                log.debug("No watch providers for movie {} in region {}", id, region);
+                return List.of();
+            }
+
+            if (!regionNode.has("flatrate")) {
+                log.debug("No flatrate providers for movie {} in region {}", id, region);
+                return List.of();
+            }
+
+            List<String> providers = new ArrayList<>();
+            for (JsonNode provider : regionNode.get("flatrate")) {
+                String name = provider.path("provider_name").asText();
+                if (!name.isBlank()) providers.add(name);
+            }
+
+            log.info("Fetched {} flatrate providers for movie {} in region {}",
+                    providers.size(), id, region);
+            return providers;
+
+        } catch (Exception e) {
+            log.debug("Failed to fetch watch providers for movie {} in region {}: {}",
+                    id, region, e.getMessage());
+            return List.of();
+        }
+    }
 }
