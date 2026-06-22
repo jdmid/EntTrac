@@ -268,12 +268,11 @@ function DetailPageLayout({
                       ))}
                     </div>
                   </div>
-                  {ratingsSection}
                 </div>
               </div>
             )}
 
-            {/* Ratings for PLANNED items — no score card */}
+            {/* Ratings for items — no score card */}
             {inLibrary && item?.status !== 'PLANNED' && ratingsSection && (
               <div className="mb-4">
                 <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">

@@ -42,7 +42,8 @@ function MangaDetailPage() {
             setInLibrary(false)
             setLoading(false)
           })
-          .catch(() => {
+          .catch((err) => {
+            console.error('Failed to load manga details:', err)
             setError('Failed to load manga.')
             setLoading(false)
           })

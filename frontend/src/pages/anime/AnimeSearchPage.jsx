@@ -30,7 +30,7 @@ function AnimeSearchPage() {
     getAnimeLibrary().then((res) => {
       const ids = new Set(res.data.map((a) => a.animeId))
       setAddedIds(ids)
-    }).catch(console.error)
+    }).catch((err) => console.error('Failed to load library for added state:', err))
   }, [])
 
   useEffect(() => {
@@ -65,7 +65,7 @@ function AnimeSearchPage() {
         setLoading(false)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to search anime:', err)
         setError('Search failed. Is the backend running?')
         setLoading(false)
       })
@@ -93,7 +93,10 @@ function AnimeSearchPage() {
         setStudioMatches(matches)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to search anime by creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   function handleCreatorMatchSelect(match) {
@@ -108,7 +111,10 @@ function AnimeSearchPage() {
         setCreatorPage(1)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to load anime works for creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   function handleLoadMore() {
@@ -138,7 +144,7 @@ function AnimeSearchPage() {
       studioId: anime.studioId ?? null,
     })
       .then(() => setAddedIds((prev) => new Set([...prev, anime.id])))
-      .catch(console.error)
+      .catch((err) => console.error('Failed to add anime to library:', err))
   }
 
   return (

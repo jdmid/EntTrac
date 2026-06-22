@@ -35,7 +35,7 @@ function AnimeLibraryPage() {
         setTimeout(() => backgroundRefreshOngoing(res.data), 300)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to load library:', err)
         setError('Failed to load library.')
         setLoading(false)
       })

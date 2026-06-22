@@ -44,7 +44,8 @@ function TvDetailPage() {
                 setInLibrary(false)
                 setLoading(false)
             })
-          .catch(() => {
+          .catch((err) => {
+            console.error('Failed to load TV show details:', err)
             setError('Failed to load TV show.')
             setLoading(false)
           })

@@ -43,7 +43,8 @@ function AnimeDetailPage() {
             setInLibrary(false)
             setLoading(false)
           })
-          .catch(() => {
+          .catch((err) => {
+            console.error('Failed to load anime details:', err)
             setError('Failed to load anime.')
             setLoading(false)
           })

@@ -35,7 +35,7 @@ function TvLibraryPage() {
         backgroundRefreshOngoing(res.data)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to load library:', err)
         setError('Failed to load library.')
         setLoading(false)
       })

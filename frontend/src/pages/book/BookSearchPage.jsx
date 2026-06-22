@@ -26,7 +26,7 @@ function BookSearchPage() {
     getBookLibrary().then((res) => {
       const ids = new Set(res.data.map((b) => b.bookId))
       setAddedIds(ids)
-    }).catch(console.error)
+    }).catch((err) => console.error('Failed to load library for added state:', err))
   }, [])
 
   useEffect(() => {
@@ -58,7 +58,7 @@ function BookSearchPage() {
         setLoading(false)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to search books:', err)
         setError('Search failed. Is the backend running?')
         setLoading(false)
       })
@@ -83,7 +83,10 @@ function BookSearchPage() {
         setAuthorMatches(matches)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to search books by creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   function handleCreatorMatchSelect(match) {
@@ -95,7 +98,10 @@ function BookSearchPage() {
         setCreatorName(match.name)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to load book works for creator:', err)        
+        setCreatorLoading(false)
+      })
   }
 
   function handleAdd(book) {
@@ -110,7 +116,7 @@ function BookSearchPage() {
       genres: book.genres ?? null,
     })
       .then(() => setAddedIds((prev) => new Set([...prev, book.id])))
-      .catch(console.error)
+      .catch((err) => console.error('Failed to add book to library:', err))
   }
 
   return (

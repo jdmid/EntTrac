@@ -28,8 +28,7 @@ function TvSearchPage() {
       .then((res) => {
         const ids = new Set(res.data.map((t) => t.tvId))
         setAddedIds(ids)
-      })
-      .catch(console.error)
+    }).catch((err) => console.error('Failed to load library for added state:', err))
   }, [])
 
   useEffect(() => {
@@ -61,7 +60,7 @@ function TvSearchPage() {
         setLoading(false)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to search shows:', err)
         setError('Search failed. Is the backend running?')
         setLoading(false)
       })
@@ -86,7 +85,10 @@ function TvSearchPage() {
         setCreatorMatches(matches)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to search TV shows by creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   function handleCreatorMatchSelect(match) {
@@ -98,7 +100,10 @@ function TvSearchPage() {
         setCreatorName(match.name)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to load TV show works for creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   async function handleAdd(show) {
@@ -128,7 +133,7 @@ function TvSearchPage() {
       })
       setAddedIds((prev) => new Set([...prev, show.id]))
     } catch (err) {
-      console.error(err)
+      console.error('Failed to add TV show to library:', err)
     }
   }
 

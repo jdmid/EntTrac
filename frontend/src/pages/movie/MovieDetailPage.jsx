@@ -44,7 +44,8 @@ function MovieDetailPage() {
             setInLibrary(false)
             setLoading(false)
           })
-          .catch(() => {
+          .catch((err) => {
+            console.error('Failed to load movie details:', err)
             setError('Failed to load movie.')
             setLoading(false)
           })

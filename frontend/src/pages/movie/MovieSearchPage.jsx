@@ -28,8 +28,7 @@ function MovieSearchPage() {
       .then((res) => {
         const ids = new Set(res.data.map((m) => m.movieId))
         setAddedIds(ids)
-      })
-      .catch(console.error)
+    }).catch((err) => console.error('Failed to load library for added state:', err))
   }, [])
 
   useEffect(() => {
@@ -61,7 +60,7 @@ function MovieSearchPage() {
         setLoading(false)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to search movies:', err)
         setError('Search failed. Is the backend running?')
         setLoading(false)
       })
@@ -86,7 +85,10 @@ function MovieSearchPage() {
         setDirectorMatches(matches)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to search movies by creator:', err)        
+        setCreatorLoading(false)
+      })
   }
 
   function handleCreatorMatchSelect(match) {
@@ -98,7 +100,10 @@ function MovieSearchPage() {
         setCreatorName(match.name)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to load movie works for creator:', err)        
+        setCreatorLoading(false)
+      })
   }
 
   async function handleAdd(movie) {
@@ -124,7 +129,7 @@ function MovieSearchPage() {
       })
       setAddedIds((prev) => new Set([...prev, movie.id]))
     } catch (err) {
-      console.error(err)
+      console.error('Failed to add movie to library:', err)
     }
   }
 

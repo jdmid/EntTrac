@@ -31,8 +31,7 @@ function GameSearchPage() {
       .then((res) => {
         const ids = new Set(res.data.map((g) => g.gameId))
         setAddedIds(ids)
-      })
-      .catch(console.error)
+      }).catch((err) => console.error('Failed to load library for added state:', err))
   }, [])
 
   useEffect(() => {
@@ -64,7 +63,7 @@ function GameSearchPage() {
         setLoading(false)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to search games:', err)
         setError('Search failed. Is the backend running?')
         setLoading(false)
       })
@@ -89,7 +88,10 @@ function GameSearchPage() {
         setDeveloperMatches(matches)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to search games by creator:', err)        
+        setCreatorLoading(false)
+      })
   }
 
   function handleCreatorMatchSelect(match) {
@@ -101,7 +103,10 @@ function GameSearchPage() {
         setCreatorName(match.name)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to load game works for creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   async function handleAdd(game) {
@@ -126,7 +131,7 @@ function GameSearchPage() {
       })
       setAddedIds((prev) => new Set([...prev, game.id]))
     } catch (err) {
-      console.error(err)
+      console.error('Failed to add game to library:', err)
     }
   }
 

@@ -159,7 +159,8 @@ function GameDetailPage() {
             setInLibrary(false)
             setLoading(false)
         })
-        .catch(() => {
+        .catch((err) => {
+            console.error('Failed to load game details:', err)
             setError('Failed to load game.')
             setLoading(false)
         })

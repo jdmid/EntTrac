@@ -27,7 +27,7 @@ function MangaSearchPage() {
     getLibrary().then((res) => {
       const ids = new Set(res.data.map((m) => m.mangaId))
       setAddedIds(ids)
-    }).catch(console.error)
+    }).catch((err) => console.error('Failed to load library for added state:', err))
   }, [])
 
   useEffect(() => {
@@ -59,7 +59,7 @@ function MangaSearchPage() {
         setLoading(false)
       })
       .catch((err) => {
-        console.error(err)
+        console.error('Failed to search manga:', err)
         setError('Search failed. Is the backend running?')
         setLoading(false)
       })
@@ -84,7 +84,10 @@ function MangaSearchPage() {
         setAuthorMatches(matches)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to search manga by creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   function handleCreatorMatchSelect(match) {
@@ -96,7 +99,10 @@ function MangaSearchPage() {
         setCreatorName(match.name)
         setCreatorLoading(false)
       })
-      .catch(() => setCreatorLoading(false))
+      .catch((err) => {
+        console.error('Failed to load manga works for creator:', err)
+        setCreatorLoading(false)
+      })
   }
 
   function handleAdd(manga) {
@@ -115,7 +121,7 @@ function MangaSearchPage() {
       artistId: manga.artistId ?? null,
     })
       .then(() => setAddedIds((prev) => new Set([...prev, manga.id])))
-      .catch(console.error)
+      .catch((err) => console.error('Failed to add manga to library:', err))
   }
 
   return (
