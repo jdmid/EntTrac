@@ -1,11 +1,11 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.MediaMetadataClient;
-import com.enttrac.backend.client.TmdbTvClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
 import com.enttrac.backend.repository.TvRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class TvService extends MediaService<TvItem, TvSearchResult> {
 
@@ -43,10 +44,12 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
     }
 
     public List<TvSearchResult> search(String query) {
+        log.info("Searching TV shows: {}", query);
         return tvMetadataClient.search(query);
     }
 
     public TvSearchResult getDetails(String id) {
+        log.info("Fetching TV show details: {}", id);
         return tvMetadataClient.getDetails(id);
     }
 
@@ -63,8 +66,10 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         item.setCurrentSeason(currentSeason);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated TV progress: {} -> {} episodes watched, season {}", tvId, episodesWatched, currentSeason);
         return item;
     }
+
     private String normalizeSeriesStatus(String rawStatus) {
         if (rawStatus == null) return null;
         String status = rawStatus.toLowerCase().trim();
@@ -112,11 +117,13 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         }
 
         repository.save(item);
+        log.info("Refreshed TV show: {}", tvId);
 
         return item;
     }
 
     public List<TvItem> refreshAll() {
+        log.info("Refreshing all TV shows in library");
         List<TvItem> library = repository.findAll();
         List<TvItem> updated = new ArrayList<>();
 
@@ -163,14 +170,17 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
                 }
                 updated.add(item);
             } catch (Exception e) {
+                log.debug("Failed to refresh TV show {} during refreshAll: {}", item.getTvId(), e.getMessage());
                 updated.add(item);
             }
         }
 
+        log.info("Finished refreshing all TV shows: {} items processed", updated.size());
         return updated;
     }
 
     public List<TvItem> refreshOngoing() {
+        log.info("Refreshing ongoing TV shows in library");
         List<TvItem> library = repository.findAll();
         List<TvItem> updated = new ArrayList<>();
 
@@ -224,9 +234,11 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
                 }
                 updated.add(item);
             } catch (Exception e) {
+                log.debug("Failed to refresh TV show {} during refreshOngoing: {}", item.getTvId(), e.getMessage());
                 updated.add(item);
             }
         }
+        log.info("Finished refreshing ongoing TV shows: {} items processed", updated.size());
         return updated;
     }
 
@@ -240,6 +252,7 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
                 item.setTmdbRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 repository.save(item);
+                log.info("Enriched TV show {} with TMDB rating: {}", tvId, rating);
             }
         }
         return item;

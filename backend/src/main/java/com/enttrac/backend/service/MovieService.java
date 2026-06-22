@@ -6,6 +6,7 @@ import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.MovieItem;
 import com.enttrac.backend.model.result.MovieSearchResult;
 import com.enttrac.backend.repository.MovieRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class MovieService {
 
@@ -29,10 +31,12 @@ public class MovieService {
     }
 
     public List<MovieSearchResult> search(String query) {
+        log.info("Searching movies: {}", query);
         return tmdbMovieClient.search(query);
     }
 
     public MovieSearchResult getDetails(String id) {
+        log.info("Fetching movie details: {}", id);
         MovieSearchResult result = tmdbMovieClient.getDetails(id);
         if (result != null && result.getImdbId() != null) {
             omdbClient.enrichWithRatings(result, result.getImdbId());
@@ -51,6 +55,7 @@ public class MovieService {
     public MovieItem addToLibrary(MovieItem item) {
         MovieItem existing = movieRepository.findById(item.getMovieId());
         if (existing != null) {
+            log.info("Movie already in library, skipping add: {}", item.getMovieId());
             return existing;
         }
         item.setPk("USER#default");
@@ -59,6 +64,7 @@ public class MovieService {
         item.setCreatedAt(now);
         item.setUpdatedAt(now);
         movieRepository.save(item);
+        log.info("Added movie to library: {}", item.getMovieId());
         return item;
     }
 
@@ -70,6 +76,7 @@ public class MovieService {
         item.setScore(score);
         item.setUpdatedAt(Instant.now().toString());
         movieRepository.save(item);
+        log.info("Updated movie score: {} -> {}", movieId, score);
         return item;
     }
 
@@ -81,6 +88,7 @@ public class MovieService {
         item.setStatus(status);
         item.setUpdatedAt(Instant.now().toString());
         movieRepository.save(item);
+        log.info("Updated movie status: {} -> {}", movieId, status);
         return item;
     }
 
@@ -92,6 +100,7 @@ public class MovieService {
         item.setNotes(notes);
         item.setUpdatedAt(Instant.now().toString());
         movieRepository.save(item);
+        log.info("Updated movie notes: {}", movieId);
         return item;
     }
 
@@ -115,6 +124,7 @@ public class MovieService {
             item.setLastRefreshed(Instant.now().toString());
             item.setUpdatedAt(Instant.now().toString());
             movieRepository.save(item);
+            log.info("Refreshed ratings for movie: {}", movieId);
         }
         return item;
     }
@@ -142,7 +152,8 @@ public class MovieService {
                 }
                 item.setUpdatedAt(Instant.now().toString());
                 movieRepository.save(item);
-            }
+                log.info("Enriched movie {} from cache (imdb/rt/metacritic: {}, tmdb: {})",
+                        movieId, !hasCachedRatings, !hasTmdbRating);            }
         }
 
         return item;

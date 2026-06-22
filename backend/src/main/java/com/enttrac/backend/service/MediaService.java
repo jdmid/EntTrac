@@ -4,10 +4,12 @@ import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.MediaItem;
 import com.enttrac.backend.model.result.MediaSearchResult;
 import com.enttrac.backend.repository.MediaRepository;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 public abstract class MediaService<T extends MediaItem, R extends MediaSearchResult> {
 
     protected final MediaRepository<T> repository;
@@ -27,17 +29,23 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
 
     // --- Shared implementations ---
 
+    private String typeLabel(T item) {
+        return item.getClass().getSimpleName().replace("Item", "");
+    }
+
     public List<T> getLibrary() {
         return repository.findAll();
     }
 
     public void removeFromLibrary(String id) {
+        log.info("Removing from library: {}", id);
         repository.delete(id);
     }
 
     public T addToLibrary(T item) {
         T existing = repository.findById(getEntityId(item));
         if (existing != null) {
+            log.info("{} already in library, skipping add: {}", typeLabel(item), getEntityId(item));
             return existing;
         }
         item.setPk("USER#default");
@@ -47,6 +55,7 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         item.setUpdatedAt(now);
         beforeSave(item);
         repository.save(item);
+        log.info("Added {} to library: {}", typeLabel(item), getEntityId(item));
         return item;
     }
 
@@ -56,6 +65,7 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         item.setScore(score);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated {} score: {} -> {}", typeLabel(item), id, score);
         return item;
     }
 
@@ -65,6 +75,7 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         item.setStatus(status);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated {} status: {} -> {}", typeLabel(item), id, status);
         return item;
     }
 
@@ -74,6 +85,7 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         item.setNotes(notes);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated {} notes: {}", typeLabel(item), id);
         return item;
     }
 }

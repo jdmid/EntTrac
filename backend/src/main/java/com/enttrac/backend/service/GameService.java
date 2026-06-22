@@ -6,6 +6,7 @@ import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.GameItem;
 import com.enttrac.backend.model.result.GameSearchResult;
 import com.enttrac.backend.repository.GameRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class GameService extends MediaService<GameItem, GameSearchResult> {
 
@@ -45,10 +47,12 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
     }
 
     public List<GameSearchResult> search(String query) {
+        log.info("Searching games: {}", query);
         return gameMetadataClient.search(query);
     }
 
     public GameSearchResult getDetails(String id) {
+        log.info("Fetching game details: {}", id);
         return gameMetadataClient.getDetails(id);
     }
 
@@ -62,6 +66,7 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         item.setHoursPlayed(hoursPlayed);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated game progress: {} -> {} hours played", gameId, hoursPlayed);
         return item;
     }
 
@@ -71,6 +76,7 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         item.setUserPlatform(userPlatform);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated game platform: {} -> {}", gameId, userPlatform);
         return item;
     }
 
@@ -82,6 +88,7 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         item.setOwnedDlcIds(cleaned);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated owned DLC for game {}: {} items", gameId, cleaned.size());
         return item;
     }
 
@@ -95,6 +102,7 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
                 item.setIgdbRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 repository.save(item);
+                log.info("Enriched game {} with IGDB rating: {}", gameId, rating);
             }
         }
         return item;
@@ -123,6 +131,7 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
             item.setLastRefreshed(Instant.now().toString());
             item.setUpdatedAt(Instant.now().toString());
             repository.save(item);
+            log.info("Refreshed ratings for game: {}", gameId);
         }
         return item;
     }

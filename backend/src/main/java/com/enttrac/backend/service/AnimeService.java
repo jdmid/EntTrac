@@ -6,6 +6,7 @@ import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.repository.AnimeRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
@@ -36,10 +38,12 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
     protected String getNotFoundMessage(String id) { return "Anime not found: " + id; }
 
     public List<AnimeSearchResult> search(String query) {
+        log.info("Searching anime: {}", query);
         return animeMetadataClient.search(query);
     }
 
     public AnimeSearchResult getDetails(String id) {
+        log.info("Fetching anime details: {}", id);
         return animeMetadataClient.getDetails(id);
     }
 
@@ -57,6 +61,7 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         item.setEpisodesWatched(episodesWatched);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated anime progress: {} -> {} episodes watched", animeId, episodesWatched);
         return item;
     }
 
@@ -79,11 +84,13 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         }
 
         repository.save(item);
+        log.info("Refreshed anime: {}", animeId);
 
         return item;
     }
 
     public List<AnimeItem> refreshAll() {
+        log.info("Refreshing all anime in library");
         List<AnimeItem> library = repository.findAll();
         List<AnimeItem> updated = new ArrayList<>();
 
@@ -119,13 +126,16 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                 }
                 updated.add(item);
             } catch (Exception e) {
+                log.debug("Failed to refresh anime {} during refreshAll: {}", item.getAnimeId(), e.getMessage());
                 updated.add(item);
             }
         }
+        log.info("Finished refreshing all anime: {} items processed", updated.size());
         return updated;
     }
 
     public List<AnimeItem> refreshOngoing() {
+        log.info("Refreshing ongoing anime in library");
         List<AnimeItem> library = repository.findAll();
         List<AnimeItem> updated = new ArrayList<>();
 
@@ -161,9 +171,11 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                 }
                 updated.add(item);
             } catch (Exception e) {
+                log.debug("Failed to refresh anime {} during refreshOngoing: {}", item.getAnimeId(), e.getMessage());
                 updated.add(item);
             }
         }
+        log.info("Finished refreshing ongoing anime: {} items processed", updated.size());
         return updated;
     }
 
@@ -186,6 +198,7 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                 item.setMalRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 repository.save(item);
+                log.info("Enriched anime {} with MAL rating: {}", animeId, rating);
             }
         }
         return item;

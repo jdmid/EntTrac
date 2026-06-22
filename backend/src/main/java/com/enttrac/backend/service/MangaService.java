@@ -1,11 +1,11 @@
 package com.enttrac.backend.service;
 
-import com.enttrac.backend.client.MangaDexClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.MangaItem;
 import com.enttrac.backend.model.result.MangaSearchResult;
 import com.enttrac.backend.repository.MangaRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
 
@@ -35,10 +36,12 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
     protected String getNotFoundMessage(String id) { return "Manga not found: " + id; }
 
     public List<MangaSearchResult> search(String query) {
+        log.info("Searching manga: {}", query);
         return mangaMetadataClient.search(query);
     }
 
     public MangaSearchResult getDetails(String id) {
+        log.info("Fetching manga details: {}", id);
         return mangaMetadataClient.getDetails(id);
     }
 
@@ -54,6 +57,7 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         item.setChaptersRead(chaptersRead);
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
+        log.info("Updated manga progress: {} -> {} chapters read", mangaId, chaptersRead);
         return item;
     }
 
@@ -76,11 +80,13 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         }
 
         repository.save(item);
+        log.info("Refreshed manga: {}", mangaId);
 
         return item;
     }
 
     public List<MangaItem> refreshAll() {
+        log.info("Refreshing all manga in library");
         List<MangaItem> library = repository.findAll();
         List<MangaItem> updated = new ArrayList<>();
 
@@ -98,13 +104,16 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
                 updated.add(item);
             } catch (Exception e) {
                 // skip this item if it fails, continue with rest
+                log.debug("Failed to refresh manga {} during refreshAll: {}", item.getMangaId(), e.getMessage());
                 updated.add(item);
             }
         }
+        log.info("Finished refreshing all manga: {} items processed", updated.size());
         return updated;
     }
 
     public List<MangaItem> refreshOngoing() {
+        log.info("Refreshing ongoing manga in library");
         List<MangaItem> library = repository.findAll();
         List<MangaItem> updated = new ArrayList<>();
 
@@ -128,9 +137,11 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
                 }
                 updated.add(item);
             } catch (Exception e) {
+                log.debug("Failed to refresh manga {} during refreshOngoing: {}", item.getMangaId(), e.getMessage());
                 updated.add(item);
             }
         }
+        log.info("Finished refreshing ongoing manga: {} items processed", updated.size());
         return updated;
     }
 
@@ -144,6 +155,7 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
                 item.setMangadexRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
                 repository.save(item);
+                log.info("Enriched manga {} with MangaDex rating: {}", mangaId, rating);
             }
         }
         return item;

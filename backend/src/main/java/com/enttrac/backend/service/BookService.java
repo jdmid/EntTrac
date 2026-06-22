@@ -5,8 +5,7 @@ import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.BookItem;
 import com.enttrac.backend.model.result.BookSearchResult;
 import com.enttrac.backend.repository.BookRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +13,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class BookService extends MediaService<BookItem, BookSearchResult> {
-
-    private static final Logger log = LoggerFactory.getLogger(BookService.class);
 
     private final MediaMetadataClient<BookSearchResult> bookMetadataClient;
 
