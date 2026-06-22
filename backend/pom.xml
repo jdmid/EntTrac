@@ -129,6 +129,46 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<excludes>
+								<exclude>com/enttrac/backend/client/**</exclude>
+								<exclude>com/enttrac/backend/repository/**</exclude>
+								<exclude>com/enttrac/backend/config/DynamoDbConfig.class</exclude>
+								<exclude>com/enttrac/backend/BackendApplication.class</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>test</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>com/enttrac/backend/client/**</exclude>
+								<exclude>com/enttrac/backend/repository/**</exclude>
+								<exclude>com/enttrac/backend/config/DynamoDbConfig.class</exclude>
+								<exclude>com/enttrac/backend/BackendApplication.class</exclude>
+							</excludes>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>INSTRUCTION</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+										<limit>
+											<counter>BRANCH</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
