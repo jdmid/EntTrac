@@ -309,4 +309,26 @@ public class MangaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Wanted!"));
     }
+
+    @Test
+    void shouldReturn404WhenNotFoundExceptionThrown() throws Exception {
+        when(mangaService.updateProgress("notreal", 10))
+                .thenThrow(new com.enttrac.backend.config.NotFoundException("Manga not found: notreal"));
+
+        mockMvc.perform(patch("/api/manga/library/notreal/progress")
+                        .param("chaptersRead", "10"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Manga not found: notreal"));
+    }
+
+    @Test
+    void shouldReturn502WhenRestClientExceptionThrown() throws Exception {
+        when(mangaService.search("one piece"))
+                .thenThrow(new org.springframework.web.client.RestClientException("Connection refused"));
+
+        mockMvc.perform(get("/api/manga/search")
+                        .param("q", "one piece"))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.error").value("Could not reach an external service. Please try again later."));
+    }
 }
