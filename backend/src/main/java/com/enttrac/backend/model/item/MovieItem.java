@@ -2,6 +2,7 @@ package com.enttrac.backend.model.item;
 
 import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.validation.ValidStatus;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,9 @@ import java.util.List;
 @DynamoDbBean
 public class MovieItem extends MediaItem {
 
+    @NotBlank(message = "Movie ID is required")
     private String movieId;
+    
     private String releaseYear;
     private String runtime;
     private String genres;
