@@ -150,3 +150,43 @@ export const SORT_OPTIONS = {
     { value: 'RECENTLY_ADDED',   label: 'Recently added' },
   ],
 }
+
+// Status options for detail page status selectors, per media type
+// Mirrors ALLOWED statuses per type — must stay consistent with backend MediaType enum
+export const DETAIL_STATUS_OPTIONS = {
+  manga: [
+    { value: 'CONSUMING', label: 'Reading' },
+    { value: 'PLANNED',   label: 'Plan to Read' },
+    { value: 'FINISHED',  label: 'Finished' },
+    { value: 'DROPPED',   label: 'Dropped' },
+  ],
+  anime: [
+    { value: 'CONSUMING', label: 'Watching' },
+    { value: 'PLANNED',   label: 'Plan to Watch' },
+    { value: 'FINISHED',  label: 'Finished' },
+    { value: 'DROPPED',   label: 'Dropped' },
+  ],
+  tv: [
+    { value: 'CONSUMING', label: 'Watching' },
+    { value: 'PLANNED',   label: 'Plan to Watch' },
+    { value: 'FINISHED',  label: 'Finished' },
+    { value: 'DROPPED',   label: 'Dropped' },
+  ],
+  movie: [
+    { value: 'PLANNED',   label: 'Plan to Watch' },
+    { value: 'FINISHED',  label: 'Watched' },
+    { value: 'DROPPED',   label: 'Dropped' },
+  ],
+  book: [
+    { value: 'CONSUMING', label: 'Reading' },
+    { value: 'PLANNED',   label: 'Plan to Read' },
+    { value: 'FINISHED',  label: 'Finished' },
+    { value: 'DROPPED',   label: 'Dropped' },
+  ],
+  game: [
+    { value: 'CONSUMING', label: 'Playing' },
+    { value: 'PLANNED',   label: 'Plan to Play' },
+    { value: 'FINISHED',  label: 'Finished' },
+    { value: 'DROPPED',   label: 'Dropped' },
+  ],
+}

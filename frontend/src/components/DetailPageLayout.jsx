@@ -6,13 +6,6 @@ import { statusStyles, statusLabels } from '../theme/themes'
 import AttributionFooter from './AttributionFooter'
 
 
-const DEFAULT_STATUS_OPTIONS = [
-  { value: 'CONSUMING' },
-  { value: 'PLANNED' },
-  { value: 'FINISHED' },
-  { value: 'DROPPED' },
-]
-
 function DetailPageLayout({
   // Navigation
   activeMedia,
@@ -36,6 +29,9 @@ function DetailPageLayout({
   platformSection, 
   dlcSection, 
 
+  // Status
+  statusOptions,
+  
   // Notes
   notesProgressLabel,
 
@@ -53,11 +49,6 @@ function DetailPageLayout({
 
   const description = item?.description ?? 'No description available.'
   const isLongDesc = description.length > 300
-
-  const statusOptions = DEFAULT_STATUS_OPTIONS.map((opt) => ({
-    value: opt.value,
-    label: statusLabels[activeMedia]?.[opt.value] ?? opt.value,
-  }))
 
   return (
     <div className="min-h-screen" style={{ background: theme.background }}>

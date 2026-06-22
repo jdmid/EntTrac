@@ -9,7 +9,6 @@ import { sortMovies } from '../../utils/sortUtils'
 
 const MOVIE_STATUS_FILTERS = [
   { value: 'ALL',       label: 'All' },
-  { value: 'CONSUMING', label: 'Watching' },
   { value: 'PLANNED',   label: 'Plan to Watch' },
   { value: 'FINISHED',  label: 'Watched' },
   { value: 'DROPPED',   label: 'Dropped' },

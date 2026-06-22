@@ -9,7 +9,7 @@ import {
   addAnimeToLibrary, enrichAnimeFromCache, updateAnimeNotes,
 } from '../../api/animeApi'
 import { themes } from '../../theme/themes'
-import { normalizeSeriesStatus } from '../../utils/statusMapping'
+import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function AnimeDetailPage() {
   const { animeId } = useParams()
@@ -84,6 +84,7 @@ function AnimeDetailPage() {
       theme={theme}
       icon="🎞️"
       refreshLabel="↻ Refresh episodes"
+      statusOptions={DETAIL_STATUS_OPTIONS.anime}
       metaLine={
         <div>
           <p className="text-[12px] text-[#555566] m-0 mb-1 capitalize">

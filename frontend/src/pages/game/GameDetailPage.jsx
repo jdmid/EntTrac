@@ -10,7 +10,7 @@ import {
   updateUserPlatform, updateOwnedDlc,
 } from '../../api/gameApi'
 import { themes } from '../../theme/themes'
-import { normalizeSeriesStatus } from '../../utils/statusMapping'
+import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function mergeGameUpdate(prev, updated) {
     return {
@@ -250,6 +250,7 @@ function GameDetailPage() {
       icon="🎮"
       refreshLabel="Refresh ratings"
       refreshing={refreshing}
+      statusOptions={DETAIL_STATUS_OPTIONS.game}
       metaLine={
         <div>
           <p className="text-[12px] text-[#555566] m-0 mb-1 capitalize">

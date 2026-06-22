@@ -9,7 +9,7 @@ import {
   addTvToLibrary, enrichTvFromCache, updateTvNotes,
 } from '../../api/tvApi'
 import { themes } from '../../theme/themes'
-import { normalizeSeriesStatus } from '../../utils/statusMapping'
+import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function TvDetailPage() {
   const { tvId } = useParams()
@@ -91,6 +91,7 @@ function TvDetailPage() {
       theme={theme}
       icon="📺"
       refreshLabel="Refresh episodes"
+      statusOptions={DETAIL_STATUS_OPTIONS.tv}
       metaLine={
         <div>
           {badgeText && (

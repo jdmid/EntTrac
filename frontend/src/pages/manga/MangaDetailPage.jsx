@@ -9,7 +9,7 @@ import {
   addToLibrary, enrichMangaFromCache, updateMangaNotes,
 } from '../../api/mangaApi'
 import { themes } from '../../theme/themes'
-import { normalizeSeriesStatus } from '../../utils/statusMapping'
+import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function MangaDetailPage() {
   const { mangaId } = useParams()
@@ -82,6 +82,7 @@ function MangaDetailPage() {
       theme={theme}
       icon="📖"
       refreshLabel="Refresh chapters"
+      statusOptions={DETAIL_STATUS_OPTIONS.manga}
       metaLine={
         <div>
           <p className="text-[12px] text-[#555566] m-0 mb-1 capitalize">

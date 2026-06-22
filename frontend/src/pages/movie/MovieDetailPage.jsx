@@ -8,7 +8,7 @@ import {
   updateMovieNotes, enrichMovieFromCache,
 } from '../../api/movieApi'
 import { themes } from '../../theme/themes'
-import { normalizeSeriesStatus } from '../../utils/statusMapping'
+import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function MovieDetailPage() {
   const { movieId } = useParams()
@@ -85,6 +85,7 @@ function MovieDetailPage() {
       icon="🎬"
       refreshLabel="Refresh ratings"
       refreshing={refreshing}
+      statusOptions={DETAIL_STATUS_OPTIONS.movie}
       metaLine={
         <div>
           <p className="text-[12px] text-[#555566] m-0 mb-1">

@@ -8,6 +8,7 @@ import {
   updateBookProgress, resetBookProgress
 } from '../../api/bookApi'
 import { themes } from '../../theme/themes'
+import { DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function BookDetailPage() {
   const { bookId } = useParams()
@@ -99,6 +100,7 @@ function BookDetailPage() {
       score={score}
       theme={theme}
       icon="📚"
+      statusOptions={DETAIL_STATUS_OPTIONS.book}
       metaLine={
         <div>
           {book.firstPublishYear && (
