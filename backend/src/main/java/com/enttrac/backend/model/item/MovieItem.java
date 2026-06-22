@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +27,9 @@ public class MovieItem extends MediaItem {
     private String rottenTomatoesRating;
     private String metacriticRating;
     private Double tmdbRating;
+
+    private List<String> watchProviders;
+    private String watchProvidersRefreshedAt;
 
     @Override
     @ValidStatus(MediaType.MOVIE)

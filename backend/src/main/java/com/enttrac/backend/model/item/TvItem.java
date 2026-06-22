@@ -37,9 +37,14 @@ public class TvItem extends MediaItem {
 
     private List<Integer> seasonEpisodes;
 
+    private List<String> watchProviders;
+    private String watchProvidersRefreshedAt;
+
     @Override
     @ValidStatus(MediaType.TV)
     public String getStatus() {
         return super.getStatus();
     }
+
+
 }
