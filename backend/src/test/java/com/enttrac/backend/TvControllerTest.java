@@ -272,4 +272,32 @@ public class TvControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Breaking Bad"));
     }
+
+    @Test
+    void enrichWatchProviders_ShouldReturnEnrichedItem() throws Exception {
+        TvItem item = new TvItem();
+        item.setTvId("1396");
+        item.setWatchProviders(List.of("Netflix", "Hulu"));
+
+        when(tvService.enrichWatchProviders("1396", "US")).thenReturn(item);
+
+        mockMvc.perform(post("/api/tv/library/1396/watch-providers")
+                        .param("region", "US"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.watchProviders[0]").value("Netflix"))
+                .andExpect(jsonPath("$.watchProviders[1]").value("Hulu"));
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldUseDefaultRegionWhenNotProvided() throws Exception {
+        TvItem item = new TvItem();
+        item.setTvId("1396");
+        item.setWatchProviders(List.of("Netflix"));
+
+        when(tvService.enrichWatchProviders("1396", "US")).thenReturn(item);
+
+        mockMvc.perform(post("/api/tv/library/1396/watch-providers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.watchProviders[0]").value("Netflix"));
+    }
 }

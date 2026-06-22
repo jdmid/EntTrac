@@ -244,4 +244,32 @@ public class MovieControllerTest {
                         .param("status", "CONSUMING"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void enrichWatchProviders_ShouldReturnEnrichedItem() throws Exception {
+        MovieItem item = new MovieItem();
+        item.setMovieId("550");
+        item.setWatchProviders(List.of("Netflix", "Hulu"));
+
+        when(movieService.enrichWatchProviders("550", "US")).thenReturn(item);
+
+        mockMvc.perform(post("/api/movies/library/550/watch-providers")
+                        .param("region", "US"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.watchProviders[0]").value("Netflix"))
+                .andExpect(jsonPath("$.watchProviders[1]").value("Hulu"));
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldUseDefaultRegionWhenNotProvided() throws Exception {
+        MovieItem item = new MovieItem();
+        item.setMovieId("550");
+        item.setWatchProviders(List.of("Netflix"));
+
+        when(movieService.enrichWatchProviders("550", "US")).thenReturn(item);
+
+        mockMvc.perform(post("/api/movies/library/550/watch-providers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.watchProviders[0]").value("Netflix"));
+    }
 }

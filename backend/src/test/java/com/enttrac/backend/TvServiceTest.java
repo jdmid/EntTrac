@@ -1,6 +1,7 @@
 package com.enttrac.backend;
 
 import com.enttrac.backend.client.MediaMetadataClient;
+import com.enttrac.backend.client.TmdbTvClient;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.result.TvSearchResult;
 import com.enttrac.backend.repository.TvRepository;
@@ -12,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -671,5 +674,69 @@ public class TvServiceTest {
         assertEquals(1, results.size());
         assertEquals("Breaking Bad", results.get(0).getTitle());
         verify(tvMetadataClient, times(1)).getWorksByCreator("66633");
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldFetchAndCacheWhenNull() {
+        testItem.setWatchProviders(null);
+        testItem.setWatchProvidersRefreshedAt(null);
+
+        List<String> providers = List.of("Netflix", "Hulu");
+        TmdbTvClient tmdbTvClient = mock(TmdbTvClient.class);
+        when(tmdbTvClient.getWatchProviders("1396", "US")).thenReturn(providers);
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+
+        TvService serviceWithTmdb = new TvService(tvRepository, tmdbTvClient);
+        TvItem result = serviceWithTmdb.enrichWatchProviders("1396", "US");
+
+        assertEquals(2, result.getWatchProviders().size());
+        assertTrue(result.getWatchProviders().contains("Netflix"));
+        assertNotNull(result.getWatchProvidersRefreshedAt());
+        verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldSkipWhenCacheStillValid() {
+        // Set refreshed timestamp to 1 day ago — within 7-day TTL
+        testItem.setWatchProviders(List.of("Netflix"));
+        testItem.setWatchProvidersRefreshedAt(
+                Instant.now().minus(Duration.ofDays(1)).toString());
+
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+
+        TvItem result = tvService.enrichWatchProviders("1396", "US");
+
+        assertEquals(1, result.getWatchProviders().size());
+        verify(tvRepository, never()).save(any());
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldRefetchWhenTtlExpired() {
+        // Set refreshed timestamp to 8 days ago — past 7-day TTL
+        testItem.setWatchProviders(List.of("Netflix"));
+        testItem.setWatchProvidersRefreshedAt(
+                Instant.now().minus(Duration.ofDays(8)).toString());
+
+        List<String> freshProviders = List.of("Netflix", "Max");
+        TmdbTvClient tmdbTvClient = mock(TmdbTvClient.class);
+        when(tmdbTvClient.getWatchProviders("1396", "US")).thenReturn(freshProviders);
+        when(tvRepository.findById("1396")).thenReturn(testItem);
+
+        TvService serviceWithTmdb = new TvService(tvRepository, tmdbTvClient);
+        TvItem result = serviceWithTmdb.enrichWatchProviders("1396", "US");
+
+        assertEquals(2, result.getWatchProviders().size());
+        assertTrue(result.getWatchProviders().contains("Max"));
+        verify(tvRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldThrowWhenNotFound() {
+        when(tvRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                tvService.enrichWatchProviders("notreal", "US"));
+
+        assertEquals("TV show not found: notreal", ex.getMessage());
     }
 }

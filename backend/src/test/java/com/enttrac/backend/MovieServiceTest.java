@@ -13,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -390,5 +392,64 @@ public class MovieServiceTest {
         assertEquals(1, results.size());
         assertEquals("The Grand Budapest Hotel", results.get(0).getTitle());
         verify(tmdbMovieClient, times(1)).getWorksByCreator("525");
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldFetchAndCacheWhenNull() {
+        testItem.setWatchProviders(null);
+        testItem.setWatchProvidersRefreshedAt(null);
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getWatchProviders("550", "US"))
+                .thenReturn(List.of("Netflix", "Hulu"));
+
+        MovieItem result = movieService.enrichWatchProviders("550", "US");
+
+        assertEquals(2, result.getWatchProviders().size());
+        assertTrue(result.getWatchProviders().contains("Netflix"));
+        assertNotNull(result.getWatchProvidersRefreshedAt());
+        verify(movieRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldSkipWhenCacheStillValid() {
+        testItem.setWatchProviders(List.of("Netflix"));
+        testItem.setWatchProvidersRefreshedAt(
+                Instant.now().minus(Duration.ofDays(1)).toString());
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+
+        MovieItem result = movieService.enrichWatchProviders("550", "US");
+
+        assertEquals(1, result.getWatchProviders().size());
+        verify(tmdbMovieClient, never()).getWatchProviders(any(), any());
+        verify(movieRepository, never()).save(any());
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldRefetchWhenTtlExpired() {
+        testItem.setWatchProviders(List.of("Netflix"));
+        testItem.setWatchProvidersRefreshedAt(
+                Instant.now().minus(Duration.ofDays(8)).toString());
+
+        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(tmdbMovieClient.getWatchProviders("550", "US"))
+                .thenReturn(List.of("Netflix", "Max"));
+
+        MovieItem result = movieService.enrichWatchProviders("550", "US");
+
+        assertEquals(2, result.getWatchProviders().size());
+        assertTrue(result.getWatchProviders().contains("Max"));
+        verify(movieRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichWatchProviders_ShouldThrowWhenNotFound() {
+        when(movieRepository.findById("notreal")).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                movieService.enrichWatchProviders("notreal", "US"));
+
+        assertEquals("Movie not found: notreal", ex.getMessage());
     }
 }
