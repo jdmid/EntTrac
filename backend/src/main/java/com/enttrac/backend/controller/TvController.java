@@ -1,12 +1,13 @@
 package com.enttrac.backend.controller;
 
 import com.enttrac.backend.model.item.TvItem;
+import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.TvSearchResult;
+import com.enttrac.backend.validation.ValidStatus;
 import com.enttrac.backend.service.TvService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +69,7 @@ public class TvController {
     @PatchMapping("/library/{tvId}/status")
     public ResponseEntity<TvItem> updateStatus(
             @PathVariable String tvId,
-            @RequestParam @Pattern(regexp = "CONSUMING|PLANNED|FINISHED|DROPPED") String status) {
+            @RequestParam @ValidStatus(MediaType.TV) String status) {
         return ResponseEntity.ok(tvService.updateStatus(tvId, status));
     }
 

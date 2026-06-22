@@ -1,5 +1,7 @@
 package com.enttrac.backend.model.item;
 
+import com.enttrac.backend.model.MediaType;
+import com.enttrac.backend.validation.ValidStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -23,4 +25,10 @@ public class MovieItem extends MediaItem {
     private String rottenTomatoesRating;
     private String metacriticRating;
     private Double tmdbRating;
+
+    @Override
+    @ValidStatus(MediaType.MOVIE)
+    public String getStatus() {
+        return super.getStatus();
+    }
 }

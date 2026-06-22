@@ -1,5 +1,7 @@
 package com.enttrac.backend.model.item;
 
+import com.enttrac.backend.model.MediaType;
+import com.enttrac.backend.validation.ValidStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -24,4 +26,10 @@ public class BookItem extends MediaItem {
     private Integer currentChapter;
     private Integer currentPage;
     private Double bookRating;
+
+    @Override
+    @ValidStatus(MediaType.BOOK)
+    public String getStatus() {
+        return super.getStatus();
+    }
 }

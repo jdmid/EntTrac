@@ -1,12 +1,13 @@
 package com.enttrac.backend.controller;
 
 import com.enttrac.backend.model.item.BookItem;
+import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.BookSearchResult;
 import com.enttrac.backend.service.BookService;
+import com.enttrac.backend.validation.ValidStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +69,7 @@ public class BookController {
     @PatchMapping("/library/{bookId}/status")
     public ResponseEntity<BookItem> updateStatus(
             @PathVariable String bookId,
-            @RequestParam @Pattern(regexp = "CONSUMING|PLANNED|FINISHED|DROPPED") String status) {
+            @RequestParam @ValidStatus(MediaType.BOOK) String status) {
         return ResponseEntity.ok(bookService.updateStatus(bookId, status));
     }
 

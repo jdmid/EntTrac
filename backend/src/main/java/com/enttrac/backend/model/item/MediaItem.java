@@ -10,7 +10,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 
 @Getter
@@ -28,10 +27,6 @@ public abstract class MediaItem {
     @NotBlank(message = "Title is required")
     private String title;
 
-    @Pattern(
-            regexp = "CONSUMING|PLANNED|FINISHED|DROPPED",
-            message = "Status must be CONSUMING, PLANNED, FINISHED, or DROPPED"
-    )
     private String status;
 
     private String coverUrl;

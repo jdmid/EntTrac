@@ -1,5 +1,7 @@
 package com.enttrac.backend.model.item;
 
+import com.enttrac.backend.model.MediaType;
+import com.enttrac.backend.validation.ValidStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -31,4 +33,10 @@ public class GameItem extends MediaItem {
     private Double igdbRating;
     private Double igdbCriticRating;
     private List<String> ownedDlcIds;
+
+    @Override
+    @ValidStatus(MediaType.GAME)
+    public String getStatus() {
+        return super.getStatus();
+    }
 }

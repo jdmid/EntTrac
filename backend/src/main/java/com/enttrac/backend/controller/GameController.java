@@ -1,12 +1,13 @@
 package com.enttrac.backend.controller;
 
 import com.enttrac.backend.model.item.GameItem;
+import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.GameSearchResult;
+import com.enttrac.backend.validation.ValidStatus;
 import com.enttrac.backend.service.GameService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -71,7 +72,7 @@ public class GameController {
     @PatchMapping("/library/{gameId}/status")
     public ResponseEntity<GameItem> updateStatus(
             @PathVariable String gameId,
-            @RequestParam @Pattern(regexp = "CONSUMING|PLANNED|FINISHED|DROPPED") String status) {
+            @RequestParam @ValidStatus(MediaType.GAME) String status) {
         return ResponseEntity.ok(gameService.updateStatus(gameId, status));
     }
 

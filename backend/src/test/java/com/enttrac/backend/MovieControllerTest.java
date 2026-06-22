@@ -237,4 +237,11 @@ public class MovieControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("The Grand Budapest Hotel"));
     }
+
+    @Test
+    void updateStatus_ShouldReturn400WhenConsumingForMovie() throws Exception {
+        mockMvc.perform(patch("/api/movies/library/550/status")
+                        .param("status", "CONSUMING"))
+                .andExpect(status().isBadRequest());
+    }
 }

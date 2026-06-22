@@ -1,5 +1,7 @@
 package com.enttrac.backend.model.item;
 
+import com.enttrac.backend.model.MediaType;
+import com.enttrac.backend.validation.ValidStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -34,4 +36,10 @@ public class TvItem extends MediaItem {
     private String creatorId;
 
     private List<Integer> seasonEpisodes;
+
+    @Override
+    @ValidStatus(MediaType.TV)
+    public String getStatus() {
+        return super.getStatus();
+    }
 }

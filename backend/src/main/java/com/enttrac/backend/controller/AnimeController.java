@@ -2,14 +2,15 @@ package com.enttrac.backend.controller;
 
 import com.enttrac.backend.client.JikanClient;
 import com.enttrac.backend.model.item.AnimeItem;
+import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.service.AnimeService;
+import com.enttrac.backend.validation.ValidStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -68,7 +69,7 @@ public class AnimeController {
     @PatchMapping("/library/{animeId}/status")
     public ResponseEntity<AnimeItem> updateStatus(
             @PathVariable String animeId,
-            @RequestParam @Pattern(regexp = "CONSUMING|PLANNED|FINISHED|DROPPED") String status) {
+            @RequestParam @ValidStatus(MediaType.ANIME) String status) {
         return ResponseEntity.ok(animeService.updateStatus(animeId, status));
     }
 

@@ -1,12 +1,13 @@
 package com.enttrac.backend.controller;
 
 import com.enttrac.backend.model.item.MovieItem;
+import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.MovieSearchResult;
 import com.enttrac.backend.service.MovieService;
+import com.enttrac.backend.validation.ValidStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +61,7 @@ public class MovieController {
     @PatchMapping("/library/{movieId}/status")
     public ResponseEntity<MovieItem> updateStatus(
             @PathVariable String movieId,
-            @RequestParam @Pattern(regexp = "CONSUMING|PLANNED|FINISHED|DROPPED") String status) {
+            @RequestParam @ValidStatus(MediaType.MOVIE) String status) {
         return ResponseEntity.ok(movieService.updateStatus(movieId, status));
     }
 

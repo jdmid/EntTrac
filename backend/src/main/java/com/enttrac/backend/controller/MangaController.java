@@ -2,8 +2,9 @@ package com.enttrac.backend.controller;
 
 import com.enttrac.backend.model.item.MangaItem;
 import com.enttrac.backend.model.result.MangaSearchResult;
+import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.service.MangaService;
-import jakarta.validation.constraints.Pattern;
+import com.enttrac.backend.validation.ValidStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
@@ -66,7 +67,7 @@ public class MangaController {
     @PatchMapping("/library/{mangaId}/status")
     public ResponseEntity<MangaItem> updateStatus(
             @PathVariable String mangaId,
-            @RequestParam @Pattern(regexp = "CONSUMING|PLANNED|FINISHED|DROPPED") String status) {
+            @RequestParam @ValidStatus(MediaType.MANGA) String status) {
         return ResponseEntity.ok(mangaService.updateStatus(mangaId, status));
     }
 
