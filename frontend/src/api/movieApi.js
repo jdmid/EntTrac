@@ -44,3 +44,8 @@ export const getWorksByDirector = (directorId) =>
 
 export const searchPeople = (name) =>
   client.get('/movies/person-search', { params: { name } })
+
+export const enrichMovieWatchProviders = (movieId, region) =>
+  client.post(`/movies/library/${movieId}/watch-providers`, null, {
+    params: { region },
+  })

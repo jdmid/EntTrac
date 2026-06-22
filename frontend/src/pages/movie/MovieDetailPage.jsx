@@ -5,9 +5,10 @@ import RatingCard from '../../components/RatingCard'
 import {
   getMovie, getMovieDetails, updateMovieScore, updateMovieStatus,
   refreshMovieRatings, removeMovieFromLibrary, addMovieToLibrary,
-  updateMovieNotes, enrichMovieFromCache,
+  updateMovieNotes, enrichMovieFromCache, enrichMovieWatchProviders
 } from '../../api/movieApi'
 import { themes } from '../../theme/themes'
+import { detectRegion } from '../../utils/regionUtils'
 import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function MovieDetailPage() {
@@ -16,6 +17,7 @@ function MovieDetailPage() {
   const location = useLocation()
   const theme = themes.movie
   const fromSearch = location.state?.from === 'search'
+  const [region] = useState(() => detectRegion())
 
   const [movie, setMovie] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -34,6 +36,9 @@ function MovieDetailPage() {
         enrichMovieFromCache(movieId)
           .then((enriched) => setMovie(enriched.data))
           .catch((err) => console.error('Enrich failed:', err))
+        enrichMovieWatchProviders(movieId, region)
+          .then((enriched) => setMovie(enriched.data))
+          .catch((err) => console.error('Failed to enrich movie watch providers:', err))
       })
       .catch(() => {
         getMovieDetails(movieId)
@@ -173,6 +178,29 @@ function MovieDetailPage() {
       }
       onNotesSave={(notes) =>
         updateMovieNotes(movieId, notes).then((res) => setMovie(res.data))
+      }
+      watchProvidersSection={
+        movie.watchProviders && movie.watchProviders.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {movie.watchProviders.map((provider) => (
+              <span
+                key={provider}
+                className="text-[11px] px-2.5 py-[3px] rounded-full"
+                style={{
+                  background: theme.accentBg,
+                  border: `0.5px solid ${theme.accentBorder}`,
+                  color: theme.accent,
+                }}
+              >
+                {provider}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[12px] text-[#555566] m-0">
+            Not available for streaming in your region
+          </p>
+        )
       }
     />
   )

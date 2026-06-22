@@ -31,7 +31,7 @@ function DetailPageLayout({
 
   // Status
   statusOptions,
-  
+
   // Notes
   notesProgressLabel,
 
@@ -42,6 +42,8 @@ function DetailPageLayout({
   onScoreSave,
   onStatusChange,
   onNotesSave,
+
+  watchProvidersSection,
 }) {
   const navigate = useNavigate()
   const [descExpanded, setDescExpanded] = useState(false)
@@ -302,6 +304,16 @@ function DetailPageLayout({
                   DLC
                 </p>
                 {dlcSection}
+              </div>
+            )}
+
+            {/* Watch providers slot — TV and movies only */}
+            {inLibrary && watchProvidersSection && (
+              <div className="mb-4">
+                <p className="text-[11px] text-[#555566] uppercase tracking-[0.05em] mb-1.5">
+                  Streaming
+                </p>
+                {watchProvidersSection}
               </div>
             )}
           </div>

@@ -6,9 +6,10 @@ import RatingCard from '../../components/RatingCard'
 import {
   getTvShow, getTvDetails, updateTvProgress, updateTvScore,
   updateTvStatus, refreshTvEpisodes, removeFromTvLibrary,
-  addTvToLibrary, enrichTvFromCache, updateTvNotes,
+  addTvToLibrary, enrichTvFromCache, updateTvNotes, enrichTvWatchProviders
 } from '../../api/tvApi'
 import { themes } from '../../theme/themes'
+import { detectRegion } from '../../utils/regionUtils'
 import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
 function TvDetailPage() {
@@ -17,6 +18,7 @@ function TvDetailPage() {
   const location = useLocation()
   const theme = themes.tv
   const fromSearch = location.state?.from === 'search'
+  const [region] = useState(() => detectRegion())
 
   const [show, setShow] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -34,6 +36,9 @@ function TvDetailPage() {
         enrichTvFromCache(tvId)
           .then((enriched) => setShow(enriched.data))
           .catch((err) => console.error('Enrich failed:', err))
+        enrichTvWatchProviders(tvId, region)
+          .then((enriched) => setShow(enriched.data))
+          .catch((err) => console.error('Failed to enrich TV watch providers:', err))  
       })
       .catch(() => {
         getTvDetails(tvId)
@@ -162,6 +167,29 @@ function TvDetailPage() {
             color="#01b4e4"
             theme={theme}
           />
+      }
+      watchProvidersSection={
+        show.watchProviders && show.watchProviders.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {show.watchProviders.map((provider) => (
+              <span
+                key={provider}
+                className="text-[11px] px-2.5 py-[3px] rounded-full"
+                style={{
+                  background: theme.accentBg,
+                  border: `0.5px solid ${theme.accentBorder}`,
+                  color: theme.accent,
+                }}
+              >
+                {provider}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[12px] text-[#555566] m-0">
+            Not available for streaming in your region
+          </p>
+        )
       }
       onRefresh={() => {
         setRefreshing(true)
