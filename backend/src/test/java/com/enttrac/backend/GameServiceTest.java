@@ -26,7 +26,7 @@ public class GameServiceTest {
     private GameRepository gameRepository;
 
     @Mock
-    private MediaMetadataClient<GameSearchResult> gameMetadataClient;
+    private IgdbClient gameMetadataClient;
 
     @InjectMocks
     private GameService gameService;
@@ -284,7 +284,7 @@ public class GameServiceTest {
     void enrichIgdbRating_ShouldFetchAndCacheWhenNull() {
         testItem.setIgdbRating(null);
         when(gameRepository.findById("1942")).thenReturn(testItem);
-        when(gameMetadataClient.getCommunityRating("1942")).thenReturn(87.5);
+        when(gameMetadataClient.getIgdbRating("1942")).thenReturn(87.5);
 
         GameItem result = gameService.enrichIgdbRating("1942");
 
@@ -300,7 +300,7 @@ public class GameServiceTest {
         GameItem result = gameService.enrichIgdbRating("1942");
 
         assertEquals(87.5, result.getIgdbRating());
-        verify(gameMetadataClient, never()).getCommunityRating(any());
+        verify(gameMetadataClient, never()).getIgdbRating(any());
         verify(gameRepository, never()).save(any());
     }
 

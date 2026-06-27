@@ -88,8 +88,7 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
         return result;
     }
 
-    @Override
-    public Double getCommunityRating(String id) {
+    public Double getTmdbRating(String id) {
         try {
             JsonNode response = restClient.get()
                     .uri("/movie/{id}?language=en-US&api_key={apiKey}", id, apiKey)
@@ -149,9 +148,9 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
             }
         }
 
-        Double communityRating = null;
+        Double tmdbRating = null;
         if (movie.has("vote_average") && !movie.get("vote_average").isNull()) {
-            communityRating = Math.round(
+            tmdbRating = Math.round(
                     movie.get("vote_average").asDouble() * 10.0) / 10.0;
         }
 
@@ -163,7 +162,7 @@ public class TmdbMovieClient implements MediaMetadataClient<MovieSearchResult> {
                 .status(status)
                 .releaseYear(releaseYear)
                 .genres(genres)
-                .communityRating(communityRating)
+                .tmdbRating(tmdbRating)
                 .build();
     }
 

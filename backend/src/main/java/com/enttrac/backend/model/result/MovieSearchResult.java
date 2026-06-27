@@ -18,7 +18,7 @@ public class MovieSearchResult extends MediaSearchResult {
     private String genres;
     private String director;
     private String directorId;
-
+    private Double tmdbRating;
 
     // Supplementary scores populated by OmdbClient
     private Double imdbRating;
@@ -28,7 +28,7 @@ public class MovieSearchResult extends MediaSearchResult {
 
     @lombok.Builder
     public MovieSearchResult(String id, String title, String description,
-                             String coverUrl, String status, Double communityRating,
+                             String coverUrl, String status, Double tmdbRating,
                              String releaseYear, String runtime, String genres,
                              String director, String directorId, Double imdbRating,
                              String rottenTomatoesRating, String metacriticRating,
@@ -39,7 +39,7 @@ public class MovieSearchResult extends MediaSearchResult {
         setDescription(description);
         setCoverUrl(coverUrl);
         setStatus(status);
-        setCommunityRating(communityRating);
+        setTmdbRating(tmdbRating);
         this.releaseYear = releaseYear;
         this.runtime = runtime;
         this.genres = genres;

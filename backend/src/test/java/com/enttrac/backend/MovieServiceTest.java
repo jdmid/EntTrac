@@ -235,7 +235,7 @@ public class MovieServiceTest {
     void enrichFromCache_ShouldCallOmdbWhenNoRatingsCached() {
         when(movieRepository.findById("550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
-                .id("550").imdbId("tt0137523").communityRating(7.8).build();
+                .id("550").imdbId("tt0137523").tmdbRating(7.8).build();
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
         movieService.enrichFromCache("550");
@@ -248,7 +248,7 @@ public class MovieServiceTest {
     void enrichFromCache_ShouldCacheTmdbRatingWhenNull() {
         when(movieRepository.findById("550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
-                .id("550").imdbId("tt0137523").communityRating(7.8).build();
+                .id("550").imdbId("tt0137523").tmdbRating(7.8).build();
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
         MovieItem result = movieService.enrichFromCache("550");

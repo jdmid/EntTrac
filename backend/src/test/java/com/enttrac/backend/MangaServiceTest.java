@@ -1,5 +1,6 @@
 package com.enttrac.backend;
 
+import com.enttrac.backend.client.MangaDexClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.item.MangaItem;
 import com.enttrac.backend.model.result.MangaSearchResult;
@@ -24,7 +25,7 @@ public class MangaServiceTest {
     private MangaRepository mangaRepository;
 
     @Mock
-    private MediaMetadataClient<MangaSearchResult> mangaMetadataClient;
+    private MangaDexClient mangaMetadataClient;
 
     @InjectMocks
     private MangaService mangaService;
@@ -400,7 +401,7 @@ public class MangaServiceTest {
     void enrichMangadexRating_ShouldFetchAndCacheWhenNull() {
         testItem.setMangadexRating(null);
         when(mangaRepository.findById("abc123")).thenReturn(testItem);
-        when(mangaMetadataClient.getCommunityRating("abc123")).thenReturn(9.6);
+        when(mangaMetadataClient.getMangadexRating("abc123")).thenReturn(9.6);
 
         MangaItem result = mangaService.enrichMangadexRating("abc123");
 
@@ -416,7 +417,7 @@ public class MangaServiceTest {
         MangaItem result = mangaService.enrichMangadexRating("abc123");
 
         assertEquals(9.6, result.getMangadexRating());
-        verify(mangaMetadataClient, never()).getCommunityRating(any());
+        verify(mangaMetadataClient, never()).getMangadexRating(any());
         verify(mangaRepository, never()).save(any());
     }
 
@@ -438,7 +439,7 @@ public class MangaServiceTest {
 
         when(mangaRepository.findById("abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
-        when(mangaMetadataClient.getCommunityRating("abc123")).thenReturn(9.6);
+        when(mangaMetadataClient.getMangadexRating("abc123")).thenReturn(9.6);
 
         MangaItem result = mangaService.refreshLatestChapter("abc123");
 
@@ -459,7 +460,7 @@ public class MangaServiceTest {
         MangaItem result = mangaService.refreshLatestChapter("abc123");
 
         assertEquals(9.6, result.getMangadexRating());
-        verify(mangaMetadataClient, never()).getCommunityRating(any());
+        verify(mangaMetadataClient, never()).getMangadexRating(any());
     }
 
     @Test
@@ -467,7 +468,7 @@ public class MangaServiceTest {
         testItem.setMangadexRating(null);
         when(mangaRepository.findById("abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(null);
-        when(mangaMetadataClient.getCommunityRating("abc123")).thenReturn(9.6);
+        when(mangaMetadataClient.getMangadexRating("abc123")).thenReturn(9.6);
 
         MangaItem result = mangaService.refreshLatestChapter("abc123");
 

@@ -28,7 +28,7 @@ public class TvServiceTest {
     private TvRepository tvRepository;
 
     @Mock
-    private MediaMetadataClient<TvSearchResult> tvMetadataClient;
+    private TmdbTvClient tvMetadataClient;
 
     @InjectMocks
     private TvService tvService;
@@ -577,7 +577,7 @@ public class TvServiceTest {
     void enrichTmdbRating_ShouldFetchAndCacheWhenNull() {
         testItem.setTmdbRating(null);
         when(tvRepository.findById("1396")).thenReturn(testItem);
-        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
+        when(tvMetadataClient.getTmdbRating("1396")).thenReturn(9.5);
 
         TvItem result = tvService.enrichTmdbRating("1396");
 
@@ -593,7 +593,7 @@ public class TvServiceTest {
         TvItem result = tvService.enrichTmdbRating("1396");
 
         assertEquals(9.5, result.getTmdbRating());
-        verify(tvMetadataClient, never()).getCommunityRating(any());
+        verify(tvMetadataClient, never()).getTmdbRating(any());
         verify(tvRepository, never()).save(any());
     }
 
@@ -620,7 +620,7 @@ public class TvServiceTest {
 
         when(tvRepository.findById("1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
-        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
+        when(tvMetadataClient.getTmdbRating("1396")).thenReturn(9.5);
 
         TvItem result = tvService.refreshLatestEpisodes("1396");
 
@@ -644,7 +644,7 @@ public class TvServiceTest {
         TvItem result = tvService.refreshLatestEpisodes("1396");
 
         assertEquals(9.5, result.getTmdbRating());
-        verify(tvMetadataClient, never()).getCommunityRating(any());
+        verify(tvMetadataClient, never()).getTmdbRating(any());
     }
 
     @Test
@@ -652,7 +652,7 @@ public class TvServiceTest {
         testItem.setTmdbRating(null);
         when(tvRepository.findById("1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(null);
-        when(tvMetadataClient.getCommunityRating("1396")).thenReturn(9.5);
+        when(tvMetadataClient.getTmdbRating("1396")).thenReturn(9.5);
 
         TvItem result = tvService.refreshLatestEpisodes("1396");
 

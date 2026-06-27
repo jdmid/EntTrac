@@ -148,8 +148,8 @@ public class MovieService {
                     item.setRottenTomatoesRating(details.getRottenTomatoesRating());
                     item.setMetacriticRating(details.getMetacriticRating());
                 }
-                if (!hasTmdbRating && details.getCommunityRating() != null) {
-                    item.setTmdbRating(details.getCommunityRating());
+                if (!hasTmdbRating && details.getTmdbRating() != null) {
+                    item.setTmdbRating(details.getTmdbRating());
                 }
                 item.setUpdatedAt(Instant.now().toString());
                 movieRepository.save(item);

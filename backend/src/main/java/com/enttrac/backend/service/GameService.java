@@ -1,5 +1,6 @@
 package com.enttrac.backend.service;
 
+import com.enttrac.backend.client.IgdbClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.GameItem;
@@ -96,7 +97,7 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         if (item == null) throw new NotFoundException("Game not found: " + gameId);
 
         if (item.getIgdbRating() == null) {
-            Double rating = gameMetadataClient.getCommunityRating(gameId);
+            Double rating = ((IgdbClient) gameMetadataClient).getIgdbRating(gameId);
             if (rating != null) {
                 item.setIgdbRating(rating);
                 item.setUpdatedAt(Instant.now().toString());

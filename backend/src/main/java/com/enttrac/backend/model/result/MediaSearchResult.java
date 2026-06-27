@@ -13,5 +13,4 @@ public abstract class MediaSearchResult {
     private String description;
     private String coverUrl;
     private String status;
-    private Double communityRating;
 }

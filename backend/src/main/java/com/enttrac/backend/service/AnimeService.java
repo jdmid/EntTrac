@@ -79,7 +79,7 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         }
 
         if (item.getMalRating() == null) {
-            Double rating = animeMetadataClient.getCommunityRating(animeId);
+            Double rating = ((JikanClient) animeMetadataClient).getMalRating(animeId);
             if (rating != null) item.setMalRating(rating);
         }
 
@@ -193,7 +193,7 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
         if (item.getMalRating() == null) {
-            Double rating = animeMetadataClient.getCommunityRating(animeId);
+            Double rating = ((JikanClient) animeMetadataClient).getMalRating(animeId);
             if (rating != null) {
                 item.setMalRating(rating);
                 item.setUpdatedAt(Instant.now().toString());

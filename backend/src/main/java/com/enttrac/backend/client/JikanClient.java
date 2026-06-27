@@ -57,8 +57,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
         return null;
     }
 
-    @Override
-    public Double getCommunityRating(String id) {
+    public Double getMalRating(String id) {
         try {
             JsonNode response = restClient.get()
                     .uri("/anime/{id}", id)
@@ -153,7 +152,6 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
                 .studio(studio)
                 .season(season)
                 .studioId(studioId)
-                .communityRating(communityRating)
                 .build();
     }
 

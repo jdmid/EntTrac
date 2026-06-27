@@ -22,15 +22,13 @@ public class BookSearchResult extends MediaSearchResult {
 
     @lombok.Builder
     public BookSearchResult(String id, String title, String description,
-                            String coverUrl, Double communityRating,
-                            List<Map<String, String>> authors,
+                            String coverUrl, List<Map<String, String>> authors,
                             String firstPublishYear, String genres) {
         super();
         setId(id);
         setTitle(title);
         setDescription(description);
         setCoverUrl(coverUrl);
-        setCommunityRating(communityRating);
         this.authors = authors;
         this.firstPublishYear = firstPublishYear;
         this.genres = genres;

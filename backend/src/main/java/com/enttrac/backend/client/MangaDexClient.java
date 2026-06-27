@@ -87,8 +87,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
         return null;
     }
 
-    @Override
-    public Double getCommunityRating(String id) {
+    public Double getMangadexRating(String id) {
         try {
             JsonNode response = restClient.get()
                     .uri("/statistics/manga/{id}", id)

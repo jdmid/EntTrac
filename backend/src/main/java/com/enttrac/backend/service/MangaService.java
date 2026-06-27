@@ -1,5 +1,6 @@
 package com.enttrac.backend.service;
 
+import com.enttrac.backend.client.MangaDexClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.MangaItem;
@@ -75,7 +76,7 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         }
 
         if (item.getMangadexRating() == null) {
-            Double rating = mangaMetadataClient.getCommunityRating(mangaId);
+            Double rating = ((MangaDexClient) mangaMetadataClient).getMangadexRating(mangaId);
             if (rating != null) item.setMangadexRating(rating);
         }
 
@@ -150,7 +151,7 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         if (item == null) throw new NotFoundException("Manga not found: " + mangaId);
 
         if (item.getMangadexRating() == null) {
-            Double rating = mangaMetadataClient.getCommunityRating(mangaId);
+            Double rating = ((MangaDexClient) mangaMetadataClient).getMangadexRating(mangaId);
             if (rating != null) {
                 item.setMangadexRating(rating);
                 item.setUpdatedAt(Instant.now().toString());

@@ -104,8 +104,7 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
         return result;
     }
 
-    @Override
-    public Double getCommunityRating(String id) {
+    public Double getTmdbRating(String id) {
         try {
             JsonNode response = restClient.get()
                     .uri("/tv/{id}?language=en-US&api_key={apiKey}", id, apiKey)
@@ -245,7 +244,6 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
                 .genres(genres)
                 .firstAirYear(firstAirYear)
                 .seriesType(seriesType)
-                .communityRating(communityRating)
                 .numberOfSeasons(numberOfSeasons)
                 .build();
     }

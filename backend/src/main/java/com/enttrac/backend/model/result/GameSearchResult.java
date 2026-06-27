@@ -27,7 +27,7 @@ public class GameSearchResult extends MediaSearchResult {
 
     @lombok.Builder
     public GameSearchResult(String id, String title, String description,
-                            String coverUrl, String status, Double communityRating,
+                            String coverUrl, String status,
                             String releaseYear, String genres,
                             String developer, String developerId,
                             List<String> platforms,
@@ -39,7 +39,6 @@ public class GameSearchResult extends MediaSearchResult {
         setDescription(description);
         setCoverUrl(coverUrl);
         setStatus(status);
-        setCommunityRating(communityRating);
         this.releaseYear = releaseYear;
         this.genres = genres;
         this.developer = developer;

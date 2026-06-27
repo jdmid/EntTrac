@@ -125,7 +125,7 @@ function MovieSearchPage() {
         imdbRating: full.imdbRating ?? null,
         rottenTomatoesRating: full.rottenTomatoesRating ?? null,
         metacriticRating: full.metacriticRating ?? null,
-        tmdbRating: full.communityRating ?? movie.communityRating,
+        tmdbRating: full.tmdbRating ?? movie.tmdbRating,
       })
       setAddedIds((prev) => new Set([...prev, movie.id]))
     } catch (err) {

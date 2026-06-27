@@ -155,8 +155,8 @@ public class IgdbClient implements MediaMetadataClient<GameSearchResult> {
         }
     }
 
-    @Override
-    public Double getCommunityRating(String id) {
+
+    public Double getIgdbRating(String id) {
         try {
             String body = """
                     fields rating;

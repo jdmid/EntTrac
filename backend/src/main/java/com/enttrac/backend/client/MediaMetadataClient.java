@@ -8,10 +8,6 @@ public interface MediaMetadataClient<T extends MediaSearchResult> {
     List<T> search(String query);
     T getDetails(String id);
 
-    default Double getCommunityRating(String id) {
-        return null;
-    }
-
     default List<T> getWorksByCreator(String creatorId) {
         return List.of();
     }

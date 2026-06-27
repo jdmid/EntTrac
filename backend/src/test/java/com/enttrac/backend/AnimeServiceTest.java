@@ -25,7 +25,7 @@ public class AnimeServiceTest {
     private AnimeRepository animeRepository;
 
     @Mock
-    private MediaMetadataClient<AnimeSearchResult> animeMetadataClient;
+    private JikanClient animeMetadataClient;
 
     @InjectMocks
     private AnimeService animeService;
@@ -388,7 +388,7 @@ public class AnimeServiceTest {
     void enrichMalRating_ShouldFetchAndCacheWhenNull() {
         testItem.setMalRating(null);
         when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getCommunityRating("21")).thenReturn(8.7);
+        when(animeMetadataClient.getMalRating("21")).thenReturn(8.7);
 
         AnimeItem result = animeService.enrichMalRating("21");
 
@@ -404,7 +404,7 @@ public class AnimeServiceTest {
         AnimeItem result = animeService.enrichMalRating("21");
 
         assertEquals(8.7, result.getMalRating());
-        verify(animeMetadataClient, never()).getCommunityRating(any());
+        verify(animeMetadataClient, never()).getMalRating(any());
         verify(animeRepository, never()).save(any());
     }
 
@@ -426,7 +426,7 @@ public class AnimeServiceTest {
 
         when(animeRepository.findById("21")).thenReturn(testItem);
         when(animeMetadataClient.getDetails("21")).thenReturn(details);
-        when(animeMetadataClient.getCommunityRating("21")).thenReturn(8.7);
+        when(animeMetadataClient.getMalRating("21")).thenReturn(8.7);
 
         AnimeItem result = animeService.refreshLatestEpisode("21");
 
@@ -447,7 +447,7 @@ public class AnimeServiceTest {
         AnimeItem result = animeService.refreshLatestEpisode("21");
 
         assertEquals(8.7, result.getMalRating());
-        verify(animeMetadataClient, never()).getCommunityRating(any());
+        verify(animeMetadataClient, never()).getMalRating(any());
     }
 
     @Test
@@ -455,7 +455,7 @@ public class AnimeServiceTest {
         testItem.setMalRating(null);
         when(animeRepository.findById("21")).thenReturn(testItem);
         when(animeMetadataClient.getDetails("21")).thenReturn(null);
-        when(animeMetadataClient.getCommunityRating("21")).thenReturn(8.7);
+        when(animeMetadataClient.getMalRating("21")).thenReturn(8.7);
 
         AnimeItem result = animeService.refreshLatestEpisode("21");
 

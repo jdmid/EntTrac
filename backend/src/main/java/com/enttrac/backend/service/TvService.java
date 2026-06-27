@@ -115,7 +115,7 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         }
 
         if (item.getTmdbRating() == null) {
-            Double rating = tvMetadataClient.getCommunityRating(tvId);
+            Double rating = ((TmdbTvClient) tvMetadataClient).getTmdbRating(tvId);
             if (rating != null) item.setTmdbRating(rating);
         }
 
@@ -250,7 +250,7 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         if (item == null) throw new NotFoundException("TV show not found: " + tvId);
 
         if (item.getTmdbRating() == null) {
-            Double rating = tvMetadataClient.getCommunityRating(tvId);
+            Double rating = ((TmdbTvClient) tvMetadataClient).getTmdbRating(tvId);
             if (rating != null) {
                 item.setTmdbRating(rating);
                 item.setUpdatedAt(Instant.now().toString());
