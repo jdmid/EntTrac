@@ -18,23 +18,25 @@ public class MangaSearchResult extends MediaSearchResult {
     private String authorId;
     private String artistId;
     private Double mangadexRating;
+    private Double anilistRating;
 
     @lombok.Builder
     public MangaSearchResult(String id, String title, String description,
                              String coverUrl, String status, Double mangadexRating,
                              Integer latestChapter, String author, String artist,
-                             String authorId, String artistId) {
+                             String authorId, String artistId, Double anilistRating) {
         super();
         setId(id);
         setTitle(title);
         setDescription(description);
         setCoverUrl(coverUrl);
         setStatus(status);
-        setMangadexRating(mangadexRating);
         this.latestChapter = latestChapter;
         this.author = author;
         this.artist = artist;
         this.authorId = authorId;
         this.artistId = artistId;
+        this.mangadexRating = mangadexRating;
+        this.anilistRating = anilistRating;
     }
 }

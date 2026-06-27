@@ -18,12 +18,14 @@ public class AnimeSearchResult extends MediaSearchResult {
     private String season;
     private String studioId;
     private Double malRating;
+    private Double anilistRating;
+    private String malId;
 
 
     @lombok.Builder
     public AnimeSearchResult(String id, String title, String description,
-                             String coverUrl, String status, Double malRating,
-                             Integer totalEpisodes, Integer latestEpisode,
+                             String coverUrl, String status, Double malRating, Double anilistRating,
+                             Integer totalEpisodes, Integer latestEpisode, String malId,
                              String studio, String season, String studioId) {
         super();
         setId(id);
@@ -31,11 +33,13 @@ public class AnimeSearchResult extends MediaSearchResult {
         setDescription(description);
         setCoverUrl(coverUrl);
         setStatus(status);
-        setMalRating(malRating);
         this.totalEpisodes = totalEpisodes;
         this.latestEpisode = latestEpisode;
         this.studio = studio;
         this.season = season;
         this.studioId = studioId;
+        this.malRating = malRating;
+        this.anilistRating = anilistRating;
+        this.malId = malId;
     }
 }

@@ -136,10 +136,10 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
             season = s.substring(0, 1).toUpperCase() + s.substring(1) + " " + y;
         }
 
-        // Community rating
-        Double communityRating = null;
+        // Mal rating
+        Double malRating = null;
         if (anime.has("score") && !anime.get("score").isNull()) {
-            communityRating = Math.round(anime.get("score").asDouble() * 10.0) / 10.0;
+            malRating = Math.round(anime.get("score").asDouble() * 10.0) / 10.0;
         }
 
         return AnimeSearchResult.builder()
@@ -152,6 +152,7 @@ public class JikanClient implements MediaMetadataClient<AnimeSearchResult> {
                 .studio(studio)
                 .season(season)
                 .studioId(studioId)
+                .malRating(malRating)
                 .build();
     }
 

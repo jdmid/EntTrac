@@ -38,7 +38,6 @@ public class TvSearchResult extends MediaSearchResult {
         setDescription(description);
         setCoverUrl(coverUrl);
         setStatus(status);
-        setTmdbRating(tmdbRating);
         this.network = network;
         this.genres = genres;
         this.firstAirYear = firstAirYear;
@@ -49,5 +48,6 @@ public class TvSearchResult extends MediaSearchResult {
         this.numberOfSeasons = numberOfSeasons;
         this.creatorName = creatorName;
         this.creatorId = creatorId;
+        this.tmdbRating = tmdbRating;
     }
 }

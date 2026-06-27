@@ -228,9 +228,9 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
             numberOfSeasons = show.get("number_of_seasons").asInt();
         }
 
-        Double communityRating = null;
+        Double tmdbRating = null;
         if (show.has("vote_average") && !show.get("vote_average").isNull()) {
-            communityRating = Math.round(
+            tmdbRating = Math.round(
                     show.get("vote_average").asDouble() * 10.0) / 10.0;
         }
 
@@ -245,6 +245,7 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
                 .firstAirYear(firstAirYear)
                 .seriesType(seriesType)
                 .numberOfSeasons(numberOfSeasons)
+                .tmdbRating(tmdbRating)
                 .build();
     }
 

@@ -28,6 +28,8 @@ public class AnimeItem extends MediaItem {
     private Integer totalEpisodes;
     private Integer latestEpisode;
     private Double malRating;
+    private Double anilistRating;
+    private String malId;
 
     @Override
     @ValidStatus(MediaType.ANIME)

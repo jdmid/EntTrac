@@ -39,7 +39,6 @@ public class MovieSearchResult extends MediaSearchResult {
         setDescription(description);
         setCoverUrl(coverUrl);
         setStatus(status);
-        setTmdbRating(tmdbRating);
         this.releaseYear = releaseYear;
         this.runtime = runtime;
         this.genres = genres;
@@ -49,5 +48,6 @@ public class MovieSearchResult extends MediaSearchResult {
         this.rottenTomatoesRating = rottenTomatoesRating;
         this.metacriticRating = metacriticRating;
         this.imdbId = imdbId;
+        this.tmdbRating = tmdbRating;
     }
 }
