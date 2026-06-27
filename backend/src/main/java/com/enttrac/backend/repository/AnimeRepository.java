@@ -30,7 +30,7 @@ public class AnimeRepository implements MediaRepository<AnimeItem> {
     public AnimeItem findById(String animeId) {
         Key key = Key.builder()
                 .partitionValue(USER_PK)
-                .sortValue("ANIME#JIKAN#" + animeId)
+                .sortValue("ANIME#ANILIST#" + animeId)
                 .build();
         return table.getItem(key);
     }
@@ -51,7 +51,7 @@ public class AnimeRepository implements MediaRepository<AnimeItem> {
     public void delete(String animeId) {
         Key key = Key.builder()
                 .partitionValue(USER_PK)
-                .sortValue("ANIME#JIKAN#" + animeId)
+                .sortValue("ANIME#ANILIST#" + animeId)
                 .build();
         table.deleteItem(key);
     }

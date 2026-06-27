@@ -32,7 +32,7 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
     protected String getEntityId(AnimeItem item) { return item.getAnimeId(); }
 
     @Override
-    protected String buildSortKey(AnimeItem item) { return "ANIME#JIKAN#" + item.getAnimeId(); }
+    protected String buildSortKey(AnimeItem item) { return "ANIME#ANILIST#" + item.getAnimeId(); }
 
     @Override
     protected String getNotFoundMessage(String id) { return "Anime not found: " + id; }

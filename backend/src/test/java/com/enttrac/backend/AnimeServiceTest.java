@@ -101,7 +101,7 @@ public class AnimeServiceTest {
 
         verify(animeRepository, times(1)).save(testItem);
         assertEquals("USER#default", result.getPk());
-        assertEquals("ANIME#JIKAN#21", result.getSk());
+        assertEquals("ANIME#ANILIST#21", result.getSk());
         assertEquals("1", result.getStudioId());
     }
 
