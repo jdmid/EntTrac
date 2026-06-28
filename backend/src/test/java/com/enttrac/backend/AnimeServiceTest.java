@@ -494,4 +494,45 @@ public class AnimeServiceTest {
         assertFalse(result.hasNextPage);
         verify(jikanClient, times(1)).getWorksByProducer("1", 1, "name");
     }
+
+    @Test
+    void enrichRatings_ShouldFetchAnilistRatingWhenNull() {
+        testItem.setAnilistRating(null);
+        testItem.setMalRating(8.7); // already cached, skip MAL fetch
+        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(aniListClient.getAnilistAnimeRating("21")).thenReturn(85.0);
+
+        AnimeItem result = animeService.enrichRatings("21");
+
+        assertEquals(85.0, result.getAnilistRating());
+        verify(animeRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void enrichRatings_ShouldSkipAnilistRatingWhenAlreadyCached() {
+        testItem.setAnilistRating(85.0);
+        testItem.setMalRating(8.7);
+        when(animeRepository.findById("21")).thenReturn(testItem);
+
+        AnimeItem result = animeService.enrichRatings("21");
+
+        assertEquals(85.0, result.getAnilistRating());
+        verify(aniListClient, never()).getAnilistAnimeRating(any());
+        verify(animeRepository, never()).save(any());
+    }
+
+    @Test
+    void enrichRatings_ShouldSaveBothRatingsWhenBothNull() {
+        testItem.setMalRating(null);
+        testItem.setAnilistRating(null);
+        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(jikanClient.getMalRating("21")).thenReturn(8.7);
+        when(aniListClient.getAnilistAnimeRating("21")).thenReturn(85.0);
+
+        AnimeItem result = animeService.enrichRatings("21");
+
+        assertEquals(8.7, result.getMalRating());
+        assertEquals(85.0, result.getAnilistRating());
+        verify(animeRepository, times(1)).save(testItem);
+    }
 }

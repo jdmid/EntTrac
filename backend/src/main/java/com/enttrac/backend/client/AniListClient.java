@@ -239,31 +239,6 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
         return null;
     }
 
-    public Double getAnilistMangaRating(String anilistId) {
-        String gql = """
-            query ($id: Int) {
-                Media(id: $id, type: MANGA) {
-                    averageScore
-                }
-            }
-            """;
-
-        try {
-            JsonNode response = postQuery(gql, Map.of("id", Integer.parseInt(anilistId)));
-            JsonNode rating = response.path("data").path("Media").path("averageScore");
-
-            if (!rating.isNull() && !rating.isMissingNode()) {
-                double value = rating.asDouble();
-                log.info("Fetched AniList manga rating for id {}: {}", anilistId, value);
-                return value;
-            }
-        } catch (Exception e) {
-            log.debug("AniList manga rating fetch failed for id {}: {}",
-                    anilistId, e.getMessage());
-        }
-        return null;
-    }
-
     private AnimeSearchResult mapToSearchResult(JsonNode node) {
         String id = node.path("id").asText();
 
