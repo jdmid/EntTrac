@@ -250,7 +250,7 @@ public class AnimeControllerTest {
         item.setAnimeId("21");
         item.setMalRating(8.7);
 
-        when(animeService.enrichMalRating("21")).thenReturn(item);
+        when(animeService.enrichRatings("21")).thenReturn(item);
 
         mockMvc.perform(post("/api/anime/library/21/enrich"))
                 .andExpect(status().isOk())

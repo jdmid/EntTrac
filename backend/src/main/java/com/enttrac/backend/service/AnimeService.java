@@ -1,5 +1,6 @@
 package com.enttrac.backend.service;
 
+import com.enttrac.backend.client.AniListClient;
 import com.enttrac.backend.client.JikanClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
@@ -20,12 +21,15 @@ import java.util.Objects;
 @Service
 public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
-    private final MediaMetadataClient<AnimeSearchResult> animeMetadataClient;
+    private final AniListClient aniListClient;
+    private final JikanClient jikanClient;
 
     public AnimeService(AnimeRepository animeRepository,
-                        @Qualifier("jikanClient") MediaMetadataClient<AnimeSearchResult> animeMetadataClient) {
+                        @Qualifier("aniListClient") AniListClient aniListClient,
+                        JikanClient jikanClient) {
         super(animeRepository);
-        this.animeMetadataClient = animeMetadataClient;
+        this.aniListClient = aniListClient;
+        this.jikanClient = jikanClient;
     }
 
     @Override
@@ -39,12 +43,12 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
     public List<AnimeSearchResult> search(String query) {
         log.info("Searching anime: {}", query);
-        return animeMetadataClient.search(query);
+        return aniListClient.search(query);
     }
 
     public AnimeSearchResult getDetails(String id) {
         log.info("Fetching anime details: {}", id);
-        return animeMetadataClient.getDetails(id);
+        return aniListClient.getDetails(id);
     }
 
 
@@ -70,7 +74,13 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         if (item == null) {
             throw new NotFoundException("Anime not found: " + animeId);
         }
-        AnimeSearchResult details = animeMetadataClient.getDetails(animeId);
+        String malId = item.getMalId();
+        if (malId == null) {
+            log.debug("No MAL ID stored for anime {}, skipping Jikan refresh", animeId);
+            repository.save(item);
+            return item;
+        }
+        AnimeSearchResult details = jikanClient.getDetails(malId);
         if (details != null && details.getTotalEpisodes() != null) {
             item.setTotalEpisodes(details.getTotalEpisodes());
             item.setLastRefreshed(Instant.now().toString());
@@ -78,8 +88,8 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
         }
 
-        if (item.getMalRating() == null) {
-            Double rating = ((JikanClient) animeMetadataClient).getMalRating(animeId);
+        if (item.getMalRating() == null && item.getMalId() != null) {
+            Double rating = jikanClient.getMalRating(item.getMalId());
             if (rating != null) item.setMalRating(rating);
         }
 
@@ -96,7 +106,12 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
         for (AnimeItem item : library) {
             try {
-                AnimeSearchResult details = animeMetadataClient.getDetails(item.getAnimeId());
+                String malId = item.getMalId();
+                if (malId == null) {
+                    updated.add(item);
+                    continue;
+                }
+                AnimeSearchResult details = jikanClient.getDetails(malId);
                 if (details != null) {
                     boolean changed = false;
 
@@ -148,7 +163,12 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                     updated.add(item);
                     continue;
                 }
-                AnimeSearchResult details = animeMetadataClient.getDetails(item.getAnimeId());
+                String malId = item.getMalId();
+                if (malId == null) {
+                    updated.add(item);
+                    continue;
+                }
+                AnimeSearchResult details = jikanClient.getDetails(malId);
                 if (details != null) {
                     boolean changed = false;
 
@@ -188,28 +208,48 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         return null;
     }
 
-    public AnimeItem enrichMalRating(String animeId) {
+    public AnimeItem enrichRatings(String animeId) {
         AnimeItem item = repository.findById(animeId);
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
+        boolean changed = false;
+
+
         if (item.getMalRating() == null) {
-            Double rating = ((JikanClient) animeMetadataClient).getMalRating(animeId);
-            if (rating != null) {
-                item.setMalRating(rating);
-                item.setUpdatedAt(Instant.now().toString());
-                repository.save(item);
-                log.info("Enriched anime {} with MAL rating: {}", animeId, rating);
+            String malId = item.getMalId();
+            if (malId != null) {
+                Double rating = jikanClient.getMalRating(malId);
+                if (rating != null) {
+                    item.setMalRating(rating);
+                    changed = true;
+                    log.info("Enriched anime {} with MAL rating: {}", animeId, rating);
+                }
             }
         }
+
+        if (item.getAnilistRating() == null) {
+            Double rating = aniListClient.getAnilistAnimeRating(animeId);
+            if (rating != null && rating > 0) {
+                item.setAnilistRating(rating);
+                changed = true;
+                log.info("Enriched anime {} with AniList rating: {}", animeId, rating);
+            }
+        }
+
+        if (changed) {
+            item.setUpdatedAt(Instant.now().toString());
+            repository.save(item);
+        }
+
         return item;
     }
 
     public JikanClient.PagedResult<AnimeSearchResult> getWorksByProducer(
             String producerId, int page, String name) {
-        return ((JikanClient) animeMetadataClient).getWorksByProducer(producerId, page, name);
+        return jikanClient.getWorksByProducer(producerId, page, name);
     }
 
     public List<Map<String, String>> searchProducers(String name) {
-        return animeMetadataClient.searchCreators(name);
+        return aniListClient.searchCreators(name);
     }
 }

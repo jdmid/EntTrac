@@ -1,7 +1,7 @@
 package com.enttrac.backend;
 
+import com.enttrac.backend.client.AniListClient;
 import com.enttrac.backend.client.JikanClient;
-import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
 import com.enttrac.backend.repository.AnimeRepository;
@@ -25,7 +25,10 @@ public class AnimeServiceTest {
     private AnimeRepository animeRepository;
 
     @Mock
-    private JikanClient animeMetadataClient;
+    private JikanClient jikanClient;
+
+    @Mock
+    private AniListClient aniListClient;
 
     @InjectMocks
     private AnimeService animeService;
@@ -36,6 +39,7 @@ public class AnimeServiceTest {
     void setUp() {
         testItem = new AnimeItem();
         testItem.setAnimeId("21");
+        testItem.setMalId("21");
         testItem.setTitle("One Piece");
         testItem.setStatus("PLANNED");
         testItem.setStudioId("1");
@@ -45,24 +49,24 @@ public class AnimeServiceTest {
     void search_ShouldDelegateToClient() {
         AnimeSearchResult result = AnimeSearchResult.builder()
                 .id("21").title("One Piece").build();
-        when(animeMetadataClient.search("one piece")).thenReturn(List.of(result));
+        when(aniListClient.search("one piece")).thenReturn(List.of(result));
 
         List<AnimeSearchResult> results = animeService.search("one piece");
 
         assertEquals(1, results.size());
-        verify(animeMetadataClient, times(1)).search("one piece");
+        verify(aniListClient, times(1)).search("one piece");
     }
 
     @Test
     void getDetails_ShouldDelegateToClient() {
         AnimeSearchResult result = AnimeSearchResult.builder()
                 .id("21").title("One Piece").build();
-        when(animeMetadataClient.getDetails("21")).thenReturn(result);
+        when(aniListClient.getDetails("21")).thenReturn(result);
 
         AnimeSearchResult details = animeService.getDetails("21");
 
         assertEquals("One Piece", details.getTitle());
-        verify(animeMetadataClient, times(1)).getDetails("21");
+        verify(aniListClient, times(1)).getDetails("21");
     }
 
     @Test
@@ -182,7 +186,7 @@ public class AnimeServiceTest {
                 .id("21").totalEpisodes(1000).build();
 
         when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getDetails("21")).thenReturn(details);
 
         AnimeItem result = animeService.refreshLatestEpisode("21");
 
@@ -234,7 +238,7 @@ public class AnimeServiceTest {
                 .id("21").totalEpisodes(1000).build();
 
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getDetails("21")).thenReturn(details);
 
         List<AnimeItem> result = animeService.refreshAll();
 
@@ -246,7 +250,7 @@ public class AnimeServiceTest {
     @Test
     void refreshAll_ShouldSkipUpdateWhenDetailsNull() {
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21")).thenReturn(null);
+        when(jikanClient.getDetails("21")).thenReturn(null);
 
         List<AnimeItem> result = animeService.refreshAll();
 
@@ -264,7 +268,7 @@ public class AnimeServiceTest {
                 .build();
 
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getDetails("21")).thenReturn(details);
 
         List<AnimeItem> result = animeService.refreshAll();
 
@@ -275,7 +279,7 @@ public class AnimeServiceTest {
     @Test
     void refreshAll_ShouldContinueWhenOneItemFails() {
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21"))
+        when(jikanClient.getDetails("21"))
                 .thenThrow(new RuntimeException("API down"));
 
         List<AnimeItem> result = animeService.refreshAll();
@@ -294,7 +298,7 @@ public class AnimeServiceTest {
                 .build();
 
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getDetails("21")).thenReturn(details);
 
         List<AnimeItem> result = animeService.refreshAll();
 
@@ -310,7 +314,7 @@ public class AnimeServiceTest {
         List<AnimeItem> result = animeService.refreshOngoing();
 
         assertEquals(1, result.size());
-        verify(animeMetadataClient, never()).getDetails(any());
+        verify(jikanClient, never()).getDetails(any());
         verify(animeRepository, never()).save(any());
     }
 
@@ -322,7 +326,7 @@ public class AnimeServiceTest {
         List<AnimeItem> result = animeService.refreshOngoing();
 
         assertEquals(1, result.size());
-        verify(animeMetadataClient, never()).getDetails(any());
+        verify(jikanClient, never()).getDetails(any());
         verify(animeRepository, never()).save(any());
     }
 
@@ -334,7 +338,7 @@ public class AnimeServiceTest {
                 .id("21").totalEpisodes(1000).build();
 
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getDetails("21")).thenReturn(details);
 
         List<AnimeItem> result = animeService.refreshOngoing();
 
@@ -347,7 +351,7 @@ public class AnimeServiceTest {
     void refreshOngoing_ShouldSkipWhenDetailsNull() {
         testItem.setSeriesStatus("ongoing");
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21")).thenReturn(null);
+        when(jikanClient.getDetails("21")).thenReturn(null);
 
         List<AnimeItem> result = animeService.refreshOngoing();
 
@@ -359,7 +363,7 @@ public class AnimeServiceTest {
     void refreshOngoing_ShouldContinueWhenOneItemFails() {
         testItem.setSeriesStatus("ongoing");
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21"))
+        when(jikanClient.getDetails("21"))
                 .thenThrow(new RuntimeException("API down"));
 
         List<AnimeItem> result = animeService.refreshOngoing();
@@ -376,7 +380,7 @@ public class AnimeServiceTest {
                 .id("21").latestEpisode(11).build();
 
         when(animeRepository.findAll()).thenReturn(List.of(testItem));
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getDetails("21")).thenReturn(details);
 
         List<AnimeItem> result = animeService.refreshOngoing();
 
@@ -385,35 +389,36 @@ public class AnimeServiceTest {
     }
 
     @Test
-    void enrichMalRating_ShouldFetchAndCacheWhenNull() {
+    void enrichRatings_ShouldFetchAndCacheWhenNull() {
         testItem.setMalRating(null);
         when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getMalRating("21")).thenReturn(8.7);
+        when(jikanClient.getMalRating("21")).thenReturn(8.7);
 
-        AnimeItem result = animeService.enrichMalRating("21");
+        AnimeItem result = animeService.enrichRatings("21");
 
         assertEquals(8.7, result.getMalRating());
         verify(animeRepository, times(1)).save(testItem);
     }
 
     @Test
-    void enrichMalRating_ShouldSkipWhenAlreadyCached() {
+    void enrichRatings_ShouldSkipWhenAlreadyCached() {
         testItem.setMalRating(8.7);
+        testItem.setAnilistRating(85.0); // both already cached
         when(animeRepository.findById("21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.enrichMalRating("21");
+        AnimeItem result = animeService.enrichRatings("21");
 
         assertEquals(8.7, result.getMalRating());
-        verify(animeMetadataClient, never()).getMalRating(any());
+        verify(jikanClient, never()).getMalRating(any());
         verify(animeRepository, never()).save(any());
     }
 
     @Test
-    void enrichMalRating_ShouldThrowWhenNotFound() {
+    void enrichRatings_ShouldThrowWhenNotFound() {
         when(animeRepository.findById("notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                animeService.enrichMalRating("notreal"));
+                animeService.enrichRatings("notreal"));
 
         assertEquals("Anime not found: notreal", ex.getMessage());
     }
@@ -425,8 +430,8 @@ public class AnimeServiceTest {
                 .id("21").totalEpisodes(1000).build();
 
         when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
-        when(animeMetadataClient.getMalRating("21")).thenReturn(8.7);
+        when(jikanClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getMalRating("21")).thenReturn(8.7);
 
         AnimeItem result = animeService.refreshLatestEpisode("21");
 
@@ -442,20 +447,20 @@ public class AnimeServiceTest {
                 .id("21").totalEpisodes(1000).build();
 
         when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getDetails("21")).thenReturn(details);
+        when(jikanClient.getDetails("21")).thenReturn(details);
 
         AnimeItem result = animeService.refreshLatestEpisode("21");
 
         assertEquals(8.7, result.getMalRating());
-        verify(animeMetadataClient, never()).getMalRating(any());
+        verify(jikanClient, never()).getMalRating(any());
     }
 
     @Test
     void refreshLatestEpisode_ShouldSaveEvenWhenDetailsNull() {
         testItem.setMalRating(null);
         when(animeRepository.findById("21")).thenReturn(testItem);
-        when(animeMetadataClient.getDetails("21")).thenReturn(null);
-        when(animeMetadataClient.getMalRating("21")).thenReturn(8.7);
+        when(jikanClient.getDetails("21")).thenReturn(null);
+        when(jikanClient.getMalRating("21")).thenReturn(8.7);
 
         AnimeItem result = animeService.refreshLatestEpisode("21");
 
@@ -476,10 +481,11 @@ public class AnimeServiceTest {
                 );
 
         AnimeRepository animeRepository = mock(AnimeRepository.class);
+        AniListClient aniListClient = mock(AniListClient.class);
         JikanClient jikanClient = mock(JikanClient.class);
         when(jikanClient.getWorksByProducer("1", 1, "name")).thenReturn(pagedResult);
 
-        AnimeService serviceWithJikan = new AnimeService(animeRepository, jikanClient);
+        AnimeService serviceWithJikan = new AnimeService(animeRepository, aniListClient, jikanClient);
         JikanClient.PagedResult<AnimeSearchResult> result =
                 serviceWithJikan.getWorksByProducer("1", 1, "name");
 

@@ -112,7 +112,7 @@ public class AnimeController {
 
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<AnimeItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(animeService.enrichMalRating(id));
+        return ResponseEntity.ok(animeService.enrichRatings(id));
     }
 
     @GetMapping("/creator/{producerId}")
