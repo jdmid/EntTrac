@@ -1,6 +1,5 @@
 package com.enttrac.backend.controller;
 
-import com.enttrac.backend.client.JikanClient;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.AnimeSearchResult;
@@ -112,19 +111,17 @@ public class AnimeController {
 
     @PostMapping("/library/{id}/enrich")
     public ResponseEntity<AnimeItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(animeService.enrichRatings(id));
+        return ResponseEntity.ok(animeService.enrichAniListRating(id));
     }
 
-    @GetMapping("/creator/{producerId}")
-    public ResponseEntity<Map<String, Object>> getWorksByProducer(
-            @PathVariable String producerId,
-            @RequestParam(defaultValue = "1") int page,
+    @GetMapping("/creator/{studioId}")
+    public ResponseEntity<Map<String, Object>> getWorksByStudio(
+            @PathVariable String studioId,
             @RequestParam(required = false) String name) {
-        JikanClient.PagedResult<AnimeSearchResult> result =
-                animeService.getWorksByProducer(producerId, page, name);
+        List<AnimeSearchResult> results = animeService.getWorksByStudio(studioId);
         return ResponseEntity.ok(Map.of(
-                "items", result.items,
-                "hasNextPage", result.hasNextPage
+                "items", results,
+                "hasNextPage", false
         ));
     }
 

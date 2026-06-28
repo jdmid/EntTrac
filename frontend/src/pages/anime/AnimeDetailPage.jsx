@@ -11,6 +11,48 @@ import {
 import { themes } from '../../theme/themes'
 import { normalizeSeriesStatus, DETAIL_STATUS_OPTIONS } from '../../utils/statusMapping'
 
+function NextEpisodeBanner({ episode, airingAt, theme }) {
+    const now = Math.floor(Date.now() / 1000)
+    const secondsUntil = airingAt - now
+
+    let label
+    if (secondsUntil <= 0) {
+        label = `Ep ${episode} has aired`
+    } else if (secondsUntil < 3600) {
+        const mins = Math.floor(secondsUntil / 60)
+        label = `Ep ${episode} · in ${mins} minute${mins !== 1 ? 's' : ''}`
+    } else if (secondsUntil < 86400) {
+        const hours = Math.floor(secondsUntil / 3600)
+        label = `Ep ${episode} · in ${hours} hour${hours !== 1 ? 's' : ''}`
+    } else if (secondsUntil < 172800) {
+        label = `Ep ${episode} · tomorrow`
+    } else {
+        const days = Math.floor(secondsUntil / 86400)
+        const date = new Date(airingAt * 1000).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric'
+        })
+        label = `Ep ${episode} · ${date} (in ${days} days)`
+    }
+
+    return (
+        <div
+            className="mt-2 rounded-md px-3 py-2"
+            style={{
+                background: `${theme.accent}11`,
+                border: `0.5px solid ${theme.accent}33`,
+                width: 'fit-content',
+            }}
+        >
+            <p className="text-[10px] m-0 mb-1" style={{ color: theme.accent }}>
+                Next episode
+            </p>
+            <p className="text-[11px] text-[#e2e2f0] m-0">
+                {label}
+            </p>
+        </div>
+    )
+}
+
 function AnimeDetailPage() {
   const { animeId } = useParams()
   const navigate = useNavigate()
@@ -115,25 +157,42 @@ function AnimeDetailPage() {
         </div>
       }
       progressSection={
-        <SimpleProgressBar
-          progress={anime.episodesWatched}
-          total={anime.totalEpisodes}
-          label="episode"
-          theme={theme}
-          onUpdate={(val) =>
-            updateAnimeProgress(animeId, val).then((res) => setAnime(res.data))
-          }
-        />
+          <SimpleProgressBar
+              progress={anime.episodesWatched}
+              total={anime.totalEpisodes}
+              label="episode"
+              theme={theme}
+              onUpdate={(val) =>
+                  updateAnimeProgress(animeId, val).then((res) => setAnime(res.data))
+              }
+              nextEpisodeContent={
+                  anime.nextAiringAt ? (
+                      <NextEpisodeBanner
+                          episode={anime.nextAiringEpisode}
+                          airingAt={anime.nextAiringAt}
+                          theme={theme}
+                      />
+                  ) : null
+              }
+          />
       }
       notesProgressLabel="Ep."
       refreshing={refreshing}
       ratingsSection={
+        <>
           <RatingCard
             value={anime.malRating}
             label="MAL"
             color="#2e51a2"
             theme={theme}
           />
+          <RatingCard
+            value={anime.anilistRating}
+            label="AniList"
+            color="#02a9ff"
+            theme={theme}
+          />
+        </>
       }
       onRefresh={() => {
         setRefreshing(true)
@@ -161,6 +220,8 @@ function AnimeDetailPage() {
           season: anime.season,
           malScore: anime.malScore,
           studioId: anime.studioId ?? null,
+          nextAiringEpisode: anime.nextAiringEpisode ?? null,
+          nextAiringAt: anime.nextAiringAt ?? null,
         }).then((res) => {
           setAnime(res.data)
           setInLibrary(true)

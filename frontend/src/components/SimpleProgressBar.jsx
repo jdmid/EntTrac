@@ -6,6 +6,7 @@ function SimpleProgressBar({
   label,
   theme,
   onUpdate,
+  nextEpisodeContent,
 }) {
   const [inputValue, setInputValue] = useState(progress ?? 0)
   const [updateLabel, setUpdateLabel] = useState('Update')
@@ -117,7 +118,14 @@ function SimpleProgressBar({
         >
           {updateLabel}
         </button>
+        
       </div>
+      
+      {nextEpisodeContent && (
+            <div className="mt-3">
+                {nextEpisodeContent}
+            </div>
+       )}
     </div>
   )
 }

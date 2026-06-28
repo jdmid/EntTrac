@@ -189,6 +189,7 @@ function TvProgressBar({ item, theme, onUpdate }) {
           style={{
             background: `${theme.accent}11`,
             border: `0.5px solid ${theme.accent}33`,
+            width: 'fit-content',
           }}
         >
           <p className="text-[10px] m-0 mb-1" style={{ color: theme.accent }}>

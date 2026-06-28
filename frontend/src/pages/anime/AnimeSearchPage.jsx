@@ -142,6 +142,8 @@ function AnimeSearchPage() {
       season: anime.season,
       malRating: anime.malRating,
       studioId: anime.studioId ?? null,
+      nextAiringEpisode: anime.nextAiringEpisode ?? null,
+      nextAiringAt: anime.nextAiringAt ?? null,
     })
       .then(() => setAddedIds((prev) => new Set([...prev, anime.id])))
       .catch((err) => console.error('Failed to add anime to library:', err))

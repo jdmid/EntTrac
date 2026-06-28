@@ -1,6 +1,5 @@
 package com.enttrac.backend;
 
-import com.enttrac.backend.client.JikanClient;
 import com.enttrac.backend.controller.AnimeController;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
@@ -242,39 +241,5 @@ public class AnimeControllerTest {
         mockMvc.perform(post("/api/anime/library/refresh-ongoing"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].animeId").value("21"));
-    }
-
-    @Test
-    void enrich_ShouldReturnEnrichedItem() throws Exception {
-        AnimeItem item = new AnimeItem();
-        item.setAnimeId("21");
-        item.setMalRating(8.7);
-
-        when(animeService.enrichRatings("21")).thenReturn(item);
-
-        mockMvc.perform(post("/api/anime/library/21/enrich"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.malRating").value(8.7));
-    }
-
-    @Test
-    void getWorksByProducer_ShouldReturnPagedResults() throws Exception {
-        JikanClient.PagedResult<AnimeSearchResult> pagedResult =
-                new JikanClient.PagedResult<>(
-                        List.of(AnimeSearchResult.builder()
-                                .id("21")
-                                .title("One Piece")
-                                .build()),
-                        false
-                );
-
-        when(animeService.getWorksByProducer("1", 1, "name")).thenReturn(pagedResult);
-
-        mockMvc.perform(get("/api/anime/creator/1")
-                        .param("page", "1")
-                        .param("name", "name"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items[0].title").value("One Piece"))
-                .andExpect(jsonPath("$.hasNextPage").value(false));
     }
 }

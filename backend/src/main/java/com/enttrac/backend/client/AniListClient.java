@@ -6,9 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component("aniListClient")
@@ -42,9 +40,8 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
         String gql = """
             query ($search: String, $page: Int, $perPage: Int) {
                 Page(page: $page, perPage: $perPage) {
-                    media(search: $search, type: ANIME) {
+                    media(search: $search, type: ANIME, isAdult: false) {
                         id
-                        idMal
                         title { english romaji }
                         description(asHtml: false)
                         coverImage { large }
@@ -91,11 +88,12 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
             query ($id: Int) {
                 Media(id: $id, type: ANIME) {
                     id
-                    idMal
                     title { english romaji }
                     description(asHtml: false)
                     coverImage { large }
                     episodes
+                    nextAiringEpisode { episode }
+                    nextAiringEpisode { episode airingAt }
                     status
                     averageScore
                     season
@@ -134,7 +132,7 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
                     media(sort: START_DATE_DESC, perPage: 50) {
                         nodes {
                             id
-                            idMal
+                            isAdult
                             title { english romaji }
                             description(asHtml: false)
                             coverImage { large }
@@ -153,13 +151,21 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
 
         try {
             JsonNode response = postQuery(gql, variables);
+            log.info("AniList studio response for {}: {}", studioId, response);
             JsonNode media = response.path("data").path("Studio")
                     .path("media").path("nodes");
 
             List<AnimeSearchResult> results = new ArrayList<>();
+            Set<String> seenIds = new HashSet<>();
             if (media.isArray()) {
                 for (JsonNode node : media) {
-                    results.add(mapToSearchResult(node));
+                    if (node.has("isAdult") && node.get("isAdult").asBoolean(false)) {
+                        continue;
+                    }
+                    String id = node.path("id").asText();
+                    if (seenIds.add(id)) {
+                        results.add(mapToSearchResult(node));
+                    }
                 }
             }
             log.info("AniList fetched {} works for studio: {}", results.size(), studioId);
@@ -177,10 +183,8 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
             query ($search: String) {
                 Page(page: 1, perPage: 10) {
                     studios(search: $search) {
-                        nodes {
-                            id
-                            name
-                        }
+                        id
+                        name
                     }
                 }
             }
@@ -190,8 +194,7 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
 
         try {
             JsonNode response = postQuery(gql, variables);
-            JsonNode studios = response.path("data").path("Page")
-                    .path("studios").path("nodes");
+            JsonNode studios = response.path("data").path("Page").path("studios");
 
             List<Map<String, String>> results = new ArrayList<>();
             if (studios.isArray()) {
@@ -242,9 +245,6 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
     private AnimeSearchResult mapToSearchResult(JsonNode node) {
         String id = node.path("id").asText();
 
-        String malId = node.has("idMal") && !node.get("idMal").isNull()
-                ? node.get("idMal").asText() : null;
-
         // Title — prefer English, fall back to romaji
         String title = null;
         JsonNode titleNode = node.path("title");
@@ -269,10 +269,22 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
             coverUrl = node.path("coverImage").path("large").asText(null);
         }
 
-        // Episodes
+        // Next Episode and time of airing
+        Integer nextAiringEpisode = null;
+        Long nextAiringAt = null;
+        if (node.has("nextAiringEpisode") && !node.get("nextAiringEpisode").isNull()) {
+            int nextEp = node.get("nextAiringEpisode").path("episode").asInt(0);
+            long airingAt = node.get("nextAiringEpisode").path("airingAt").asLong(0);
+            if (nextEp > 0) nextAiringEpisode = nextEp;
+            if (airingAt > 0) nextAiringAt = airingAt;
+        }
+
+        // Derive totalEpisodes from nextAiringEpisode when episodes field is null
         Integer totalEpisodes = null;
         if (node.has("episodes") && !node.get("episodes").isNull()) {
             totalEpisodes = node.get("episodes").asInt();
+        } else if (nextAiringEpisode != null && nextAiringEpisode > 1) {
+            totalEpisodes = nextAiringEpisode - 1;
         }
 
         // Status — AniList enum to normalized string
@@ -282,7 +294,6 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
         }
 
         // Community score — AniList is 0-100
-        Double malRating = null;
         Double anilistRating = null;
         if (node.has("averageScore") && !node.get("averageScore").isNull()) {
             anilistRating = node.get("averageScore").asDouble();
@@ -311,17 +322,17 @@ public class AniListClient implements MediaMetadataClient<AnimeSearchResult> {
 
         return AnimeSearchResult.builder()
                 .id(id)
-                .malId(malId)
                 .title(title)
                 .description(description)
                 .coverUrl(coverUrl)
                 .totalEpisodes(totalEpisodes)
                 .status(status)
                 .anilistRating(anilistRating)
-                .malRating(malRating)
                 .studio(studio)
                 .studioId(studioId)
                 .season(season)
+                .nextAiringEpisode(nextAiringEpisode)
+                .nextAiringAt(nextAiringAt)
                 .build();
     }
 

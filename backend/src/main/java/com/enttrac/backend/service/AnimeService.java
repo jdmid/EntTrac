@@ -1,8 +1,6 @@
 package com.enttrac.backend.service;
 
 import com.enttrac.backend.client.AniListClient;
-import com.enttrac.backend.client.JikanClient;
-import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.result.AnimeSearchResult;
@@ -22,14 +20,11 @@ import java.util.Objects;
 public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
     private final AniListClient aniListClient;
-    private final JikanClient jikanClient;
 
     public AnimeService(AnimeRepository animeRepository,
-                        @Qualifier("aniListClient") AniListClient aniListClient,
-                        JikanClient jikanClient) {
+                        @Qualifier("aniListClient") AniListClient aniListClient) {
         super(animeRepository);
         this.aniListClient = aniListClient;
-        this.jikanClient = jikanClient;
     }
 
     @Override
@@ -71,31 +66,30 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
     public AnimeItem refreshLatestEpisode(String animeId) {
         AnimeItem item = repository.findById(animeId);
-        if (item == null) {
-            throw new NotFoundException("Anime not found: " + animeId);
-        }
-        String malId = item.getMalId();
-        if (malId == null) {
-            log.debug("No MAL ID stored for anime {}, skipping Jikan refresh", animeId);
-            repository.save(item);
-            return item;
-        }
-        AnimeSearchResult details = jikanClient.getDetails(malId);
+        if (item == null) throw new NotFoundException("Anime not found: " + animeId);
+
+        AnimeSearchResult details = aniListClient.getDetails(animeId);
         if (details != null && details.getTotalEpisodes() != null) {
             item.setTotalEpisodes(details.getTotalEpisodes());
             item.setLastRefreshed(Instant.now().toString());
             item.setUpdatedAt(Instant.now().toString());
-
+        }
+        if (details.getNextAiringEpisode() != null) {
+            item.setNextAiringEpisode(details.getNextAiringEpisode());
+            item.setNextAiringAt(details.getNextAiringAt());
+        } else {
+            // Clear stale data when no next episode scheduled
+            item.setNextAiringEpisode(null);
+            item.setNextAiringAt(null);
         }
 
-        if (item.getMalRating() == null && item.getMalId() != null) {
-            Double rating = jikanClient.getMalRating(item.getMalId());
-            if (rating != null) item.setMalRating(rating);
+        if (item.getAnilistRating() == null) {
+            Double rating = aniListClient.getAnilistAnimeRating(animeId);
+            if (rating != null && rating > 0) item.setAnilistRating(rating);
         }
 
         repository.save(item);
         log.info("Refreshed anime: {}", animeId);
-
         return item;
     }
 
@@ -106,12 +100,7 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
         for (AnimeItem item : library) {
             try {
-                String malId = item.getMalId();
-                if (malId == null) {
-                    updated.add(item);
-                    continue;
-                }
-                AnimeSearchResult details = jikanClient.getDetails(malId);
+                AnimeSearchResult details = aniListClient.getDetails(item.getAnimeId());
                 if (details != null) {
                     boolean changed = false;
 
@@ -123,6 +112,11 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                     if (details.getTotalEpisodes() != null &&
                             !details.getTotalEpisodes().equals(item.getTotalEpisodes())) {
                         item.setTotalEpisodes(details.getTotalEpisodes());
+                        changed = true;
+                    }
+                    if (!Objects.equals(details.getNextAiringEpisode(), item.getNextAiringEpisode())) {
+                        item.setNextAiringEpisode(details.getNextAiringEpisode());
+                        item.setNextAiringAt(details.getNextAiringAt());
                         changed = true;
                     }
                     if (details.getStatus() != null) {
@@ -141,10 +135,12 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                 }
                 updated.add(item);
             } catch (Exception e) {
-                log.debug("Failed to refresh anime {} during refreshAll: {}", item.getAnimeId(), e.getMessage());
+                log.debug("Failed to refresh anime {} during refreshAll: {}",
+                        item.getAnimeId(), e.getMessage());
                 updated.add(item);
             }
         }
+
         log.info("Finished refreshing all anime: {} items processed", updated.size());
         return updated;
     }
@@ -156,19 +152,12 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
 
         for (AnimeItem item : library) {
             try {
-                // Items with null or unknown seriesStatus are included intentionally —
-                // refreshing them may populate their status from the API
                 if ("completed".equals(item.getSeriesStatus()) ||
                         "cancelled".equals(item.getSeriesStatus())) {
                     updated.add(item);
                     continue;
                 }
-                String malId = item.getMalId();
-                if (malId == null) {
-                    updated.add(item);
-                    continue;
-                }
-                AnimeSearchResult details = jikanClient.getDetails(malId);
+                AnimeSearchResult details = aniListClient.getDetails(item.getAnimeId());
                 if (details != null) {
                     boolean changed = false;
 
@@ -182,7 +171,11 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                         item.setTotalEpisodes(details.getTotalEpisodes());
                         changed = true;
                     }
-
+                    if (!Objects.equals(details.getNextAiringEpisode(), item.getNextAiringEpisode())) {
+                        item.setNextAiringEpisode(details.getNextAiringEpisode());
+                        item.setNextAiringAt(details.getNextAiringAt());
+                        changed = true;
+                    }
                     if (changed) {
                         item.setLastRefreshed(Instant.now().toString());
                         item.setUpdatedAt(Instant.now().toString());
@@ -191,10 +184,12 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
                 }
                 updated.add(item);
             } catch (Exception e) {
-                log.debug("Failed to refresh anime {} during refreshOngoing: {}", item.getAnimeId(), e.getMessage());
+                log.debug("Failed to refresh anime {} during refreshOngoing: {}",
+                        item.getAnimeId(), e.getMessage());
                 updated.add(item);
             }
         }
+
         log.info("Finished refreshing ongoing anime: {} items processed", updated.size());
         return updated;
     }
@@ -208,48 +203,29 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         return null;
     }
 
-    public AnimeItem enrichRatings(String animeId) {
+    public AnimeItem enrichAniListRating(String animeId) {
         AnimeItem item = repository.findById(animeId);
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
-
-        boolean changed = false;
-
-
-        if (item.getMalRating() == null) {
-            String malId = item.getMalId();
-            if (malId != null) {
-                Double rating = jikanClient.getMalRating(malId);
-                if (rating != null) {
-                    item.setMalRating(rating);
-                    changed = true;
-                    log.info("Enriched anime {} with MAL rating: {}", animeId, rating);
-                }
-            }
-        }
 
         if (item.getAnilistRating() == null) {
             Double rating = aniListClient.getAnilistAnimeRating(animeId);
             if (rating != null && rating > 0) {
                 item.setAnilistRating(rating);
-                changed = true;
+                item.setUpdatedAt(Instant.now().toString());
+                repository.save(item);
                 log.info("Enriched anime {} with AniList rating: {}", animeId, rating);
             }
         }
-
-        if (changed) {
-            item.setUpdatedAt(Instant.now().toString());
-            repository.save(item);
-        }
-
         return item;
     }
 
-    public JikanClient.PagedResult<AnimeSearchResult> getWorksByProducer(
-            String producerId, int page, String name) {
-        return jikanClient.getWorksByProducer(producerId, page, name);
+    public List<Map<String, String>> searchProducers(String name) {
+        log.info("Searching producers for: {}", name);
+        return aniListClient.searchCreators(name);
     }
 
-    public List<Map<String, String>> searchProducers(String name) {
-        return aniListClient.searchCreators(name);
+    public List<AnimeSearchResult> getWorksByStudio(String studioId) {
+        log.info("Fetching works for AniList studio: {}", studioId);
+        return aniListClient.getWorksByCreator(studioId);
     }
 }
