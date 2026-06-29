@@ -69,18 +69,19 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
         AnimeSearchResult details = aniListClient.getDetails(animeId);
-        if (details != null && details.getTotalEpisodes() != null) {
-            item.setTotalEpisodes(details.getTotalEpisodes());
-            item.setLastRefreshed(Instant.now().toString());
-            item.setUpdatedAt(Instant.now().toString());
-        }
-        if (details.getNextAiringEpisode() != null) {
-            item.setNextAiringEpisode(details.getNextAiringEpisode());
-            item.setNextAiringAt(details.getNextAiringAt());
-        } else {
-            // Clear stale data when no next episode scheduled
-            item.setNextAiringEpisode(null);
-            item.setNextAiringAt(null);
+        if (details != null) {
+            if (details.getTotalEpisodes() != null) {
+                item.setTotalEpisodes(details.getTotalEpisodes());
+                item.setLastRefreshed(Instant.now().toString());
+                item.setUpdatedAt(Instant.now().toString());
+            }
+            if (details.getNextAiringEpisode() != null) {
+                item.setNextAiringEpisode(details.getNextAiringEpisode());
+                item.setNextAiringAt(details.getNextAiringAt());
+            } else {
+                item.setNextAiringEpisode(null);
+                item.setNextAiringAt(null);
+            }
         }
 
         if (item.getAnilistRating() == null) {
