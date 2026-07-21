@@ -17,8 +17,12 @@ import GameDetailPage from './pages/game/GameDetailPage'
 import BookLibraryPage from './pages/book/BookLibraryPage'
 import BookSearchPage from './pages/book/BookSearchPage'
 import BookDetailPage from './pages/book/BookDetailPage'
+import LoginPage from './pages/auth/LoginPage'
 import SettingsPage from './pages/settings/SettingsPage'
+import OnboardingChoicePage from './pages/auth/OnboardingChoicePage'
+import OnboardingPreferencesPage from './pages/auth/OnboardingPreferencesPage'
 import { useSettings } from './context/SettingsContext'
+import { useAuth } from './context/AuthContext'
 
 function TabGuard({ tabId, children }) {
   const { tabs, firstVisibleTab } = useSettings()
@@ -27,40 +31,56 @@ function TabGuard({ tabId, children }) {
   return <Navigate to={`/${firstVisibleTab()}/library`} replace />
 }
 
+function RequireAuth({ children }) {
+  const { status } = useAuth()
+
+  if (status === 'loading') {
+    return <div className="flex min-h-screen items-center justify-center">Loading…</div>
+  }
+  if (status === 'unauthenticated') {
+    return <Navigate to="/login" replace />
+  }
+  return children
+}
+
 function App() {
   const { firstVisibleTab } = useSettings()
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to={`/${firstVisibleTab()}/library`} replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/onboarding" element={<RequireAuth><OnboardingChoicePage /></RequireAuth>} />
+        <Route path="/onboarding/preferences" element={<RequireAuth><OnboardingPreferencesPage /></RequireAuth>} />
 
-        <Route path="/manga/library" element={<TabGuard tabId="manga"><MangaLibraryPage /></TabGuard>} />
-        <Route path="/manga/search" element={<TabGuard tabId="manga"><MangaSearchPage /></TabGuard>} />
-        <Route path="/manga/library/:mangaId" element={<TabGuard tabId="manga"><MangaDetailPage /></TabGuard>} />
+        <Route path="/" element={<RequireAuth><Navigate to={`/${firstVisibleTab()}/library`} replace /></RequireAuth>} />
 
-        <Route path="/anime/library" element={<TabGuard tabId="anime"><AnimeLibraryPage /></TabGuard>} />
-        <Route path="/anime/search" element={<TabGuard tabId="anime"><AnimeSearchPage /></TabGuard>} />
-        <Route path="/anime/library/:animeId" element={<TabGuard tabId="anime"><AnimeDetailPage /></TabGuard>} />
+        <Route path="/manga/library" element={<RequireAuth><TabGuard tabId="manga"><MangaLibraryPage /></TabGuard></RequireAuth>} />
+        <Route path="/manga/search" element={<RequireAuth><TabGuard tabId="manga"><MangaSearchPage /></TabGuard></RequireAuth>} />
+        <Route path="/manga/library/:mangaId" element={<RequireAuth><TabGuard tabId="manga"><MangaDetailPage /></TabGuard></RequireAuth>} />
 
-        <Route path="/tv/library" element={<TabGuard tabId="tv"><TvLibraryPage /></TabGuard>} />
-        <Route path="/tv/search" element={<TabGuard tabId="tv"><TvSearchPage /></TabGuard>} />
-        <Route path="/tv/library/:tvId" element={<TabGuard tabId="tv"><TvDetailPage /></TabGuard>} />
+        <Route path="/anime/library" element={<RequireAuth><TabGuard tabId="anime"><AnimeLibraryPage /></TabGuard></RequireAuth>} />
+        <Route path="/anime/search" element={<RequireAuth><TabGuard tabId="anime"><AnimeSearchPage /></TabGuard></RequireAuth>} />
+        <Route path="/anime/library/:animeId" element={<RequireAuth><TabGuard tabId="anime"><AnimeDetailPage /></TabGuard></RequireAuth>} />
 
-        <Route path="/movie/library" element={<TabGuard tabId="movie"><MovieLibraryPage /></TabGuard>} />
-        <Route path="/movie/search" element={<TabGuard tabId="movie"><MovieSearchPage /></TabGuard>} />
-        <Route path="/movie/library/:movieId" element={<TabGuard tabId="movie"><MovieDetailPage /></TabGuard>} />
+        <Route path="/tv/library" element={<RequireAuth><TabGuard tabId="tv"><TvLibraryPage /></TabGuard></RequireAuth>} />
+        <Route path="/tv/search" element={<RequireAuth><TabGuard tabId="tv"><TvSearchPage /></TabGuard></RequireAuth>} />
+        <Route path="/tv/library/:tvId" element={<RequireAuth><TabGuard tabId="tv"><TvDetailPage /></TabGuard></RequireAuth>} />
 
-        <Route path="/book/library" element={<TabGuard tabId="book"><BookLibraryPage /></TabGuard>} />
-        <Route path="/book/search" element={<TabGuard tabId="book"><BookSearchPage /></TabGuard>} />
-        <Route path="/book/library/:bookId" element={<TabGuard tabId="book"><BookDetailPage /></TabGuard>} />
+        <Route path="/movie/library" element={<RequireAuth><TabGuard tabId="movie"><MovieLibraryPage /></TabGuard></RequireAuth>} />
+        <Route path="/movie/search" element={<RequireAuth><TabGuard tabId="movie"><MovieSearchPage /></TabGuard></RequireAuth>} />
+        <Route path="/movie/library/:movieId" element={<RequireAuth><TabGuard tabId="movie"><MovieDetailPage /></TabGuard></RequireAuth>} />
 
-        <Route path="/game/library" element={<TabGuard tabId="game"><GameLibraryPage /></TabGuard>} />
-        <Route path="/game/search" element={<TabGuard tabId="game"><GameSearchPage /></TabGuard>} />
-        <Route path="/game/library/:gameId" element={<TabGuard tabId="game"><GameDetailPage /></TabGuard>} />
-        <Route path="/game/dlc/:dlcId" element={<TabGuard tabId="game"><GameDetailPage /></TabGuard>} />
-        
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/book/library" element={<RequireAuth><TabGuard tabId="book"><BookLibraryPage /></TabGuard></RequireAuth>} />
+        <Route path="/book/search" element={<RequireAuth><TabGuard tabId="book"><BookSearchPage /></TabGuard></RequireAuth>} />
+        <Route path="/book/library/:bookId" element={<RequireAuth><TabGuard tabId="book"><BookDetailPage /></TabGuard></RequireAuth>} />
+
+        <Route path="/game/library" element={<RequireAuth><TabGuard tabId="game"><GameLibraryPage /></TabGuard></RequireAuth>} />
+        <Route path="/game/search" element={<RequireAuth><TabGuard tabId="game"><GameSearchPage /></TabGuard></RequireAuth>} />
+        <Route path="/game/library/:gameId" element={<RequireAuth><TabGuard tabId="game"><GameDetailPage /></TabGuard></RequireAuth>} />
+        <Route path="/game/dlc/:dlcId" element={<RequireAuth><TabGuard tabId="game"><GameDetailPage /></TabGuard></RequireAuth>} />
+
+        <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
       </Routes>
     </BrowserRouter>
   )

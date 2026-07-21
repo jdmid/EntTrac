@@ -1,5 +1,7 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
+import client from '../api/client'
+import { useAuth } from './AuthContext'
 
 const DEFAULT_TABS = [
   { id: 'manga',  label: 'Manga',  visible: true },
@@ -10,51 +12,45 @@ const DEFAULT_TABS = [
   { id: 'game', label: 'Games', visible: true },
 ]
 
-const STORAGE_KEY = 'enttrac-settings'
-
-function loadFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return DEFAULT_TABS
-    const parsed = JSON.parse(raw)
-    // Guard against stale storage missing tabs added in future releases
-    const storedIds = new Set(parsed.map((t) => t.id))
-    const merged = DEFAULT_TABS.map((defaultTab) => {
-      if (storedIds.has(defaultTab.id)) {
-        return parsed.find((t) => t.id === defaultTab.id)
-      }
-      return defaultTab
-    })
-    // Preserve stored order for tabs that exist in both
-    const storedOrder = parsed
-      .filter((t) => merged.find((m) => m.id === t.id))
-      .map((t) => merged.find((m) => m.id === t.id))
-    const newTabs = merged.filter((t) => !storedIds.has(t.id))
-    return [...storedOrder, ...newTabs]
-  } catch {
-    return DEFAULT_TABS
-  }
+function mergeWithDefaults(stored) {
+  const storedIds = new Set(stored.map((t) => t.id))
+  const merged = DEFAULT_TABS.map((defaultTab) =>
+    storedIds.has(defaultTab.id) ? stored.find((t) => t.id === defaultTab.id) : defaultTab
+  )
+  const storedOrder = stored
+    .filter((t) => merged.find((m) => m.id === t.id))
+    .map((t) => merged.find((m) => m.id === t.id))
+  const newTabs = merged.filter((t) => !storedIds.has(t.id))
+  return [...storedOrder, ...newTabs]
 }
 
-function saveToStorage(tabs) {
+async function persistTabs(tabs) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tabs))
+    await client.put('/settings', tabs)
   } catch {
-    // localStorage unavailable — silently continue
+    // best-effort — the UI already reflects the change locally
   }
 }
 
 const SettingsContext = createContext(null)
 
 export function SettingsProvider({ children }) {
-  const [tabs, setTabs] = useState(loadFromStorage)
+  const { status } = useAuth()
+  const [tabs, setTabs] = useState(DEFAULT_TABS)
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    client.get('/settings')
+      .then((res) => setTabs(mergeWithDefaults(res.data)))
+      .catch(() => setTabs(DEFAULT_TABS)) // no saved settings yet
+  }, [status])
 
   function reorderTabs(activeId, overId) {
     setTabs((prev) => {
       const oldIndex = prev.findIndex((t) => t.id === activeId)
       const newIndex = prev.findIndex((t) => t.id === overId)
       const reordered = arrayMove(prev, oldIndex, newIndex)
-      saveToStorage(reordered)
+      persistTabs(reordered)
       return reordered
     })
   }
@@ -63,14 +59,16 @@ export function SettingsProvider({ children }) {
     setTabs((prev) => {
       const visibleCount = prev.filter((t) => t.visible).length
       const target = prev.find((t) => t.id === id)
-      // Prevent hiding the last visible tab
       if (target?.visible && visibleCount === 1) return prev
-      const updated = prev.map((t) =>
-        t.id === id ? { ...t, visible: !t.visible } : t
-      )
-      saveToStorage(updated)
+      const updated = prev.map((t) => (t.id === id ? { ...t, visible: !t.visible } : t))
+      persistTabs(updated)
       return updated
     })
+  }
+
+  function setTabsAndPersist(newTabs) {
+    setTabs(newTabs)
+    persistTabs(newTabs)
   }
 
   function firstVisibleTab() {
@@ -78,7 +76,7 @@ export function SettingsProvider({ children }) {
   }
 
   return (
-    <SettingsContext.Provider value={{ tabs, reorderTabs, toggleTab, firstVisibleTab }}>
+    <SettingsContext.Provider value={{ tabs, reorderTabs, toggleTab, setTabsAndPersist, firstVisibleTab }}>
       {children}
     </SettingsContext.Provider>
   )

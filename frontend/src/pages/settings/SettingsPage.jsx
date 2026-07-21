@@ -15,6 +15,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import Navbar from '../../components/Navbar'
 import { useSettings } from '../../context/SettingsContext'
+import { useAuth } from '../../context/AuthContext'
 import { themes } from '../../theme/themes'
 
 const theme = themes.brand
@@ -207,6 +208,27 @@ function Section({ title, description, children, defaultOpen = true }) {
 function SettingsPage() {
   const { tabs, reorderTabs, toggleTab } = useSettings()
 
+  const { user, logout, updateDisplayName } = useAuth()
+  const [nameInput, setNameInput] = useState(user?.displayName || '')
+  const [savingName, setSavingName] = useState(false)
+
+  const nameChanged = nameInput.trim() !== (user?.displayName || '')
+
+  async function handleSaveName() {
+    setSavingName(true)
+    await updateDisplayName(nameInput.trim())
+    setSavingName(false)
+  }
+
+  const navigate = useNavigate()
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  async function handleLogout() {
+    setLoggingOut(true)
+    await logout()
+    navigate('/login', { replace: true })
+  }
+
   const visibleCount = tabs.filter((t) => t.visible).length
 
   const sensors = useSensors(
@@ -237,6 +259,64 @@ function SettingsPage() {
         </p>
 
         <Section
+          title="Account"
+          description="Signed in with Google"
+          defaultOpen={true}
+        >
+          <div className="flex flex-col gap-3 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <div
+                className="flex flex-1 items-center gap-2 rounded px-3 py-1.5"
+                style={{ background: theme.cardCover, border: `0.5px solid ${theme.cardBorder}` }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555580"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  placeholder="Display name"
+                  className="flex-1 bg-transparent text-[13px] outline-none"
+                  style={{ color: '#e2e2f0' }}
+                />
+              </div>
+              {nameChanged && (
+                <button
+                  onClick={handleSaveName}
+                  disabled={savingName}
+                  className="rounded px-3 py-1.5 text-[12px] font-medium"
+                  style={{ background: theme.accent, color: '#ffffff', opacity: savingName ? 0.6 : 1 }}
+                >
+                  {savingName ? 'Saving…' : 'Save'}
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] m-0" style={{ color: '#555580' }}>
+                {user?.email}
+              </p>
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="rounded px-3 py-1.5 text-[12px] font-medium"
+                style={{
+                  background: theme.cardCover,
+                  border: `0.5px solid ${theme.cardBorder}`,
+                  color: '#f43f5e',
+                  opacity: loggingOut ? 0.6 : 1,
+                }}
+              >
+                {loggingOut ? 'Logging out…' : 'Log out'}
+              </button>
+            </div>
+          </div>
+        </Section>
+
+        <Section
           title="Tabs"
           description="Reorder or hide media tabs"
           defaultOpen={true}
@@ -245,21 +325,11 @@ function SettingsPage() {
             className="flex items-center justify-between px-4 py-2"
             style={{ borderBottom: `0.5px solid ${theme.cardBorder}` }}
           >
-            <span className="text-[11px]" style={{ color: '#555580' }}>
-              {visibleCount} of {tabs.length} tabs visible
+            <span className="text-[11px]" style={{ color: '#9090a8', userSelect: 'none' }}>
+              Drag to reorder
             </span>
-            <span
-              className="text-[11px] rounded"
-              style={{
-                color: '#555580',
-                background: theme.background,
-                border: `0.5px solid ${theme.cardBorder}`,
-                padding: '2px 7px',
-                cursor: 'default',
-                userSelect: 'none',
-              }}
-            >
-              drag to reorder
+            <span className="text-[11px]" style={{ color: '#555580' }}>
+              {visibleCount} of {tabs.length} visible
             </span>
           </div>
 
