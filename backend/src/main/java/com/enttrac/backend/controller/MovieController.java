@@ -1,5 +1,6 @@
 package com.enttrac.backend.controller;
 
+import com.enttrac.backend.auth.CurrentUserId;
 import com.enttrac.backend.model.item.MovieItem;
 import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.MovieSearchResult;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/movies")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @Validated
 public class MovieController {
 
@@ -33,13 +34,13 @@ public class MovieController {
     }
 
     @GetMapping("/library")
-    public ResponseEntity<List<MovieItem>> getLibrary() {
-        return ResponseEntity.ok(movieService.getLibrary());
+    public ResponseEntity<List<MovieItem>> getLibrary(@CurrentUserId String userId) {
+        return ResponseEntity.ok(movieService.getLibrary(userId));
     }
 
     @GetMapping("/library/{movieId}")
-    public ResponseEntity<MovieItem> getMovie(@PathVariable String movieId) {
-        MovieItem item = movieService.getMovie(movieId);
+    public ResponseEntity<MovieItem> getMovie(@CurrentUserId String userId, @PathVariable String movieId) {
+        MovieItem item = movieService.getMovie(userId, movieId);
         if (item == null) {
             return ResponseEntity.notFound().build();
         }
@@ -47,46 +48,50 @@ public class MovieController {
     }
 
     @PostMapping("/library")
-    public ResponseEntity<MovieItem> addToLibrary(@Valid @RequestBody MovieItem item) {
-        return ResponseEntity.ok(movieService.addToLibrary(item));
+    public ResponseEntity<MovieItem> addToLibrary(@CurrentUserId String userId, @Valid @RequestBody MovieItem item) {
+        return ResponseEntity.ok(movieService.addToLibrary(userId, item));
     }
 
     @PatchMapping("/library/{movieId}/score")
     public ResponseEntity<MovieItem> updateScore(
+            @CurrentUserId String userId,
             @PathVariable String movieId,
             @RequestParam @Min(1) @Max(10) int score) {
-        return ResponseEntity.ok(movieService.updateScore(movieId, score));
+        return ResponseEntity.ok(movieService.updateScore(userId, movieId, score));
     }
 
     @PatchMapping("/library/{movieId}/status")
     public ResponseEntity<MovieItem> updateStatus(
+            @CurrentUserId String userId,
             @PathVariable String movieId,
             @RequestParam @ValidStatus(MediaType.MOVIE) String status) {
-        return ResponseEntity.ok(movieService.updateStatus(movieId, status));
+        return ResponseEntity.ok(movieService.updateStatus(userId, movieId, status));
     }
 
     @PatchMapping("/library/{movieId}/notes")
     public ResponseEntity<MovieItem> updateNotes(
+            @CurrentUserId String userId,
             @PathVariable String movieId,
             @RequestBody(required = false) String notes) {
-        return ResponseEntity.ok(movieService.updateNotes(movieId, notes != null ? notes : ""));
+        return ResponseEntity.ok(movieService.updateNotes(userId, movieId, notes != null ? notes : ""));
     }
 
     @PostMapping("/library/{movieId}/refresh")
-    public ResponseEntity<MovieItem> refresh(@PathVariable String movieId) {
-        return ResponseEntity.ok(movieService.refreshRatings(movieId));
+    public ResponseEntity<MovieItem> refresh(@CurrentUserId String userId, @PathVariable String movieId) {
+        return ResponseEntity.ok(movieService.refreshRatings(userId, movieId));
     }
 
     @PostMapping("/library/{movieId}/enrich")
-    public ResponseEntity<MovieItem> enrich(@PathVariable String movieId) {
-        return ResponseEntity.ok(movieService.enrichFromCache(movieId));
+    public ResponseEntity<MovieItem> enrich(@CurrentUserId String userId, @PathVariable String movieId) {
+        return ResponseEntity.ok(movieService.enrichFromCache(userId, movieId));
     }
 
     @PostMapping("/library/{movieId}/watch-providers")
     public ResponseEntity<MovieItem> enrichWatchProviders(
+            @CurrentUserId String userId,
             @PathVariable String movieId,
             @RequestParam(defaultValue = "US") String region) {
-        return ResponseEntity.ok(movieService.enrichWatchProviders(movieId, region));
+        return ResponseEntity.ok(movieService.enrichWatchProviders(userId, movieId, region));
     }
 
     @GetMapping("/details/{movieId}")
@@ -99,8 +104,8 @@ public class MovieController {
     }
 
     @DeleteMapping("/library/{movieId}")
-    public ResponseEntity<Void> removeFromLibrary(@PathVariable String movieId) {
-        movieService.removeFromLibrary(movieId);
+    public ResponseEntity<Void> removeFromLibrary(@CurrentUserId String userId, @PathVariable String movieId) {
+        movieService.removeFromLibrary(userId, movieId);
         return ResponseEntity.noContent().build();
     }
 

@@ -46,12 +46,12 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         return mangaMetadataClient.getDetails(id);
     }
 
-    public MangaItem getManga(String mangaId) {
-        return repository.findById(mangaId);
+    public MangaItem getManga(String userId, String mangaId) {
+        return repository.findById(userId, mangaId);
     }
 
-    public MangaItem updateProgress(String mangaId, int chaptersRead) {
-        MangaItem item = repository.findById(mangaId);
+    public MangaItem updateProgress(String userId, String mangaId, int chaptersRead) {
+        MangaItem item = repository.findById(userId, mangaId);
         if (item == null) {
             throw new NotFoundException("Manga not found: " + mangaId);
         }
@@ -62,8 +62,8 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         return item;
     }
 
-    public MangaItem refreshLatestChapter(String mangaId) {
-        MangaItem item = repository.findById(mangaId);
+    public MangaItem refreshLatestChapter(String userId, String mangaId) {
+        MangaItem item = repository.findById(userId, mangaId);
         if (item == null) {
             throw new NotFoundException("Manga not found: " + mangaId);
         }
@@ -86,9 +86,9 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         return item;
     }
 
-    public List<MangaItem> refreshAll() {
+    public List<MangaItem> refreshAll(String userId) {
         log.info("Refreshing all manga in library");
-        List<MangaItem> library = repository.findAll();
+        List<MangaItem> library = repository.findAll(userId);
         List<MangaItem> updated = new ArrayList<>();
 
         for (MangaItem item : library) {
@@ -113,9 +113,9 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         return updated;
     }
 
-    public List<MangaItem> refreshOngoing() {
+    public List<MangaItem> refreshOngoing(String userId) {
         log.info("Refreshing ongoing manga in library");
-        List<MangaItem> library = repository.findAll();
+        List<MangaItem> library = repository.findAll(userId);
         List<MangaItem> updated = new ArrayList<>();
 
         for (MangaItem item : library) {
@@ -146,8 +146,8 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
         return updated;
     }
 
-    public MangaItem enrichMangadexRating(String mangaId) {
-        MangaItem item = repository.findById(mangaId);
+    public MangaItem enrichMangadexRating(String userId, String mangaId) {
+        MangaItem item = repository.findById(userId, mangaId);
         if (item == null) throw new NotFoundException("Manga not found: " + mangaId);
 
         if (item.getMangadexRating() == null) {

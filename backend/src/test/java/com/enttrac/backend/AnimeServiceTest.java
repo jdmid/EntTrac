@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -67,49 +68,49 @@ public class AnimeServiceTest {
 
     @Test
     void getLibrary_ShouldReturnAllItems() {
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<AnimeItem> library = animeService.getLibrary();
+        List<AnimeItem> library = animeService.getLibrary(TEST_USER_ID);
 
         assertEquals(1, library.size());
-        verify(animeRepository, times(1)).findAll();
+        verify(animeRepository, times(1)).findAll(TEST_USER_ID);
     }
 
     @Test
     void getAnime_ShouldReturnItemWhenFound() {
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.getAnime("21");
+        AnimeItem result = animeService.getAnime(TEST_USER_ID,"21");
 
         assertEquals("One Piece", result.getTitle());
     }
 
     @Test
     void getAnime_ShouldReturnNullWhenNotFound() {
-        when(animeRepository.findById("notreal")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
-        AnimeItem result = animeService.getAnime("notreal");
+        AnimeItem result = animeService.getAnime(TEST_USER_ID,"notreal");
 
         assertNull(result);
     }
 
     @Test
     void addToLibrary_ShouldSaveAndReturnNewItem() {
-        when(animeRepository.findById("21")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(null);
 
-        AnimeItem result = animeService.addToLibrary(testItem);
+        AnimeItem result = animeService.addToLibrary(TEST_USER_ID,testItem);
 
         verify(animeRepository, times(1)).save(testItem);
-        assertEquals("USER#default", result.getPk());
+        assertEquals(TEST_USER_ID, result.getPk());
         assertEquals("ANIME#ANILIST#21", result.getSk());
         assertEquals("1", result.getStudioId());
     }
 
     @Test
     void addToLibrary_ShouldReturnExistingWhenAlreadyInLibrary() {
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.addToLibrary(testItem);
+        AnimeItem result = animeService.addToLibrary(TEST_USER_ID,testItem);
 
         assertEquals(testItem, result);
         verify(animeRepository, never()).save(any());
@@ -117,9 +118,9 @@ public class AnimeServiceTest {
 
     @Test
     void updateProgress_ShouldUpdateEpisodesWatched() {
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.updateProgress("21", 50);
+        AnimeItem result = animeService.updateProgress(TEST_USER_ID,"21", 50);
 
         assertEquals(50, result.getEpisodesWatched());
         verify(animeRepository, times(1)).save(testItem);
@@ -127,19 +128,19 @@ public class AnimeServiceTest {
 
     @Test
     void updateProgress_ShouldThrowWhenNotFound() {
-        when(animeRepository.findById("notreal")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                animeService.updateProgress("notreal", 50));
+                animeService.updateProgress(TEST_USER_ID,"notreal", 50));
 
         assertEquals("Anime not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateScore_ShouldUpdateScore() {
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.updateScore("21", 9);
+        AnimeItem result = animeService.updateScore(TEST_USER_ID,"21", 9);
 
         assertEquals(9, result.getScore());
         verify(animeRepository, times(1)).save(testItem);
@@ -147,19 +148,19 @@ public class AnimeServiceTest {
 
     @Test
     void updateScore_ShouldThrowWhenNotFound() {
-        when(animeRepository.findById("notreal")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                animeService.updateScore("notreal", 9));
+                animeService.updateScore(TEST_USER_ID,"notreal", 9));
 
         assertEquals("Anime not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateStatus_ShouldUpdateStatus() {
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.updateStatus("21", "CONSUMING");
+        AnimeItem result = animeService.updateStatus(TEST_USER_ID,"21", "CONSUMING");
 
         assertEquals("CONSUMING", result.getStatus());
         verify(animeRepository, times(1)).save(testItem);
@@ -167,10 +168,10 @@ public class AnimeServiceTest {
 
     @Test
     void updateStatus_ShouldThrowWhenNotFound() {
-        when(animeRepository.findById("notreal")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                animeService.updateStatus("notreal", "CONSUMING"));
+                animeService.updateStatus(TEST_USER_ID,"notreal", "CONSUMING"));
 
         assertEquals("Anime not found: notreal", ex.getMessage());
     }
@@ -181,10 +182,10 @@ public class AnimeServiceTest {
         AnimeSearchResult details = AnimeSearchResult.builder()
                 .id("21").totalEpisodes(1000).build();
 
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
         when(aniListClient.getDetails("21")).thenReturn(details);
 
-        AnimeItem result = animeService.refreshLatestEpisode("21");
+        AnimeItem result = animeService.refreshLatestEpisode(TEST_USER_ID,"21");
 
         assertEquals(1000, result.getTotalEpisodes());
         verify(animeRepository, times(1)).save(testItem);
@@ -192,26 +193,26 @@ public class AnimeServiceTest {
 
     @Test
     void refreshLatestEpisode_ShouldThrowWhenNotFound() {
-        when(animeRepository.findById("notreal")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                animeService.refreshLatestEpisode("notreal"));
+                animeService.refreshLatestEpisode(TEST_USER_ID,"notreal"));
 
         assertEquals("Anime not found: notreal", ex.getMessage());
     }
 
     @Test
     void removeFromLibrary_ShouldCallDelete() {
-        animeService.removeFromLibrary("21");
+        animeService.removeFromLibrary(TEST_USER_ID,"21");
 
-        verify(animeRepository, times(1)).delete("21");
+        verify(animeRepository, times(1)).delete(TEST_USER_ID,"21");
     }
 
     @Test
     void updateNotes_ShouldUpdateNotes() {
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.updateNotes("21", "Great anime");
+        AnimeItem result = animeService.updateNotes(TEST_USER_ID,"21", "Great anime");
 
         assertEquals("Great anime", result.getNotes());
         verify(animeRepository, times(1)).save(testItem);
@@ -219,10 +220,10 @@ public class AnimeServiceTest {
 
     @Test
     void updateNotes_ShouldThrowWhenNotFound() {
-        when(animeRepository.findById("notreal")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                animeService.updateNotes("notreal", "some notes"));
+                animeService.updateNotes(TEST_USER_ID,"notreal", "some notes"));
 
         assertEquals("Anime not found: notreal", ex.getMessage());
     }
@@ -233,10 +234,10 @@ public class AnimeServiceTest {
         AnimeSearchResult details = AnimeSearchResult.builder()
                 .id("21").totalEpisodes(1000).build();
 
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21")).thenReturn(details);
 
-        List<AnimeItem> result = animeService.refreshAll();
+        List<AnimeItem> result = animeService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         assertEquals(1000, result.get(0).getTotalEpisodes());
@@ -245,10 +246,10 @@ public class AnimeServiceTest {
 
     @Test
     void refreshAll_ShouldSkipUpdateWhenDetailsNull() {
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21")).thenReturn(null);
 
-        List<AnimeItem> result = animeService.refreshAll();
+        List<AnimeItem> result = animeService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(animeRepository, never()).save(any());
@@ -263,10 +264,10 @@ public class AnimeServiceTest {
                 .status("Currently Airing") // normalizes to "ongoing" — matches existing
                 .build();
 
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21")).thenReturn(details);
 
-        List<AnimeItem> result = animeService.refreshAll();
+        List<AnimeItem> result = animeService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(animeRepository, never()).save(any());
@@ -274,11 +275,11 @@ public class AnimeServiceTest {
 
     @Test
     void refreshAll_ShouldContinueWhenOneItemFails() {
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21"))
                 .thenThrow(new RuntimeException("API down"));
 
-        List<AnimeItem> result = animeService.refreshAll();
+        List<AnimeItem> result = animeService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(animeRepository, never()).save(any());
@@ -293,10 +294,10 @@ public class AnimeServiceTest {
                 .totalEpisodes(1000)
                 .build();
 
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21")).thenReturn(details);
 
-        List<AnimeItem> result = animeService.refreshAll();
+        List<AnimeItem> result = animeService.refreshAll(TEST_USER_ID);
 
         assertEquals("ongoing", result.get(0).getSeriesStatus());
         verify(animeRepository, times(1)).save(testItem);
@@ -305,9 +306,9 @@ public class AnimeServiceTest {
     @Test
     void refreshOngoing_ShouldSkipCompletedItems() {
         testItem.setSeriesStatus("completed");
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<AnimeItem> result = animeService.refreshOngoing();
+        List<AnimeItem> result = animeService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(aniListClient, never()).getDetails(any());
@@ -317,9 +318,9 @@ public class AnimeServiceTest {
     @Test
     void refreshOngoing_ShouldSkipCancelledItems() {
         testItem.setSeriesStatus("cancelled");
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<AnimeItem> result = animeService.refreshOngoing();
+        List<AnimeItem> result = animeService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(aniListClient, never()).getDetails(any());
@@ -333,10 +334,10 @@ public class AnimeServiceTest {
         AnimeSearchResult details = AnimeSearchResult.builder()
                 .id("21").totalEpisodes(1000).build();
 
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21")).thenReturn(details);
 
-        List<AnimeItem> result = animeService.refreshOngoing();
+        List<AnimeItem> result = animeService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         assertEquals(1000, result.get(0).getTotalEpisodes());
@@ -346,10 +347,10 @@ public class AnimeServiceTest {
     @Test
     void refreshOngoing_ShouldSkipWhenDetailsNull() {
         testItem.setSeriesStatus("ongoing");
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21")).thenReturn(null);
 
-        List<AnimeItem> result = animeService.refreshOngoing();
+        List<AnimeItem> result = animeService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(animeRepository, never()).save(any());
@@ -358,11 +359,11 @@ public class AnimeServiceTest {
     @Test
     void refreshOngoing_ShouldContinueWhenOneItemFails() {
         testItem.setSeriesStatus("ongoing");
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21"))
                 .thenThrow(new RuntimeException("API down"));
 
-        List<AnimeItem> result = animeService.refreshOngoing();
+        List<AnimeItem> result = animeService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(animeRepository, never()).save(any());
@@ -375,10 +376,10 @@ public class AnimeServiceTest {
         AnimeSearchResult details = AnimeSearchResult.builder()
                 .id("21").latestEpisode(11).build();
 
-        when(animeRepository.findAll()).thenReturn(List.of(testItem));
+        when(animeRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(aniListClient.getDetails("21")).thenReturn(details);
 
-        List<AnimeItem> result = animeService.refreshOngoing();
+        List<AnimeItem> result = animeService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(11, result.get(0).getLatestEpisode());
         verify(animeRepository, times(1)).save(testItem);
@@ -387,10 +388,10 @@ public class AnimeServiceTest {
     @Test
     void enrichAniListRating_ShouldFetchAndCacheWhenNull() {
         testItem.setAnilistRating(null);
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
         when(aniListClient.getAnilistAnimeRating("21")).thenReturn(8.7);
 
-        AnimeItem result = animeService.enrichAniListRating("21");
+        AnimeItem result = animeService.enrichAniListRating(TEST_USER_ID,"21");
 
         assertEquals(8.7, result.getAnilistRating());
         verify(animeRepository, times(1)).save(testItem);
@@ -399,9 +400,9 @@ public class AnimeServiceTest {
     @Test
     void enrichAniListRating_ShouldSkipWhenAlreadyCached() {
         testItem.setAnilistRating(85.0);
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.enrichAniListRating("21");
+        AnimeItem result = animeService.enrichAniListRating(TEST_USER_ID,"21");
 
         assertEquals(85.0, result.getAnilistRating());
         verify(aniListClient, never()).getAnilistAnimeRating(any());
@@ -410,10 +411,10 @@ public class AnimeServiceTest {
 
     @Test
     void enrichAniListRating_ShouldThrowWhenNotFound() {
-        when(animeRepository.findById("notreal")).thenReturn(null);
+        when(animeRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                animeService.enrichAniListRating("notreal"));
+                animeService.enrichAniListRating(TEST_USER_ID,"notreal"));
 
         assertEquals("Anime not found: notreal", ex.getMessage());
     }
@@ -421,10 +422,10 @@ public class AnimeServiceTest {
     @Test
     void refreshLatestEpisode_ShouldSaveEvenWhenDetailsNull() {
         testItem.setAnilistRating(null);
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
         when(aniListClient.getDetails("21")).thenReturn(null);
 
-        AnimeItem result = animeService.refreshLatestEpisode("21");
+        AnimeItem result = animeService.refreshLatestEpisode(TEST_USER_ID,"21");
 
         assertNotNull(result);
         verify(animeRepository, times(1)).save(testItem);
@@ -433,10 +434,10 @@ public class AnimeServiceTest {
     @Test
     void enrichAniListRating_ShouldFetchAnilistRatingWhenNull() {
         testItem.setAnilistRating(null);
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
         when(aniListClient.getAnilistAnimeRating("21")).thenReturn(85.0);
 
-        AnimeItem result = animeService.enrichAniListRating("21");
+        AnimeItem result = animeService.enrichAniListRating(TEST_USER_ID,"21");
 
         assertEquals(85.0, result.getAnilistRating());
         verify(animeRepository, times(1)).save(testItem);
@@ -445,9 +446,9 @@ public class AnimeServiceTest {
     @Test
     void enrichAniListRating_ShouldSkipAnilistRatingWhenAlreadyCached() {
         testItem.setAnilistRating(85.0);
-        when(animeRepository.findById("21")).thenReturn(testItem);
+        when(animeRepository.findById(TEST_USER_ID,"21")).thenReturn(testItem);
 
-        AnimeItem result = animeService.enrichAniListRating("21");
+        AnimeItem result = animeService.enrichAniListRating(TEST_USER_ID,"21");
 
         assertEquals(85.0, result.getAnilistRating());
         verify(aniListClient, never()).getAnilistAnimeRating(any());

@@ -1,5 +1,6 @@
 package com.enttrac.backend.controller;
 
+import com.enttrac.backend.auth.CurrentUserId;
 import com.enttrac.backend.model.item.AnimeItem;
 import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.AnimeSearchResult;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/anime")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @Validated
 public class AnimeController {
 
@@ -33,13 +34,13 @@ public class AnimeController {
     }
 
     @GetMapping("/library")
-    public ResponseEntity<List<AnimeItem>> getLibrary() {
-        return ResponseEntity.ok(animeService.getLibrary());
+    public ResponseEntity<List<AnimeItem>> getLibrary(@CurrentUserId String userId) {
+        return ResponseEntity.ok(animeService.getLibrary(userId));
     }
 
     @GetMapping("/library/{animeId}")
-    public ResponseEntity<AnimeItem> getAnime(@PathVariable String animeId) {
-        AnimeItem item = animeService.getAnime(animeId);
+    public ResponseEntity<AnimeItem> getAnime(@CurrentUserId String userId, @PathVariable String animeId) {
+        AnimeItem item = animeService.getAnime(userId, animeId);
         if (item == null) {
             return ResponseEntity.notFound().build();
         }
@@ -47,34 +48,37 @@ public class AnimeController {
     }
 
     @PostMapping("/library")
-    public ResponseEntity<AnimeItem> addToLibrary(@Valid @RequestBody AnimeItem item) {
-        return ResponseEntity.ok(animeService.addToLibrary(item));
+    public ResponseEntity<AnimeItem> addToLibrary(@CurrentUserId String userId, @Valid @RequestBody AnimeItem item) {
+        return ResponseEntity.ok(animeService.addToLibrary(userId, item));
     }
 
     @PatchMapping("/library/{animeId}/progress")
     public ResponseEntity<AnimeItem> updateProgress(
+            @CurrentUserId String userId,
             @PathVariable String animeId,
             @RequestParam int episodesWatched) {
-        return ResponseEntity.ok(animeService.updateProgress(animeId, episodesWatched));
+        return ResponseEntity.ok(animeService.updateProgress(userId, animeId, episodesWatched));
     }
 
     @PatchMapping("/library/{animeId}/score")
     public ResponseEntity<AnimeItem> updateScore(
+            @CurrentUserId String userId,
             @PathVariable String animeId,
             @RequestParam @Min(1) @Max(10) int score) {
-        return ResponseEntity.ok(animeService.updateScore(animeId, score));
+        return ResponseEntity.ok(animeService.updateScore(userId, animeId, score));
     }
 
     @PatchMapping("/library/{animeId}/status")
     public ResponseEntity<AnimeItem> updateStatus(
+            @CurrentUserId String userId,
             @PathVariable String animeId,
             @RequestParam @ValidStatus(MediaType.ANIME) String status) {
-        return ResponseEntity.ok(animeService.updateStatus(animeId, status));
+        return ResponseEntity.ok(animeService.updateStatus(userId, animeId, status));
     }
 
     @PostMapping("/library/{animeId}/refresh")
-    public ResponseEntity<AnimeItem> refresh(@PathVariable String animeId) {
-        return ResponseEntity.ok(animeService.refreshLatestEpisode(animeId));
+    public ResponseEntity<AnimeItem> refresh(@CurrentUserId String userId, @PathVariable String animeId) {
+        return ResponseEntity.ok(animeService.refreshLatestEpisode(userId, animeId));
     }
 
     @GetMapping("/details/{animeId}")
@@ -87,31 +91,32 @@ public class AnimeController {
     }
 
     @DeleteMapping("/library/{animeId}")
-    public ResponseEntity<Void> removeFromLibrary(@PathVariable String animeId) {
-        animeService.removeFromLibrary(animeId);
+    public ResponseEntity<Void> removeFromLibrary(@CurrentUserId String userId, @PathVariable String animeId) {
+        animeService.removeFromLibrary(userId, animeId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/library/{animeId}/notes")
     public ResponseEntity<AnimeItem> updateNotes(
+            @CurrentUserId String userId,
             @PathVariable String animeId,
             @RequestBody(required = false) String notes) {
-        return ResponseEntity.ok(animeService.updateNotes(animeId, notes != null ? notes : ""));
+        return ResponseEntity.ok(animeService.updateNotes(userId, animeId, notes != null ? notes : ""));
     }
 
     @PostMapping("/library/refresh-all")
-    public ResponseEntity<List<AnimeItem>> refreshAll() {
-        return ResponseEntity.ok(animeService.refreshAll());
+    public ResponseEntity<List<AnimeItem>> refreshAll(@CurrentUserId String userId) {
+        return ResponseEntity.ok(animeService.refreshAll(userId));
     }
 
     @PostMapping("/library/refresh-ongoing")
-    public ResponseEntity<List<AnimeItem>> refreshOngoing() {
-        return ResponseEntity.ok(animeService.refreshOngoing());
+    public ResponseEntity<List<AnimeItem>> refreshOngoing(@CurrentUserId String userId) {
+        return ResponseEntity.ok(animeService.refreshOngoing(userId));
     }
 
     @PostMapping("/library/{id}/enrich")
-    public ResponseEntity<AnimeItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(animeService.enrichAniListRating(id));
+    public ResponseEntity<AnimeItem> enrich(@CurrentUserId String userId, @PathVariable String id) {
+        return ResponseEntity.ok(animeService.enrichAniListRating(userId, id));
     }
 
     @GetMapping("/creator/{studioId}")

@@ -1,6 +1,9 @@
 package com.enttrac.backend;
 
-import com.enttrac.backend.controller.GameController;
+import com.enttrac.backend.auth.AuthFilter;
+import com.enttrac.backend.auth.CurrentUserIdArgumentResolver;
+import com.enttrac.backend.auth.JwtService;
+import com.enttrac.backend.config.WebMvcConfig;import com.enttrac.backend.controller.GameController;
 import com.enttrac.backend.model.item.GameItem;
 import com.enttrac.backend.model.result.GameSearchResult;
 import com.enttrac.backend.service.GameService;
@@ -8,21 +11,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
+import static com.enttrac.backend.auth.AuthTestSupport.accessTokenCookie;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(GameController.class)
+@Import({AuthFilter.class, CurrentUserIdArgumentResolver.class, WebMvcConfig.class, JwtService.class})
 public class GameControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JwtService jwtService;
 
     @MockitoBean
     private GameService gameService;
@@ -39,7 +49,7 @@ public class GameControllerTest {
 
         when(gameService.search("skyrim")).thenReturn(List.of(result));
 
-        mockMvc.perform(get("/api/games/search").param("q", "skyrim"))
+        mockMvc.perform(get("/api/games/search").param("q", "skyrim").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Skyrim"));
     }
@@ -50,9 +60,9 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setTitle("Skyrim");
 
-        when(gameService.getLibrary()).thenReturn(List.of(item));
+        when(gameService.getLibrary(TEST_USER_ID)).thenReturn(List.of(item));
 
-        mockMvc.perform(get("/api/games/library"))
+        mockMvc.perform(get("/api/games/library").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].gameId").value("1942"));
     }
@@ -63,18 +73,18 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setTitle("Skyrim");
 
-        when(gameService.getGame("1942")).thenReturn(item);
+        when(gameService.getGame(TEST_USER_ID,"1942")).thenReturn(item);
 
-        mockMvc.perform(get("/api/games/library/1942"))
+        mockMvc.perform(get("/api/games/library/1942").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameId").value("1942"));
     }
 
     @Test
     void getGame_ShouldReturn404WhenNotFound() throws Exception {
-        when(gameService.getGame("notreal")).thenReturn(null);
+        when(gameService.getGame(TEST_USER_ID,"notreal")).thenReturn(null);
 
-        mockMvc.perform(get("/api/games/library/notreal"))
+        mockMvc.perform(get("/api/games/library/notreal").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isNotFound());
     }
 
@@ -85,9 +95,10 @@ public class GameControllerTest {
         item.setTitle("Skyrim");
         item.setStatus("PLANNED");
 
-        when(gameService.addToLibrary(any())).thenReturn(item);
+        when(gameService.addToLibrary(eq(TEST_USER_ID) ,any())).thenReturn(item);
 
         mockMvc.perform(post("/api/games/library")
+                        .cookie(accessTokenCookie(jwtService))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(item)))
                 .andExpect(status().isOk())
@@ -96,10 +107,10 @@ public class GameControllerTest {
 
     @Test
     void removeFromLibrary_ShouldReturn204() throws Exception {
-        mockMvc.perform(delete("/api/games/library/1942"))
+        mockMvc.perform(delete("/api/games/library/1942").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isNoContent());
 
-        verify(gameService, times(1)).removeFromLibrary("1942");
+        verify(gameService, times(1)).removeFromLibrary(TEST_USER_ID,"1942");
     }
 
     @Test
@@ -108,9 +119,10 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setHoursPlayed(42);
 
-        when(gameService.updateProgress("1942", 42)).thenReturn(item);
+        when(gameService.updateProgress(TEST_USER_ID,"1942", 42)).thenReturn(item);
 
         mockMvc.perform(patch("/api/games/library/1942/progress")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("hoursPlayed", "42"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hoursPlayed").value(42));
@@ -122,9 +134,10 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setScore(9);
 
-        when(gameService.updateScore("1942", 9)).thenReturn(item);
+        when(gameService.updateScore(TEST_USER_ID,"1942", 9)).thenReturn(item);
 
         mockMvc.perform(patch("/api/games/library/1942/score")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("score", "9"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.score").value(9));
@@ -133,6 +146,7 @@ public class GameControllerTest {
     @Test
     void updateScore_ShouldReturn400WhenOutOfRange() throws Exception {
         mockMvc.perform(patch("/api/games/library/1942/score")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("score", "11"))
                 .andExpect(status().isBadRequest());
     }
@@ -143,9 +157,10 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setStatus("FINISHED");
 
-        when(gameService.updateStatus("1942", "FINISHED")).thenReturn(item);
+        when(gameService.updateStatus(TEST_USER_ID,"1942", "FINISHED")).thenReturn(item);
 
         mockMvc.perform(patch("/api/games/library/1942/status")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("status", "FINISHED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("FINISHED"));
@@ -154,6 +169,7 @@ public class GameControllerTest {
     @Test
     void updateStatus_ShouldReturn400WhenInvalid() throws Exception {
         mockMvc.perform(patch("/api/games/library/1942/status")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("status", "INVALID"))
                 .andExpect(status().isBadRequest());
     }
@@ -164,9 +180,10 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setUserPlatform("PC");
 
-        when(gameService.updateUserPlatform("1942", "PC")).thenReturn(item);
+        when(gameService.updateUserPlatform(TEST_USER_ID,"1942", "PC")).thenReturn(item);
 
         mockMvc.perform(patch("/api/games/library/1942/platform")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("userPlatform", "PC"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userPlatform").value("PC"));
@@ -178,9 +195,10 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setOwnedDlcIds(List.of("dlc1", "dlc2"));
 
-        when(gameService.updateOwnedDlc("1942", List.of("dlc1", "dlc2"))).thenReturn(item);
+        when(gameService.updateOwnedDlc(TEST_USER_ID,"1942", List.of("dlc1", "dlc2"))).thenReturn(item);
 
         mockMvc.perform(patch("/api/games/library/1942/dlc")
+                        .cookie(accessTokenCookie(jwtService))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(List.of("dlc1", "dlc2"))))
                 .andExpect(status().isOk())
@@ -193,9 +211,10 @@ public class GameControllerTest {
         GameItem item = new GameItem();
         item.setGameId("1942");
 
-        when(gameService.updateNotes("1942", "Great game")).thenReturn(item);
+        when(gameService.updateNotes(TEST_USER_ID,"1942", "Great game")).thenReturn(item);
 
         mockMvc.perform(patch("/api/games/library/1942/notes")
+                        .cookie(accessTokenCookie(jwtService))
                         .contentType(MediaType.TEXT_PLAIN)
                         .content("Great game"))
                 .andExpect(status().isOk());
@@ -206,9 +225,9 @@ public class GameControllerTest {
         GameItem item = new GameItem();
         item.setGameId("1942");
 
-        when(gameService.updateNotes("1942", "")).thenReturn(item);
+        when(gameService.updateNotes(TEST_USER_ID,"1942", "")).thenReturn(item);
 
-        mockMvc.perform(patch("/api/games/library/1942/notes"))
+        mockMvc.perform(patch("/api/games/library/1942/notes").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk());
     }
 
@@ -218,9 +237,9 @@ public class GameControllerTest {
         item.setGameId("1942");
         item.setIgdbRating(87.5);
 
-        when(gameService.enrichIgdbRating("1942")).thenReturn(item);
+        when(gameService.enrichIgdbRating(TEST_USER_ID,"1942")).thenReturn(item);
 
-        mockMvc.perform(post("/api/games/library/1942/enrich"))
+        mockMvc.perform(post("/api/games/library/1942/enrich").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.igdbRating").value(87.5));
     }
@@ -232,9 +251,9 @@ public class GameControllerTest {
         item.setIgdbRating(87.5);
         item.setIgdbCriticRating(92.0);
 
-        when(gameService.refreshRatings("1942")).thenReturn(item);
+        when(gameService.refreshRatings(TEST_USER_ID,"1942")).thenReturn(item);
 
-        mockMvc.perform(post("/api/games/library/1942/refresh"))
+        mockMvc.perform(post("/api/games/library/1942/refresh").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.igdbRating").value(87.5))
                 .andExpect(jsonPath("$.igdbCriticRating").value(92.0));
@@ -249,7 +268,7 @@ public class GameControllerTest {
 
         when(gameService.getDetails("1942")).thenReturn(result);
 
-        mockMvc.perform(get("/api/games/details/1942"))
+        mockMvc.perform(get("/api/games/details/1942").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Skyrim"));
     }
@@ -258,7 +277,7 @@ public class GameControllerTest {
     void getDetails_ShouldReturn404WhenNotFound() throws Exception {
         when(gameService.getDetails("notreal")).thenReturn(null);
 
-        mockMvc.perform(get("/api/games/details/notreal"))
+        mockMvc.perform(get("/api/games/details/notreal").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isNotFound());
     }
 
@@ -271,7 +290,7 @@ public class GameControllerTest {
 
         when(gameService.getWorksByDeveloper("1234")).thenReturn(List.of(result));
 
-        mockMvc.perform(get("/api/games/creator/1234"))
+        mockMvc.perform(get("/api/games/creator/1234").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Skyrim"));
     }

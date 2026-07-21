@@ -1,5 +1,6 @@
 package com.enttrac.backend.controller;
 
+import com.enttrac.backend.auth.CurrentUserId;
 import com.enttrac.backend.model.item.MangaItem;
 import com.enttrac.backend.model.result.MangaSearchResult;
 import com.enttrac.backend.model.MediaType;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/manga")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @Validated
 public class MangaController {
 
@@ -35,14 +36,14 @@ public class MangaController {
 
     // Get full library
     @GetMapping("/library")
-    public ResponseEntity<List<MangaItem>> getLibrary() {
-        return ResponseEntity.ok(mangaService.getLibrary());
+    public ResponseEntity<List<MangaItem>> getLibrary(@CurrentUserId String userId) {
+        return ResponseEntity.ok(mangaService.getLibrary(userId));
     }
 
     // Get single manga from library
     @GetMapping("/library/{mangaId}")
-    public ResponseEntity<MangaItem> getManga(@PathVariable String mangaId) {
-        MangaItem item = mangaService.getManga(mangaId);
+    public ResponseEntity<MangaItem> getManga(@CurrentUserId String userId, @PathVariable String mangaId) {
+        MangaItem item = mangaService.getManga(userId, mangaId);
         if (item == null) {
             return ResponseEntity.notFound().build();
         }
@@ -51,44 +52,47 @@ public class MangaController {
 
     // Add manga to library
     @PostMapping("/library")
-    public ResponseEntity<MangaItem> addToLibrary(@Valid @RequestBody MangaItem item) {
-        return ResponseEntity.ok(mangaService.addToLibrary(item));
+    public ResponseEntity<MangaItem> addToLibrary(@CurrentUserId String userId, @Valid @RequestBody MangaItem item) {
+        return ResponseEntity.ok(mangaService.addToLibrary(userId, item));
     }
 
     // Update reading progress
     @PatchMapping("/library/{mangaId}/progress")
     public ResponseEntity<MangaItem> updateProgress(
+            @CurrentUserId String userId,
             @PathVariable String mangaId,
             @RequestParam int chaptersRead) {
-        return ResponseEntity.ok(mangaService.updateProgress(mangaId, chaptersRead));
+        return ResponseEntity.ok(mangaService.updateProgress(userId, mangaId, chaptersRead));
     }
 
     // Update status from user
     @PatchMapping("/library/{mangaId}/status")
     public ResponseEntity<MangaItem> updateStatus(
+            @CurrentUserId String userId,
             @PathVariable String mangaId,
             @RequestParam @ValidStatus(MediaType.MANGA) String status) {
-        return ResponseEntity.ok(mangaService.updateStatus(mangaId, status));
+        return ResponseEntity.ok(mangaService.updateStatus(userId, mangaId, status));
     }
 
     // Refresh latest chapter from API
     @PostMapping("/library/{mangaId}/refresh")
-    public ResponseEntity<MangaItem> refresh(@PathVariable String mangaId) {
-        return ResponseEntity.ok(mangaService.refreshLatestChapter(mangaId));
+    public ResponseEntity<MangaItem> refresh(@CurrentUserId String userId, @PathVariable String mangaId) {
+        return ResponseEntity.ok(mangaService.refreshLatestChapter(userId, mangaId));
     }
 
     // Update score from user
     @PatchMapping("/library/{mangaId}/score")
     public ResponseEntity<MangaItem> updateScore(
+            @CurrentUserId String userId,
             @PathVariable String mangaId,
             @RequestParam @Min(1) @Max(10) int score) {
-        return ResponseEntity.ok(mangaService.updateScore(mangaId, score));
+        return ResponseEntity.ok(mangaService.updateScore(userId, mangaId, score));
     }
 
     // Remove from library
     @DeleteMapping("/library/{mangaId}")
-    public ResponseEntity<Void> removeFromLibrary(@PathVariable String mangaId) {
-        mangaService.removeFromLibrary(mangaId);
+    public ResponseEntity<Void> removeFromLibrary(@CurrentUserId String userId, @PathVariable String mangaId) {
+        mangaService.removeFromLibrary(userId, mangaId);
         return ResponseEntity.noContent().build();
     }
 
@@ -105,25 +109,26 @@ public class MangaController {
     // Update notes on manga DB entry
     @PatchMapping("/library/{mangaId}/notes")
     public ResponseEntity<MangaItem> updateNotes(
+            @CurrentUserId String userId,
             @PathVariable String mangaId,
             @RequestBody(required = false) String notes) {
-        return ResponseEntity.ok(mangaService.updateNotes(mangaId, notes != null ? notes : ""));
+        return ResponseEntity.ok(mangaService.updateNotes(userId, mangaId, notes != null ? notes : ""));
     }
 
     @PostMapping("/library/refresh-all")
-    public ResponseEntity<List<MangaItem>> refreshAll() {
-        return ResponseEntity.ok(mangaService.refreshAll());
+    public ResponseEntity<List<MangaItem>> refreshAll(@CurrentUserId String userId) {
+        return ResponseEntity.ok(mangaService.refreshAll(userId));
     }
 
     // Refresh all ongoing series from API
     @PostMapping("/library/refresh-ongoing")
-    public ResponseEntity<List<MangaItem>> refreshOngoing() {
-        return ResponseEntity.ok(mangaService.refreshOngoing());
+    public ResponseEntity<List<MangaItem>> refreshOngoing(@CurrentUserId String userId) {
+        return ResponseEntity.ok(mangaService.refreshOngoing(userId));
     }
 
     @PostMapping("/library/{id}/enrich")
-    public ResponseEntity<MangaItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(mangaService.enrichMangadexRating(id));
+    public ResponseEntity<MangaItem> enrich(@CurrentUserId String userId, @PathVariable String id) {
+        return ResponseEntity.ok(mangaService.enrichMangadexRating(userId, id));
     }
 
     @GetMapping("/creator/{authorId}")

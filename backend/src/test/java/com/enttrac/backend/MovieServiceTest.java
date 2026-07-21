@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -83,49 +84,49 @@ public class MovieServiceTest {
 
     @Test
     void getLibrary_ShouldReturnAllItems() {
-        when(movieRepository.findAll()).thenReturn(List.of(testItem));
+        when(movieRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<MovieItem> library = movieService.getLibrary();
+        List<MovieItem> library = movieService.getLibrary(TEST_USER_ID);
 
         assertEquals(1, library.size());
-        verify(movieRepository, times(1)).findAll();
+        verify(movieRepository, times(1)).findAll(TEST_USER_ID);
     }
 
     @Test
     void getMovie_ShouldReturnItemWhenFound() {
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
 
-        MovieItem result = movieService.getMovie("550");
+        MovieItem result = movieService.getMovie(TEST_USER_ID,"550");
 
         assertEquals("Fight Club", result.getTitle());
     }
 
     @Test
     void getMovie_ShouldReturnNullWhenNotFound() {
-        when(movieRepository.findById("notreal")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
-        MovieItem result = movieService.getMovie("notreal");
+        MovieItem result = movieService.getMovie(TEST_USER_ID,"notreal");
 
         assertNull(result);
     }
 
     @Test
     void addToLibrary_ShouldSetPkAndSk() {
-        when(movieRepository.findById("550")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(null);
 
-        MovieItem result = movieService.addToLibrary(testItem);
+        MovieItem result = movieService.addToLibrary(TEST_USER_ID,testItem);
 
         verify(movieRepository, times(1)).save(testItem);
-        assertEquals("USER#default", result.getPk());
+        assertEquals(TEST_USER_ID, result.getPk());
         assertEquals("MOVIE#TMDB#550", result.getSk());
         assertEquals("525", result.getDirectorId());
     }
 
     @Test
     void addToLibrary_ShouldReturnExistingWhenAlreadyInLibrary() {
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
 
-        MovieItem result = movieService.addToLibrary(testItem);
+        MovieItem result = movieService.addToLibrary(TEST_USER_ID,testItem);
 
         assertEquals(testItem, result);
         verify(movieRepository, never()).save(any());
@@ -133,9 +134,9 @@ public class MovieServiceTest {
 
     @Test
     void updateScore_ShouldUpdateScore() {
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
 
-        MovieItem result = movieService.updateScore("550", 9);
+        MovieItem result = movieService.updateScore(TEST_USER_ID,"550", 9);
 
         assertEquals(9, result.getScore());
         verify(movieRepository, times(1)).save(testItem);
@@ -143,19 +144,19 @@ public class MovieServiceTest {
 
     @Test
     void updateScore_ShouldThrowWhenNotFound() {
-        when(movieRepository.findById("notreal")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                movieService.updateScore("notreal", 9));
+                movieService.updateScore(TEST_USER_ID,"notreal", 9));
 
         assertEquals("Movie not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateStatus_ShouldUpdateStatus() {
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
 
-        MovieItem result = movieService.updateStatus("550", "FINISHED");
+        MovieItem result = movieService.updateStatus(TEST_USER_ID,"550", "FINISHED");
 
         assertEquals("FINISHED", result.getStatus());
         verify(movieRepository, times(1)).save(testItem);
@@ -163,19 +164,19 @@ public class MovieServiceTest {
 
     @Test
     void updateStatus_ShouldThrowWhenNotFound() {
-        when(movieRepository.findById("notreal")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                movieService.updateStatus("notreal", "FINISHED"));
+                movieService.updateStatus(TEST_USER_ID,"notreal", "FINISHED"));
 
         assertEquals("Movie not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateNotes_ShouldUpdateNotes() {
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
 
-        MovieItem result = movieService.updateNotes("550", "Great movie");
+        MovieItem result = movieService.updateNotes(TEST_USER_ID,"550", "Great movie");
 
         assertEquals("Great movie", result.getNotes());
         verify(movieRepository, times(1)).save(testItem);
@@ -183,10 +184,10 @@ public class MovieServiceTest {
 
     @Test
     void updateNotes_ShouldThrowWhenNotFound() {
-        when(movieRepository.findById("notreal")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                movieService.updateNotes("notreal", "notes"));
+                movieService.updateNotes(TEST_USER_ID,"notreal", "notes"));
 
         assertEquals("Movie not found: notreal", ex.getMessage());
     }
@@ -201,7 +202,7 @@ public class MovieServiceTest {
                 .metacriticRating("79/100")
                 .build();
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
         doAnswer(invocation -> {
@@ -212,7 +213,7 @@ public class MovieServiceTest {
             return null;
         }).when(omdbClient).enrichWithRatings(any(), any());
 
-        MovieItem result = movieService.refreshRatings("550");
+        MovieItem result = movieService.refreshRatings(TEST_USER_ID,"550");
 
         verify(movieRepository, times(1)).save(testItem);
         assertNotNull(result.getLastRefreshed());
@@ -223,22 +224,22 @@ public class MovieServiceTest {
 
     @Test
     void refreshRatings_ShouldThrowWhenNotFound() {
-        when(movieRepository.findById("notreal")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                movieService.refreshRatings("notreal"));
+                movieService.refreshRatings(TEST_USER_ID,"notreal"));
 
         assertEquals("Movie not found: notreal", ex.getMessage());
     }
 
     @Test
     void enrichFromCache_ShouldCallOmdbWhenNoRatingsCached() {
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").imdbId("tt0137523").tmdbRating(7.8).build();
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        movieService.enrichFromCache("550");
+        movieService.enrichFromCache(TEST_USER_ID,"550");
 
         verify(omdbClient, times(1)).enrichWithRatings(any(), eq("tt0137523"));
         verify(movieRepository, times(1)).save(testItem);
@@ -246,12 +247,12 @@ public class MovieServiceTest {
 
     @Test
     void enrichFromCache_ShouldCacheTmdbRatingWhenNull() {
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").imdbId("tt0137523").tmdbRating(7.8).build();
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.enrichFromCache("550");
+        MovieItem result = movieService.enrichFromCache(TEST_USER_ID,"550");
 
         assertEquals(7.8, result.getTmdbRating());
         verify(movieRepository, times(1)).save(testItem);
@@ -261,9 +262,9 @@ public class MovieServiceTest {
     void enrichFromCache_ShouldSkipOmdbWhenRatingsCached() {
         testItem.setImdbRating(8.8);
         testItem.setTmdbRating(7.8);
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
 
-        movieService.enrichFromCache("550");
+        movieService.enrichFromCache(TEST_USER_ID,"550");
 
         verify(omdbClient, never()).enrichWithRatings(any(), any());
         verify(tmdbMovieClient, never()).getDetails(any());
@@ -273,12 +274,12 @@ public class MovieServiceTest {
     @Test
     void enrichFromCache_ShouldSkipTmdbRatingWhenAlreadyCached() {
         testItem.setTmdbRating(7.8);
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").imdbId("tt0137523").build();
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.enrichFromCache("550");
+        MovieItem result = movieService.enrichFromCache(TEST_USER_ID,"550");
 
         assertEquals(7.8, result.getTmdbRating());
         verify(omdbClient, times(1)).enrichWithRatings(any(), eq("tt0137523"));
@@ -286,19 +287,19 @@ public class MovieServiceTest {
 
     @Test
     void enrichFromCache_ShouldThrowWhenNotFound() {
-        when(movieRepository.findById("notreal")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                movieService.enrichFromCache("notreal"));
+                movieService.enrichFromCache(TEST_USER_ID,"notreal"));
 
         assertEquals("Movie not found: notreal", ex.getMessage());
     }
 
     @Test
     void removeFromLibrary_ShouldCallDelete() {
-        movieService.removeFromLibrary("550");
+        movieService.removeFromLibrary(TEST_USER_ID,"550");
 
-        verify(movieRepository, times(1)).delete("550");
+        verify(movieRepository, times(1)).delete(TEST_USER_ID,"550");
     }
 
     @Test
@@ -306,10 +307,10 @@ public class MovieServiceTest {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").status("released").imdbId("tt0137523").build();
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.refreshRatings("550");
+        MovieItem result = movieService.refreshRatings(TEST_USER_ID,"550");
 
         assertEquals("released", result.getSeriesStatus());
     }
@@ -319,10 +320,10 @@ public class MovieServiceTest {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").status("in production").imdbId("tt0137523").build();
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.refreshRatings("550");
+        MovieItem result = movieService.refreshRatings(TEST_USER_ID,"550");
 
         assertEquals("in production", result.getSeriesStatus());
     }
@@ -332,10 +333,10 @@ public class MovieServiceTest {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").status("post production").imdbId("tt0137523").build();
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.refreshRatings("550");
+        MovieItem result = movieService.refreshRatings(TEST_USER_ID,"550");
 
         assertEquals("in production", result.getSeriesStatus());
     }
@@ -345,10 +346,10 @@ public class MovieServiceTest {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").status("planned").imdbId("tt0137523").build();
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.refreshRatings("550");
+        MovieItem result = movieService.refreshRatings(TEST_USER_ID,"550");
 
         assertEquals("upcoming", result.getSeriesStatus());
     }
@@ -358,10 +359,10 @@ public class MovieServiceTest {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").status("rumored").imdbId("tt0137523").build();
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.refreshRatings("550");
+        MovieItem result = movieService.refreshRatings(TEST_USER_ID,"550");
 
         assertEquals("upcoming", result.getSeriesStatus());
     }
@@ -371,10 +372,10 @@ public class MovieServiceTest {
         MovieSearchResult details = MovieSearchResult.builder()
                 .id("550").status("canceled").imdbId("tt0137523").build();
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getDetails("550")).thenReturn(details);
 
-        MovieItem result = movieService.refreshRatings("550");
+        MovieItem result = movieService.refreshRatings(TEST_USER_ID,"550");
 
         assertEquals("cancelled", result.getSeriesStatus());
     }
@@ -399,11 +400,11 @@ public class MovieServiceTest {
         testItem.setWatchProviders(null);
         testItem.setWatchProvidersRefreshedAt(null);
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getWatchProviders("550", "US"))
                 .thenReturn(List.of("Netflix", "Hulu"));
 
-        MovieItem result = movieService.enrichWatchProviders("550", "US");
+        MovieItem result = movieService.enrichWatchProviders(TEST_USER_ID,"550", "US");
 
         assertEquals(2, result.getWatchProviders().size());
         assertTrue(result.getWatchProviders().contains("Netflix"));
@@ -417,9 +418,9 @@ public class MovieServiceTest {
         testItem.setWatchProvidersRefreshedAt(
                 Instant.now().minus(Duration.ofDays(1)).toString());
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
 
-        MovieItem result = movieService.enrichWatchProviders("550", "US");
+        MovieItem result = movieService.enrichWatchProviders(TEST_USER_ID,"550", "US");
 
         assertEquals(1, result.getWatchProviders().size());
         verify(tmdbMovieClient, never()).getWatchProviders(any(), any());
@@ -432,11 +433,11 @@ public class MovieServiceTest {
         testItem.setWatchProvidersRefreshedAt(
                 Instant.now().minus(Duration.ofDays(8)).toString());
 
-        when(movieRepository.findById("550")).thenReturn(testItem);
+        when(movieRepository.findById(TEST_USER_ID,"550")).thenReturn(testItem);
         when(tmdbMovieClient.getWatchProviders("550", "US"))
                 .thenReturn(List.of("Netflix", "Max"));
 
-        MovieItem result = movieService.enrichWatchProviders("550", "US");
+        MovieItem result = movieService.enrichWatchProviders(TEST_USER_ID,"550", "US");
 
         assertEquals(2, result.getWatchProviders().size());
         assertTrue(result.getWatchProviders().contains("Max"));
@@ -445,10 +446,10 @@ public class MovieServiceTest {
 
     @Test
     void enrichWatchProviders_ShouldThrowWhenNotFound() {
-        when(movieRepository.findById("notreal")).thenReturn(null);
+        when(movieRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                movieService.enrichWatchProviders("notreal", "US"));
+                movieService.enrichWatchProviders(TEST_USER_ID,"notreal", "US"));
 
         assertEquals("Movie not found: notreal", ex.getMessage());
     }

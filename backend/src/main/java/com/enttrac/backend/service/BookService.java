@@ -44,14 +44,14 @@ public class BookService extends MediaService<BookItem, BookSearchResult> {
         return bookMetadataClient.getDetails(id);
     }
 
-    public BookItem getBook(String bookId) {
+    public BookItem getBook(String userId,String bookId) {
         log.info("Fetching book from library: {}", bookId);
-        return repository.findById(bookId);
+        return repository.findById(userId, bookId);
     }
 
-    public BookItem updateProgress(String bookId, Integer currentChapter, Integer currentPage) {
+    public BookItem updateProgress(String userId, String bookId, Integer currentChapter, Integer currentPage) {
         log.info("Updating progress for book: {} chapter={} page={}", bookId, currentChapter, currentPage);
-        BookItem item = repository.findById(bookId);
+        BookItem item = repository.findById(userId, bookId);
         if (item == null) {
             throw new NotFoundException("Book not found: " + bookId);
         }
@@ -72,9 +72,9 @@ public class BookService extends MediaService<BookItem, BookSearchResult> {
         return bookMetadataClient.searchCreators(name);
     }
 
-    public BookItem resetProgress(String bookId) {
+    public BookItem resetProgress(String userId, String bookId) {
         log.info("Resetting progress for book: {}", bookId);
-        BookItem item = repository.findById(bookId);
+        BookItem item = repository.findById(userId, bookId);
         if (item == null) throw new NotFoundException("Book not found: " + bookId);
         item.setCurrentChapter(null);
         item.setCurrentPage(null);

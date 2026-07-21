@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class AnimeRepository implements MediaRepository<AnimeItem> {
 
     private static final String TABLE_NAME = "EntTrac";
-    private static final String USER_PK = "USER#default";
 
     private final DynamoDbTable<AnimeItem> table;
 
@@ -27,18 +26,18 @@ public class AnimeRepository implements MediaRepository<AnimeItem> {
         table.putItem(item);
     }
 
-    public AnimeItem findById(String animeId) {
+    public AnimeItem findById(String userId, String animeId) {
         Key key = Key.builder()
-                .partitionValue(USER_PK)
+                .partitionValue(userId)
                 .sortValue("ANIME#ANILIST#" + animeId)
                 .build();
         return table.getItem(key);
     }
 
-    public List<AnimeItem> findAll() {
+    public List<AnimeItem> findAll(String userId) {
         QueryConditional queryConditional = QueryConditional
                 .keyEqualTo(Key.builder()
-                        .partitionValue(USER_PK)
+                        .partitionValue(userId)
                         .build());
 
         return table.query(queryConditional)
@@ -48,9 +47,9 @@ public class AnimeRepository implements MediaRepository<AnimeItem> {
                 .collect(Collectors.toList());
     }
 
-    public void delete(String animeId) {
+    public void delete(String userId, String animeId) {
         Key key = Key.builder()
-                .partitionValue(USER_PK)
+                .partitionValue(userId)
                 .sortValue("ANIME#ANILIST#" + animeId)
                 .build();
         table.deleteItem(key);

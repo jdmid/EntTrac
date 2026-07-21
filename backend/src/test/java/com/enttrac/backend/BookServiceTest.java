@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Map;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -69,50 +70,50 @@ public class BookServiceTest {
 
     @Test
     void getLibrary_ShouldReturnAllItems() {
-        when(bookRepository.findAll()).thenReturn(List.of(testItem));
+        when(bookRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<BookItem> result = bookService.getLibrary();
+        List<BookItem> result = bookService.getLibrary(TEST_USER_ID);
 
         assertEquals(1, result.size());
-        verify(bookRepository, times(1)).findAll();
+        verify(bookRepository, times(1)).findAll(TEST_USER_ID);
     }
 
     @Test
     void getBook_ShouldReturnItemWhenFound() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.getBook("OL27448W");
+        BookItem result = bookService.getBook(TEST_USER_ID,"OL27448W");
 
         assertEquals("The Lord of the Rings", result.getTitle());
-        verify(bookRepository, times(1)).findById("OL27448W");
+        verify(bookRepository, times(1)).findById(TEST_USER_ID,"OL27448W");
     }
 
     @Test
     void getBook_ShouldReturnNullWhenNotFound() {
-        when(bookRepository.findById("notreal")).thenReturn(null);
+        when(bookRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
-        BookItem result = bookService.getBook("notreal");
+        BookItem result = bookService.getBook(TEST_USER_ID,"notreal");
 
         assertNull(result);
     }
 
     @Test
     void addToLibrary_ShouldSetPkAndSk() {
-        when(bookRepository.findById("OL27448W")).thenReturn(null);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(null);
 
-        BookItem result = bookService.addToLibrary(testItem);
+        BookItem result = bookService.addToLibrary(TEST_USER_ID,testItem);
 
         verify(bookRepository, times(1)).save(testItem);
-        assertEquals("USER#default", result.getPk());
+        assertEquals(TEST_USER_ID, result.getPk());
         assertEquals("BOOK#OPENLIBRARY#OL27448W", result.getSk());
         assertEquals("OL26320A", result.getAuthors().get(0).get("id"));
     }
 
     @Test
     void addToLibrary_ShouldReturnExistingWhenAlreadyInLibrary() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.addToLibrary(testItem);
+        BookItem result = bookService.addToLibrary(TEST_USER_ID,testItem);
 
         assertEquals(testItem, result);
         verify(bookRepository, never()).save(any());
@@ -120,9 +121,9 @@ public class BookServiceTest {
 
     @Test
     void updateProgress_ShouldUpdateBothFields() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.updateProgress("OL27448W", 10, 250);
+        BookItem result = bookService.updateProgress(TEST_USER_ID,"OL27448W", 10, 250);
 
         assertEquals(10, result.getCurrentChapter());
         assertEquals(250, result.getCurrentPage());
@@ -131,9 +132,9 @@ public class BookServiceTest {
 
     @Test
     void updateProgress_ShouldOnlyUpdateChapterWhenPageIsNull() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.updateProgress("OL27448W", 10, null);
+        BookItem result = bookService.updateProgress(TEST_USER_ID,"OL27448W", 10, null);
 
         assertEquals(10, result.getCurrentChapter());
         assertEquals(120, result.getCurrentPage());
@@ -142,9 +143,9 @@ public class BookServiceTest {
 
     @Test
     void updateProgress_ShouldOnlyUpdatePageWhenChapterIsNull() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.updateProgress("OL27448W", null, 250);
+        BookItem result = bookService.updateProgress(TEST_USER_ID,"OL27448W", null, 250);
 
         assertEquals(5, result.getCurrentChapter());
         assertEquals(250, result.getCurrentPage());
@@ -153,19 +154,19 @@ public class BookServiceTest {
 
     @Test
     void updateProgress_ShouldThrowWhenNotFound() {
-        when(bookRepository.findById("notreal")).thenReturn(null);
+        when(bookRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                bookService.updateProgress("notreal", 10, 250));
+                bookService.updateProgress(TEST_USER_ID,"notreal", 10, 250));
 
         assertEquals("Book not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateScore_ShouldUpdateScore() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.updateScore("OL27448W", 9);
+        BookItem result = bookService.updateScore(TEST_USER_ID,"OL27448W", 9);
 
         assertEquals(9, result.getScore());
         verify(bookRepository, times(1)).save(testItem);
@@ -173,19 +174,19 @@ public class BookServiceTest {
 
     @Test
     void updateScore_ShouldThrowWhenNotFound() {
-        when(bookRepository.findById("notreal")).thenReturn(null);
+        when(bookRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                bookService.updateScore("notreal", 9));
+                bookService.updateScore(TEST_USER_ID,"notreal", 9));
 
         assertEquals("Book not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateStatus_ShouldUpdateStatus() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.updateStatus("OL27448W", "FINISHED");
+        BookItem result = bookService.updateStatus(TEST_USER_ID,"OL27448W", "FINISHED");
 
         assertEquals("FINISHED", result.getStatus());
         verify(bookRepository, times(1)).save(testItem);
@@ -193,19 +194,19 @@ public class BookServiceTest {
 
     @Test
     void updateStatus_ShouldThrowWhenNotFound() {
-        when(bookRepository.findById("notreal")).thenReturn(null);
+        when(bookRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                bookService.updateStatus("notreal", "FINISHED"));
+                bookService.updateStatus(TEST_USER_ID,"notreal", "FINISHED"));
 
         assertEquals("Book not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateNotes_ShouldUpdateNotes() {
-        when(bookRepository.findById("OL27448W")).thenReturn(testItem);
+        when(bookRepository.findById(TEST_USER_ID,"OL27448W")).thenReturn(testItem);
 
-        BookItem result = bookService.updateNotes("OL27448W", "Great book");
+        BookItem result = bookService.updateNotes(TEST_USER_ID,"OL27448W", "Great book");
 
         assertEquals("Great book", result.getNotes());
         verify(bookRepository, times(1)).save(testItem);
@@ -213,19 +214,19 @@ public class BookServiceTest {
 
     @Test
     void updateNotes_ShouldThrowWhenNotFound() {
-        when(bookRepository.findById("notreal")).thenReturn(null);
+        when(bookRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                bookService.updateNotes("notreal", "some notes"));
+                bookService.updateNotes(TEST_USER_ID,"notreal", "some notes"));
 
         assertEquals("Book not found: notreal", ex.getMessage());
     }
 
     @Test
     void removeFromLibrary_ShouldCallDelete() {
-        bookService.removeFromLibrary("OL27448W");
+        bookService.removeFromLibrary(TEST_USER_ID,"OL27448W");
 
-        verify(bookRepository, times(1)).delete("OL27448W");
+        verify(bookRepository, times(1)).delete(TEST_USER_ID,"OL27448W");
     }
 
     @Test

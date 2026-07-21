@@ -56,12 +56,12 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         return gameMetadataClient.getDetails(id);
     }
 
-    public GameItem getGame(String gameId) {
-        return repository.findById(gameId);
+    public GameItem getGame(String userId, String gameId) {
+        return repository.findById(userId, gameId);
     }
 
-    public GameItem updateProgress(String gameId, int hoursPlayed) {
-        GameItem item = repository.findById(gameId);
+    public GameItem updateProgress(String userId, String gameId, int hoursPlayed) {
+        GameItem item = repository.findById(userId, gameId);
         if (item == null) throw new NotFoundException("Game not found: " + gameId);
         item.setHoursPlayed(hoursPlayed);
         item.setUpdatedAt(Instant.now().toString());
@@ -70,8 +70,8 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         return item;
     }
 
-    public GameItem updateUserPlatform(String gameId, String userPlatform) {
-        GameItem item = repository.findById(gameId);
+    public GameItem updateUserPlatform(String userId, String gameId, String userPlatform) {
+        GameItem item = repository.findById(userId, gameId);
         if (item == null) throw new NotFoundException("Game not found: " + gameId);
         item.setUserPlatform(userPlatform);
         item.setUpdatedAt(Instant.now().toString());
@@ -80,8 +80,8 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         return item;
     }
 
-    public GameItem updateOwnedDlc(String gameId, List<String> ownedDlcIds) {
-        GameItem item = repository.findById(gameId);
+    public GameItem updateOwnedDlc(String userId, String gameId, List<String> ownedDlcIds) {
+        GameItem item = repository.findById(userId, gameId);
         if (item == null) throw new NotFoundException("Game not found: " + gameId);
         List<String> cleaned = new ArrayList<>(ownedDlcIds);
         cleaned.removeIf(id -> id == null || id.isBlank());
@@ -92,8 +92,8 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         return item;
     }
 
-    public GameItem enrichIgdbRating(String gameId) {
-        GameItem item = repository.findById(gameId);
+    public GameItem enrichIgdbRating(String userId, String gameId) {
+        GameItem item = repository.findById(userId, gameId);
         if (item == null) throw new NotFoundException("Game not found: " + gameId);
 
         if (item.getIgdbRating() == null) {
@@ -116,8 +116,8 @@ public class GameService extends MediaService<GameItem, GameSearchResult> {
         return gameMetadataClient.searchCreators(name);
     }
 
-    public GameItem refreshRatings(String gameId) {
-        GameItem item = repository.findById(gameId);
+    public GameItem refreshRatings(String userId, String gameId) {
+        GameItem item = repository.findById(userId, gameId);
         if (item == null) throw new NotFoundException("Game not found: " + gameId);
 
         GameSearchResult details = gameMetadataClient.getDetails(gameId);

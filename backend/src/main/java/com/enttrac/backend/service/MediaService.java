@@ -33,22 +33,22 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         return item.getClass().getSimpleName().replace("Item", "");
     }
 
-    public List<T> getLibrary() {
-        return repository.findAll();
+    public List<T> getLibrary(String userId) {
+        return repository.findAll(userId);
     }
 
-    public void removeFromLibrary(String id) {
+    public void removeFromLibrary(String userId, String id) {
         log.info("Removing from library: {}", id);
-        repository.delete(id);
+        repository.delete(userId, id);
     }
 
-    public T addToLibrary(T item) {
-        T existing = repository.findById(getEntityId(item));
+    public T addToLibrary(String userId, T item) {
+        T existing = repository.findById(userId, getEntityId(item));
         if (existing != null) {
             log.info("{} already in library, skipping add: {}", typeLabel(item), getEntityId(item));
             return existing;
         }
-        item.setPk("USER#default");
+        item.setPk(userId);
         item.setSk(buildSortKey(item));
         String now = Instant.now().toString();
         item.setCreatedAt(now);
@@ -59,8 +59,8 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         return item;
     }
 
-    public T updateScore(String id, int score) {
-        T item = repository.findById(id);
+    public T updateScore(String userId, String id, int score) {
+        T item = repository.findById(userId, id);
         if (item == null) throw new NotFoundException(getNotFoundMessage(id));
         item.setScore(score);
         item.setUpdatedAt(Instant.now().toString());
@@ -69,8 +69,8 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         return item;
     }
 
-    public T updateStatus(String id, String status) {
-        T item = repository.findById(id);
+    public T updateStatus(String userId, String id, String status) {
+        T item = repository.findById(userId, id);
         if (item == null) throw new NotFoundException(getNotFoundMessage(id));
         item.setStatus(status);
         item.setUpdatedAt(Instant.now().toString());
@@ -79,8 +79,8 @@ public abstract class MediaService<T extends MediaItem, R extends MediaSearchRes
         return item;
     }
 
-    public T updateNotes(String id, String notes) {
-        T item = repository.findById(id);
+    public T updateNotes(String userId, String id, String notes) {
+        T item = repository.findById(userId, id);
         if (item == null) throw new NotFoundException(getNotFoundMessage(id));
         item.setNotes(notes);
         item.setUpdatedAt(Instant.now().toString());

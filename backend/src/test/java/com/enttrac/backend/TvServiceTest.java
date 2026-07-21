@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -75,40 +76,40 @@ public class TvServiceTest {
 
     @Test
     void getLibrary_ShouldReturnAllItems() {
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<TvItem> library = tvService.getLibrary();
+        List<TvItem> library = tvService.getLibrary(TEST_USER_ID);
 
         assertEquals(1, library.size());
-        verify(tvRepository, times(1)).findAll();
+        verify(tvRepository, times(1)).findAll(TEST_USER_ID);
     }
 
     @Test
     void getTvShow_ShouldReturnItemWhenFound() {
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.getTvShow("1396");
+        TvItem result = tvService.getTvShow(TEST_USER_ID,"1396");
 
         assertEquals("Breaking Bad", result.getTitle());
     }
 
     @Test
     void getTvShow_ShouldReturnNullWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
-        TvItem result = tvService.getTvShow("notreal");
+        TvItem result = tvService.getTvShow(TEST_USER_ID,"notreal");
 
         assertNull(result);
     }
 
     @Test
     void addToLibrary_ShouldSaveAndReturnNewItem() {
-        when(tvRepository.findById("1396")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(null);
 
-        TvItem result = tvService.addToLibrary(testItem);
+        TvItem result = tvService.addToLibrary(TEST_USER_ID,testItem);
 
         verify(tvRepository, times(1)).save(testItem);
-        assertEquals("USER#default", result.getPk());
+        assertEquals(TEST_USER_ID, result.getPk());
         assertEquals("TV#TMDB#1396", result.getSk());
         assertEquals("Vince Gilligan", result.getCreatorName());
         assertEquals("66633", result.getCreatorId());
@@ -116,9 +117,9 @@ public class TvServiceTest {
 
     @Test
     void addToLibrary_ShouldReturnExistingWhenAlreadyInLibrary() {
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.addToLibrary(testItem);
+        TvItem result = tvService.addToLibrary(TEST_USER_ID,testItem);
 
         assertEquals(testItem, result);
         verify(tvRepository, never()).save(any());
@@ -126,9 +127,9 @@ public class TvServiceTest {
 
     @Test
     void updateProgress_ShouldUpdateEpisodesAndSeason() {
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.updateProgress("1396", 20, 2);
+        TvItem result = tvService.updateProgress(TEST_USER_ID,"1396", 20, 2);
 
         assertEquals(20, result.getEpisodesWatched());
         assertEquals(2, result.getCurrentSeason());
@@ -137,19 +138,19 @@ public class TvServiceTest {
 
     @Test
     void updateProgress_ShouldThrowWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.updateProgress("notreal", 5, 1));
+                tvService.updateProgress(TEST_USER_ID,"notreal", 5, 1));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateScore_ShouldUpdateScore() {
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.updateScore("1396", 9);
+        TvItem result = tvService.updateScore(TEST_USER_ID,"1396", 9);
 
         assertEquals(9, result.getScore());
         verify(tvRepository, times(1)).save(testItem);
@@ -157,19 +158,19 @@ public class TvServiceTest {
 
     @Test
     void updateScore_ShouldThrowWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.updateScore("notreal", 9));
+                tvService.updateScore(TEST_USER_ID,"notreal", 9));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateStatus_ShouldUpdateStatus() {
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.updateStatus("1396", "FINISHED");
+        TvItem result = tvService.updateStatus(TEST_USER_ID,"1396", "FINISHED");
 
         assertEquals("FINISHED", result.getStatus());
         verify(tvRepository, times(1)).save(testItem);
@@ -177,19 +178,19 @@ public class TvServiceTest {
 
     @Test
     void updateStatus_ShouldThrowWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.updateStatus("notreal", "FINISHED"));
+                tvService.updateStatus(TEST_USER_ID,"notreal", "FINISHED"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateNotes_ShouldUpdateNotes() {
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.updateNotes("1396", "Great show");
+        TvItem result = tvService.updateNotes(TEST_USER_ID,"1396", "Great show");
 
         assertEquals("Great show", result.getNotes());
         verify(tvRepository, times(1)).save(testItem);
@@ -197,19 +198,19 @@ public class TvServiceTest {
 
     @Test
     void updateNotes_ShouldThrowWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.updateNotes("notreal", "notes"));
+                tvService.updateNotes(TEST_USER_ID,"notreal", "notes"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
 
     @Test
     void removeFromLibrary_ShouldCallDelete() {
-        tvService.removeFromLibrary("1396");
+        tvService.removeFromLibrary(TEST_USER_ID,"1396");
 
-        verify(tvRepository, times(1)).delete("1396");
+        verify(tvRepository, times(1)).delete(TEST_USER_ID,"1396");
     }
 
     @Test
@@ -220,10 +221,10 @@ public class TvServiceTest {
                 .seasonEpisodes(List.of(7, 13, 13, 13, 16))
                 .build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshAll();
+        List<TvItem> result = tvService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         assertEquals(62, result.get(0).getTotalEpisodes());
@@ -232,10 +233,10 @@ public class TvServiceTest {
 
     @Test
     void refreshAll_ShouldSkipWhenDetailsNull() {
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(null);
 
-        List<TvItem> result = tvService.refreshAll();
+        List<TvItem> result = tvService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvRepository, never()).save(any());
@@ -243,11 +244,11 @@ public class TvServiceTest {
 
     @Test
     void refreshAll_ShouldContinueWhenOneItemFails() {
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396"))
                 .thenThrow(new RuntimeException("API down"));
 
-        List<TvItem> result = tvService.refreshAll();
+        List<TvItem> result = tvService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvRepository, never()).save(any());
@@ -264,10 +265,10 @@ public class TvServiceTest {
                 .numberOfSeasons(5)
                 .build();
 
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        TvItem result = tvService.refreshLatestEpisodes("1396");
+        TvItem result = tvService.refreshLatestEpisodes(TEST_USER_ID,"1396");
 
         assertEquals(62, result.getTotalEpisodes());
         assertEquals("S6 E1 · \"Pilot\" · 2025-01-01", result.getNextEpisodeDate());
@@ -278,10 +279,10 @@ public class TvServiceTest {
 
     @Test
     void refreshLatestEpisodes_ShouldThrowWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.refreshLatestEpisodes("notreal"));
+                tvService.refreshLatestEpisodes(TEST_USER_ID,"notreal"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
@@ -297,10 +298,10 @@ public class TvServiceTest {
                 .numberOfSeasons(5)
                 .build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshAll();
+        List<TvItem> result = tvService.refreshAll(TEST_USER_ID);
 
         assertEquals(62, result.get(0).getTotalEpisodes());
         assertEquals("ongoing", result.get(0).getSeriesStatus());
@@ -310,10 +311,10 @@ public class TvServiceTest {
 
     @Test
     void addToLibrary_ShouldCleanNullsFromSeasonEpisodes() {
-        when(tvRepository.findById("1396")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(null);
         testItem.setSeasonEpisodes(new ArrayList<>(List.of(8, 10)));
 
-        TvItem result = tvService.addToLibrary(testItem);
+        TvItem result = tvService.addToLibrary(TEST_USER_ID,testItem);
 
         verify(tvRepository, times(1)).save(testItem);
         assertNotNull(result.getSeasonEpisodes());
@@ -328,10 +329,10 @@ public class TvServiceTest {
                 .numberOfSeasons(5)
                 .build();
 
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        TvItem result = tvService.refreshLatestEpisodes("1396");
+        TvItem result = tvService.refreshLatestEpisodes(TEST_USER_ID,"1396");
 
         assertEquals(62, result.getTotalEpisodes());
         verify(tvRepository, times(1)).save(testItem);
@@ -344,10 +345,10 @@ public class TvServiceTest {
                 .seasonEpisodes(List.of(7, 13))
                 .build();
 
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        TvItem result = tvService.refreshLatestEpisodes("1396");
+        TvItem result = tvService.refreshLatestEpisodes(TEST_USER_ID,"1396");
 
         assertNotNull(result);
         verify(tvRepository, times(1)).save(testItem);
@@ -361,10 +362,10 @@ public class TvServiceTest {
                 .status("Returning Series")
                 .build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshAll();
+        List<TvItem> result = tvService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvRepository, times(1)).save(testItem);
@@ -377,10 +378,10 @@ public class TvServiceTest {
                 .seasonEpisodes(List.of(7, 13))
                 .build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshAll();
+        List<TvItem> result = tvService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvRepository, times(1)).save(testItem);
@@ -394,19 +395,19 @@ public class TvServiceTest {
                 .totalEpisodes(62)
                 .build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        assertDoesNotThrow(() -> tvService.refreshAll());
+        assertDoesNotThrow(() -> tvService.refreshAll(TEST_USER_ID));
         verify(tvRepository, times(1)).save(testItem);
     }
 
     @Test
     void refreshOngoing_ShouldSkipCompletedItems() {
         testItem.setSeriesStatus("completed");
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvMetadataClient, never()).getDetails(any());
@@ -416,9 +417,9 @@ public class TvServiceTest {
     @Test
     void refreshOngoing_ShouldSkipCancelledItems() {
         testItem.setSeriesStatus("cancelled");
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvMetadataClient, never()).getDetails(any());
@@ -436,10 +437,10 @@ public class TvServiceTest {
                 .numberOfSeasons(5)
                 .build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         assertEquals(62, result.get(0).getTotalEpisodes());
@@ -449,10 +450,10 @@ public class TvServiceTest {
     @Test
     void refreshOngoing_ShouldSkipWhenDetailsNull() {
         testItem.setSeriesStatus("ongoing");
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(null);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvRepository, never()).save(any());
@@ -461,11 +462,11 @@ public class TvServiceTest {
     @Test
     void refreshOngoing_ShouldContinueWhenOneItemFails() {
         testItem.setSeriesStatus("ongoing");
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396"))
                 .thenThrow(new RuntimeException("API down"));
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(tvRepository, never()).save(any());
@@ -480,10 +481,10 @@ public class TvServiceTest {
                 .nextEpisodeDate("S2 E1 · 2025-06-01")
                 .build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals("S2 E1 · 2025-06-01", result.get(0).getNextEpisodeDate());
         verify(tvRepository, times(1)).save(testItem);
@@ -495,10 +496,10 @@ public class TvServiceTest {
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396").status("In Production").build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals("in production", result.get(0).getSeriesStatus());
     }
@@ -509,10 +510,10 @@ public class TvServiceTest {
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396").status("Pilot").build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals("upcoming", result.get(0).getSeriesStatus());
     }
@@ -523,10 +524,10 @@ public class TvServiceTest {
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396").status("Planned").build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals("upcoming", result.get(0).getSeriesStatus());
     }
@@ -537,10 +538,10 @@ public class TvServiceTest {
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396").status("Ended").build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals("completed", result.get(0).getSeriesStatus());
     }
@@ -551,10 +552,10 @@ public class TvServiceTest {
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396").status("Canceled").build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertEquals("cancelled", result.get(0).getSeriesStatus());
     }
@@ -565,10 +566,10 @@ public class TvServiceTest {
         TvSearchResult details = TvSearchResult.builder()
                 .id("1396").status("Unknown Status").build();
 
-        when(tvRepository.findAll()).thenReturn(List.of(testItem));
+        when(tvRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        List<TvItem> result = tvService.refreshOngoing();
+        List<TvItem> result = tvService.refreshOngoing(TEST_USER_ID);
 
         assertNull(result.get(0).getSeriesStatus());
     }
@@ -576,10 +577,10 @@ public class TvServiceTest {
     @Test
     void enrichTmdbRating_ShouldFetchAndCacheWhenNull() {
         testItem.setTmdbRating(null);
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
         when(tvMetadataClient.getTmdbRating("1396")).thenReturn(9.5);
 
-        TvItem result = tvService.enrichTmdbRating("1396");
+        TvItem result = tvService.enrichTmdbRating(TEST_USER_ID,"1396");
 
         assertEquals(9.5, result.getTmdbRating());
         verify(tvRepository, times(1)).save(testItem);
@@ -588,9 +589,9 @@ public class TvServiceTest {
     @Test
     void enrichTmdbRating_ShouldSkipWhenAlreadyCached() {
         testItem.setTmdbRating(9.5);
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.enrichTmdbRating("1396");
+        TvItem result = tvService.enrichTmdbRating(TEST_USER_ID,"1396");
 
         assertEquals(9.5, result.getTmdbRating());
         verify(tvMetadataClient, never()).getTmdbRating(any());
@@ -599,10 +600,10 @@ public class TvServiceTest {
 
     @Test
     void enrichTmdbRating_ShouldThrowWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.enrichTmdbRating("notreal"));
+                tvService.enrichTmdbRating(TEST_USER_ID,"notreal"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }
@@ -618,11 +619,11 @@ public class TvServiceTest {
                 .numberOfSeasons(5)
                 .build();
 
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
         when(tvMetadataClient.getTmdbRating("1396")).thenReturn(9.5);
 
-        TvItem result = tvService.refreshLatestEpisodes("1396");
+        TvItem result = tvService.refreshLatestEpisodes(TEST_USER_ID,"1396");
 
         assertEquals(62, result.getTotalEpisodes());
         assertEquals(9.5, result.getTmdbRating());
@@ -638,10 +639,10 @@ public class TvServiceTest {
                 .status("Returning Series")
                 .build();
 
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(details);
 
-        TvItem result = tvService.refreshLatestEpisodes("1396");
+        TvItem result = tvService.refreshLatestEpisodes(TEST_USER_ID,"1396");
 
         assertEquals(9.5, result.getTmdbRating());
         verify(tvMetadataClient, never()).getTmdbRating(any());
@@ -650,11 +651,11 @@ public class TvServiceTest {
     @Test
     void refreshLatestEpisodes_ShouldSaveEvenWhenDetailsNull() {
         testItem.setTmdbRating(null);
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
         when(tvMetadataClient.getDetails("1396")).thenReturn(null);
         when(tvMetadataClient.getTmdbRating("1396")).thenReturn(9.5);
 
-        TvItem result = tvService.refreshLatestEpisodes("1396");
+        TvItem result = tvService.refreshLatestEpisodes(TEST_USER_ID,"1396");
 
         assertNotNull(result);
         assertEquals(9.5, result.getTmdbRating());
@@ -684,10 +685,10 @@ public class TvServiceTest {
         List<String> providers = List.of("Netflix", "Hulu");
         TmdbTvClient tmdbTvClient = mock(TmdbTvClient.class);
         when(tmdbTvClient.getWatchProviders("1396", "US")).thenReturn(providers);
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
         TvService serviceWithTmdb = new TvService(tvRepository, tmdbTvClient);
-        TvItem result = serviceWithTmdb.enrichWatchProviders("1396", "US");
+        TvItem result = serviceWithTmdb.enrichWatchProviders(TEST_USER_ID,"1396", "US");
 
         assertEquals(2, result.getWatchProviders().size());
         assertTrue(result.getWatchProviders().contains("Netflix"));
@@ -702,9 +703,9 @@ public class TvServiceTest {
         testItem.setWatchProvidersRefreshedAt(
                 Instant.now().minus(Duration.ofDays(1)).toString());
 
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
-        TvItem result = tvService.enrichWatchProviders("1396", "US");
+        TvItem result = tvService.enrichWatchProviders(TEST_USER_ID,"1396", "US");
 
         assertEquals(1, result.getWatchProviders().size());
         verify(tvRepository, never()).save(any());
@@ -720,10 +721,10 @@ public class TvServiceTest {
         List<String> freshProviders = List.of("Netflix", "Max");
         TmdbTvClient tmdbTvClient = mock(TmdbTvClient.class);
         when(tmdbTvClient.getWatchProviders("1396", "US")).thenReturn(freshProviders);
-        when(tvRepository.findById("1396")).thenReturn(testItem);
+        when(tvRepository.findById(TEST_USER_ID,"1396")).thenReturn(testItem);
 
         TvService serviceWithTmdb = new TvService(tvRepository, tmdbTvClient);
-        TvItem result = serviceWithTmdb.enrichWatchProviders("1396", "US");
+        TvItem result = serviceWithTmdb.enrichWatchProviders(TEST_USER_ID,"1396", "US");
 
         assertEquals(2, result.getWatchProviders().size());
         assertTrue(result.getWatchProviders().contains("Max"));
@@ -732,10 +733,10 @@ public class TvServiceTest {
 
     @Test
     void enrichWatchProviders_ShouldThrowWhenNotFound() {
-        when(tvRepository.findById("notreal")).thenReturn(null);
+        when(tvRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                tvService.enrichWatchProviders("notreal", "US"));
+                tvService.enrichWatchProviders(TEST_USER_ID,"notreal", "US"));
 
         assertEquals("TV show not found: notreal", ex.getMessage());
     }

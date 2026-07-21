@@ -1,5 +1,6 @@
 package com.enttrac.backend.controller;
 
+import com.enttrac.backend.auth.CurrentUserId;
 import com.enttrac.backend.model.item.TvItem;
 import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.TvSearchResult;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tv")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @Validated
 public class TvController {
 
@@ -33,13 +34,13 @@ public class TvController {
     }
 
     @GetMapping("/library")
-    public ResponseEntity<List<TvItem>> getLibrary() {
-        return ResponseEntity.ok(tvService.getLibrary());
+    public ResponseEntity<List<TvItem>> getLibrary(@CurrentUserId String userId) {
+        return ResponseEntity.ok(tvService.getLibrary(userId));
     }
 
     @GetMapping("/library/{tvId}")
-    public ResponseEntity<TvItem> getTvShow(@PathVariable String tvId) {
-        TvItem item = tvService.getTvShow(tvId);
+    public ResponseEntity<TvItem> getTvShow(@CurrentUserId String userId, @PathVariable String tvId) {
+        TvItem item = tvService.getTvShow(userId, tvId);
         if (item == null) {
             return ResponseEntity.notFound().build();
         }
@@ -47,42 +48,46 @@ public class TvController {
     }
 
     @PostMapping("/library")
-    public ResponseEntity<TvItem> addToLibrary(@Valid @RequestBody TvItem item) {
-        return ResponseEntity.ok(tvService.addToLibrary(item));
+    public ResponseEntity<TvItem> addToLibrary(@CurrentUserId String userId, @Valid @RequestBody TvItem item) {
+        return ResponseEntity.ok(tvService.addToLibrary(userId, item));
     }
 
     @PatchMapping("/library/{tvId}/progress")
     public ResponseEntity<TvItem> updateProgress(
+            @CurrentUserId String userId,
             @PathVariable String tvId,
             @RequestParam int episodesWatched,
             @RequestParam int currentSeason) {
-        return ResponseEntity.ok(tvService.updateProgress(tvId, episodesWatched, currentSeason));
+        return ResponseEntity.ok(tvService.updateProgress(userId, tvId, episodesWatched, currentSeason));
     }
 
     @PatchMapping("/library/{tvId}/score")
     public ResponseEntity<TvItem> updateScore(
+            @CurrentUserId String userId,
             @PathVariable String tvId,
             @RequestParam @Min(1) @Max(10) int score) {
-        return ResponseEntity.ok(tvService.updateScore(tvId, score));
+        return ResponseEntity.ok(tvService.updateScore(userId, tvId, score));
     }
 
     @PatchMapping("/library/{tvId}/status")
     public ResponseEntity<TvItem> updateStatus(
+            @CurrentUserId String userId,
             @PathVariable String tvId,
             @RequestParam @ValidStatus(MediaType.TV) String status) {
-        return ResponseEntity.ok(tvService.updateStatus(tvId, status));
+        return ResponseEntity.ok(tvService.updateStatus(userId, tvId, status));
     }
 
     @PatchMapping("/library/{tvId}/notes")
     public ResponseEntity<TvItem> updateNotes(
+            @CurrentUserId String userId,
             @PathVariable String tvId,
             @RequestBody(required = false) String notes) {
-        return ResponseEntity.ok(tvService.updateNotes(tvId, notes != null ? notes : ""));
+        return ResponseEntity.ok(tvService.updateNotes(userId, tvId, notes != null ? notes : ""));
     }
 
     @PostMapping("/library/{tvId}/refresh")
-    public ResponseEntity<TvItem> refresh(@PathVariable String tvId) {
-        return ResponseEntity.ok(tvService.refreshLatestEpisodes(tvId));
+    public ResponseEntity<TvItem> refresh(@CurrentUserId String userId, @PathVariable String tvId) {
+        return ResponseEntity.ok(tvService.refreshLatestEpisodes(userId, tvId));
     }
 
     @GetMapping("/details/{tvId}")
@@ -95,31 +100,32 @@ public class TvController {
     }
 
     @DeleteMapping("/library/{tvId}")
-    public ResponseEntity<Void> removeFromLibrary(@PathVariable String tvId) {
-        tvService.removeFromLibrary(tvId);
+    public ResponseEntity<Void> removeFromLibrary(@CurrentUserId String userId, @PathVariable String tvId) {
+        tvService.removeFromLibrary(userId, tvId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/library/refresh-all")
-    public ResponseEntity<List<TvItem>> refreshAll() {
-        return ResponseEntity.ok(tvService.refreshAll());
+    public ResponseEntity<List<TvItem>> refreshAll(@CurrentUserId String userId) {
+        return ResponseEntity.ok(tvService.refreshAll(userId));
     }
 
     @PostMapping("/library/refresh-ongoing")
-    public ResponseEntity<List<TvItem>> refreshOngoing() {
-        return ResponseEntity.ok(tvService.refreshOngoing());
+    public ResponseEntity<List<TvItem>> refreshOngoing(@CurrentUserId String userId) {
+        return ResponseEntity.ok(tvService.refreshOngoing(userId));
     }
 
     @PostMapping("/library/{id}/enrich")
-    public ResponseEntity<TvItem> enrich(@PathVariable String id) {
-        return ResponseEntity.ok(tvService.enrichTmdbRating(id));
+    public ResponseEntity<TvItem> enrich(@CurrentUserId String userId, @PathVariable String id) {
+        return ResponseEntity.ok(tvService.enrichTmdbRating(userId, id));
     }
 
     @PostMapping("/library/{id}/watch-providers")
     public ResponseEntity<TvItem> enrichWatchProviders(
+            @CurrentUserId String userId,
             @PathVariable String id,
             @RequestParam(defaultValue = "US") String region) {
-        return ResponseEntity.ok(tvService.enrichWatchProviders(id, region));
+        return ResponseEntity.ok(tvService.enrichWatchProviders(userId, id, region));
     }
 
     @GetMapping("/creator/{personId}")

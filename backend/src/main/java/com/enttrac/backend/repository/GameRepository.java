@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class GameRepository implements MediaRepository<GameItem> {
 
     private static final String TABLE_NAME = "EntTrac";
-    private static final String USER_PK = "USER#default";
 
     private final DynamoDbTable<GameItem> table;
 
@@ -29,19 +28,19 @@ public class GameRepository implements MediaRepository<GameItem> {
     }
 
     @Override
-    public GameItem findById(String gameId) {
+    public GameItem findById(String userId,String gameId) {
         Key key = Key.builder()
-                .partitionValue(USER_PK)
+                .partitionValue(userId)
                 .sortValue("GAME#IGDB#" + gameId)
                 .build();
         return table.getItem(key);
     }
 
     @Override
-    public List<GameItem> findAll() {
+    public List<GameItem> findAll(String userId) {
         QueryConditional queryConditional = QueryConditional
                 .keyEqualTo(Key.builder()
-                        .partitionValue(USER_PK)
+                        .partitionValue(userId)
                         .build());
 
         return table.query(queryConditional)
@@ -52,9 +51,9 @@ public class GameRepository implements MediaRepository<GameItem> {
     }
 
     @Override
-    public void delete(String gameId) {
+    public void delete(String userId, String gameId) {
         Key key = Key.builder()
-                .partitionValue(USER_PK)
+                .partitionValue(userId)
                 .sortValue("GAME#IGDB#" + gameId)
                 .build();
         table.deleteItem(key);

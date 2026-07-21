@@ -56,12 +56,12 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         return tvMetadataClient.getDetails(id);
     }
 
-    public TvItem getTvShow(String tvId) {
-        return repository.findById(tvId);
+    public TvItem getTvShow(String userId, String tvId) {
+        return repository.findById(userId, tvId);
     }
 
-    public TvItem updateProgress(String tvId, int episodesWatched, int currentSeason) {
-        TvItem item = repository.findById(tvId);
+    public TvItem updateProgress(String userId, String tvId, int episodesWatched, int currentSeason) {
+        TvItem item = repository.findById(userId, tvId);
         if (item == null) {
             throw new NotFoundException("TV show not found: " + tvId);
         }
@@ -85,8 +85,8 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         return null;
     }
 
-    public TvItem refreshLatestEpisodes(String tvId) {
-        TvItem item = repository.findById(tvId);
+    public TvItem refreshLatestEpisodes(String userId, String tvId) {
+        TvItem item = repository.findById(userId, tvId);
         if (item == null) {
             throw new NotFoundException("TV show not found: " + tvId);
         }
@@ -125,9 +125,9 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         return item;
     }
 
-    public List<TvItem> refreshAll() {
+    public List<TvItem> refreshAll(String userId) {
         log.info("Refreshing all TV shows in library");
-        List<TvItem> library = repository.findAll();
+        List<TvItem> library = repository.findAll(userId);
         List<TvItem> updated = new ArrayList<>();
 
         for (TvItem item : library) {
@@ -182,9 +182,9 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         return updated;
     }
 
-    public List<TvItem> refreshOngoing() {
+    public List<TvItem> refreshOngoing(String userId) {
         log.info("Refreshing ongoing TV shows in library");
-        List<TvItem> library = repository.findAll();
+        List<TvItem> library = repository.findAll(userId);
         List<TvItem> updated = new ArrayList<>();
 
         for (TvItem item : library) {
@@ -245,8 +245,8 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         return updated;
     }
 
-    public TvItem enrichTmdbRating(String tvId) {
-        TvItem item = repository.findById(tvId);
+    public TvItem enrichTmdbRating(String userId, String tvId) {
+        TvItem item = repository.findById(userId, tvId);
         if (item == null) throw new NotFoundException("TV show not found: " + tvId);
 
         if (item.getTmdbRating() == null) {
@@ -269,8 +269,8 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         return tvMetadataClient.searchCreators(name);
     }
 
-    public TvItem enrichWatchProviders(String tvId, String region) {
-        TvItem item = repository.findById(tvId);
+    public TvItem enrichWatchProviders(String userId, String tvId, String region) {
+        TvItem item = repository.findById(userId, tvId);
         if (item == null) throw new NotFoundException("TV show not found: " + tvId);
 
         boolean needsRefresh = item.getWatchProvidersRefreshedAt() == null

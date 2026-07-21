@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface MediaRepository<T> {
     void save(T item);
-    T findById(String id);
-    List<T> findAll();
-    void delete(String id);
+    T findById(String userId, String id);
+    List<T> findAll(String userId);
+    void delete(String userId, String id);
 }

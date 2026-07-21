@@ -47,13 +47,13 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
     }
 
 
-    public AnimeItem getAnime(String animeId) {
-        return repository.findById(animeId);
+    public AnimeItem getAnime(String userId, String animeId) {
+        return repository.findById(userId, animeId);
     }
 
 
-    public AnimeItem updateProgress(String animeId, int episodesWatched) {
-        AnimeItem item = repository.findById(animeId);
+    public AnimeItem updateProgress(String userId, String animeId, int episodesWatched) {
+        AnimeItem item = repository.findById(userId, animeId);
         if (item == null) {
             throw new NotFoundException("Anime not found: " + animeId);
         }
@@ -64,8 +64,8 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         return item;
     }
 
-    public AnimeItem refreshLatestEpisode(String animeId) {
-        AnimeItem item = repository.findById(animeId);
+    public AnimeItem refreshLatestEpisode(String userId, String animeId) {
+        AnimeItem item = repository.findById(userId, animeId);
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
         AnimeSearchResult details = aniListClient.getDetails(animeId);
@@ -94,9 +94,9 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         return item;
     }
 
-    public List<AnimeItem> refreshAll() {
+    public List<AnimeItem> refreshAll(String userId) {
         log.info("Refreshing all anime in library");
-        List<AnimeItem> library = repository.findAll();
+        List<AnimeItem> library = repository.findAll(userId);
         List<AnimeItem> updated = new ArrayList<>();
 
         for (AnimeItem item : library) {
@@ -146,9 +146,9 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         return updated;
     }
 
-    public List<AnimeItem> refreshOngoing() {
+    public List<AnimeItem> refreshOngoing(String userId) {
         log.info("Refreshing ongoing anime in library");
-        List<AnimeItem> library = repository.findAll();
+        List<AnimeItem> library = repository.findAll(userId);
         List<AnimeItem> updated = new ArrayList<>();
 
         for (AnimeItem item : library) {
@@ -204,8 +204,8 @@ public class AnimeService extends MediaService<AnimeItem, AnimeSearchResult> {
         return null;
     }
 
-    public AnimeItem enrichAniListRating(String animeId) {
-        AnimeItem item = repository.findById(animeId);
+    public AnimeItem enrichAniListRating(String userId, String animeId) {
+        AnimeItem item = repository.findById(userId, animeId);
         if (item == null) throw new NotFoundException("Anime not found: " + animeId);
 
         if (item.getAnilistRating() == null) {

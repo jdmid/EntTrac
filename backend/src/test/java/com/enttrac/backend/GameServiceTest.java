@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -70,49 +71,49 @@ public class GameServiceTest {
 
     @Test
     void getLibrary_ShouldReturnAllItems() {
-        when(gameRepository.findAll()).thenReturn(List.of(testItem));
+        when(gameRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<GameItem> library = gameService.getLibrary();
+        List<GameItem> library = gameService.getLibrary(TEST_USER_ID);
 
         assertEquals(1, library.size());
-        verify(gameRepository, times(1)).findAll();
+        verify(gameRepository, times(1)).findAll(TEST_USER_ID);
     }
 
     @Test
     void getGame_ShouldReturnItemWhenFound() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.getGame("1942");
+        GameItem result = gameService.getGame(TEST_USER_ID,"1942");
 
         assertEquals("The Elder Scrolls V: Skyrim", result.getTitle());
     }
 
     @Test
     void getGame_ShouldReturnNullWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
-        GameItem result = gameService.getGame("notreal");
+        GameItem result = gameService.getGame(TEST_USER_ID,"notreal");
 
         assertNull(result);
     }
 
     @Test
     void addToLibrary_ShouldSetPkAndSk() {
-        when(gameRepository.findById("1942")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(null);
 
-        GameItem result = gameService.addToLibrary(testItem);
+        GameItem result = gameService.addToLibrary(TEST_USER_ID,testItem);
 
         verify(gameRepository, times(1)).save(testItem);
-        assertEquals("USER#default", result.getPk());
+        assertEquals(TEST_USER_ID, result.getPk());
         assertEquals("GAME#IGDB#1942", result.getSk());
         assertEquals("1234", result.getDeveloperId());
     }
 
     @Test
     void addToLibrary_ShouldReturnExistingWhenAlreadyInLibrary() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.addToLibrary(testItem);
+        GameItem result = gameService.addToLibrary(TEST_USER_ID,testItem);
 
         assertEquals(testItem, result);
         verify(gameRepository, never()).save(any());
@@ -120,10 +121,10 @@ public class GameServiceTest {
 
     @Test
     void addToLibrary_ShouldStripNullsFromPlatforms() {
-        when(gameRepository.findById("1942")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(null);
         testItem.setPlatforms(new ArrayList<>(List.of("PC", "Xbox Series X")));
 
-        GameItem result = gameService.addToLibrary(testItem);
+        GameItem result = gameService.addToLibrary(TEST_USER_ID,testItem);
 
         assertNotNull(result.getPlatforms());
         verify(gameRepository, times(1)).save(testItem);
@@ -131,27 +132,27 @@ public class GameServiceTest {
 
     @Test
     void addToLibrary_ShouldHandleNullPlatforms() {
-        when(gameRepository.findById("1942")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(null);
         testItem.setPlatforms(null);
 
-        assertDoesNotThrow(() -> gameService.addToLibrary(testItem));
+        assertDoesNotThrow(() -> gameService.addToLibrary(TEST_USER_ID,testItem));
         verify(gameRepository, times(1)).save(testItem);
     }
 
     @Test
     void addToLibrary_ShouldHandleNullOwnedDlcIds() {
-        when(gameRepository.findById("1942")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(null);
         testItem.setOwnedDlcIds(null);
 
-        assertDoesNotThrow(() -> gameService.addToLibrary(testItem));
+        assertDoesNotThrow(() -> gameService.addToLibrary(TEST_USER_ID,testItem));
         verify(gameRepository, times(1)).save(testItem);
     }
 
     @Test
     void updateProgress_ShouldUpdateHoursPlayed() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.updateProgress("1942", 42);
+        GameItem result = gameService.updateProgress(TEST_USER_ID,"1942", 42);
 
         assertEquals(42, result.getHoursPlayed());
         verify(gameRepository, times(1)).save(testItem);
@@ -159,19 +160,19 @@ public class GameServiceTest {
 
     @Test
     void updateProgress_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.updateProgress("notreal", 42));
+                gameService.updateProgress(TEST_USER_ID,"notreal", 42));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateScore_ShouldUpdateScore() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.updateScore("1942", 9);
+        GameItem result = gameService.updateScore(TEST_USER_ID,"1942", 9);
 
         assertEquals(9, result.getScore());
         verify(gameRepository, times(1)).save(testItem);
@@ -179,19 +180,19 @@ public class GameServiceTest {
 
     @Test
     void updateScore_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.updateScore("notreal", 9));
+                gameService.updateScore(TEST_USER_ID,"notreal", 9));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateStatus_ShouldUpdateStatus() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.updateStatus("1942", "FINISHED");
+        GameItem result = gameService.updateStatus(TEST_USER_ID,"1942", "FINISHED");
 
         assertEquals("FINISHED", result.getStatus());
         verify(gameRepository, times(1)).save(testItem);
@@ -199,19 +200,19 @@ public class GameServiceTest {
 
     @Test
     void updateStatus_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.updateStatus("notreal", "FINISHED"));
+                gameService.updateStatus(TEST_USER_ID,"notreal", "FINISHED"));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateUserPlatform_ShouldUpdatePlatform() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.updateUserPlatform("1942", "PC");
+        GameItem result = gameService.updateUserPlatform(TEST_USER_ID,"1942", "PC");
 
         assertEquals("PC", result.getUserPlatform());
         verify(gameRepository, times(1)).save(testItem);
@@ -219,20 +220,20 @@ public class GameServiceTest {
 
     @Test
     void updateUserPlatform_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.updateUserPlatform("notreal", "PC"));
+                gameService.updateUserPlatform(TEST_USER_ID,"notreal", "PC"));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateOwnedDlc_ShouldUpdateDlcList() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
         List<String> dlcIds = List.of("dlc1", "dlc2");
 
-        GameItem result = gameService.updateOwnedDlc("1942", dlcIds);
+        GameItem result = gameService.updateOwnedDlc(TEST_USER_ID,"1942", dlcIds);
 
         assertEquals(2, result.getOwnedDlcIds().size());
         assertTrue(result.getOwnedDlcIds().contains("dlc1"));
@@ -241,10 +242,10 @@ public class GameServiceTest {
 
     @Test
     void updateOwnedDlc_ShouldStripBlankIds() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
         List<String> dlcIds = new ArrayList<>(List.of("dlc1", "", "dlc2"));
 
-        GameItem result = gameService.updateOwnedDlc("1942", dlcIds);
+        GameItem result = gameService.updateOwnedDlc(TEST_USER_ID,"1942", dlcIds);
 
         assertEquals(2, result.getOwnedDlcIds().size());
         assertFalse(result.getOwnedDlcIds().contains(""));
@@ -252,19 +253,19 @@ public class GameServiceTest {
 
     @Test
     void updateOwnedDlc_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.updateOwnedDlc("notreal", List.of("dlc1")));
+                gameService.updateOwnedDlc(TEST_USER_ID,"notreal", List.of("dlc1")));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateNotes_ShouldUpdateNotes() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.updateNotes("1942", "Great game");
+        GameItem result = gameService.updateNotes(TEST_USER_ID,"1942", "Great game");
 
         assertEquals("Great game", result.getNotes());
         verify(gameRepository, times(1)).save(testItem);
@@ -272,10 +273,10 @@ public class GameServiceTest {
 
     @Test
     void updateNotes_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.updateNotes("notreal", "notes"));
+                gameService.updateNotes(TEST_USER_ID,"notreal", "notes"));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
@@ -283,10 +284,10 @@ public class GameServiceTest {
     @Test
     void enrichIgdbRating_ShouldFetchAndCacheWhenNull() {
         testItem.setIgdbRating(null);
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
         when(gameMetadataClient.getIgdbRating("1942")).thenReturn(87.5);
 
-        GameItem result = gameService.enrichIgdbRating("1942");
+        GameItem result = gameService.enrichIgdbRating(TEST_USER_ID,"1942");
 
         assertEquals(87.5, result.getIgdbRating());
         verify(gameRepository, times(1)).save(testItem);
@@ -295,9 +296,9 @@ public class GameServiceTest {
     @Test
     void enrichIgdbRating_ShouldSkipWhenAlreadyCached() {
         testItem.setIgdbRating(87.5);
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
 
-        GameItem result = gameService.enrichIgdbRating("1942");
+        GameItem result = gameService.enrichIgdbRating(TEST_USER_ID,"1942");
 
         assertEquals(87.5, result.getIgdbRating());
         verify(gameMetadataClient, never()).getIgdbRating(any());
@@ -306,10 +307,10 @@ public class GameServiceTest {
 
     @Test
     void enrichIgdbRating_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.enrichIgdbRating("notreal"));
+                gameService.enrichIgdbRating(TEST_USER_ID,"notreal"));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
@@ -322,10 +323,10 @@ public class GameServiceTest {
                 .igdbCriticRating(92.0)
                 .build();
 
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
         when(gameMetadataClient.getDetails("1942")).thenReturn(details);
 
-        GameItem result = gameService.refreshRatings("1942");
+        GameItem result = gameService.refreshRatings(TEST_USER_ID,"1942");
 
         assertEquals(87.5, result.getIgdbRating());
         assertEquals(92.0, result.getIgdbCriticRating());
@@ -335,29 +336,29 @@ public class GameServiceTest {
 
     @Test
     void refreshRatings_ShouldThrowWhenNotFound() {
-        when(gameRepository.findById("notreal")).thenReturn(null);
+        when(gameRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gameService.refreshRatings("notreal"));
+                gameService.refreshRatings(TEST_USER_ID,"notreal"));
 
         assertEquals("Game not found: notreal", ex.getMessage());
     }
 
     @Test
     void refreshRatings_ShouldNotSaveWhenDetailsNull() {
-        when(gameRepository.findById("1942")).thenReturn(testItem);
+        when(gameRepository.findById(TEST_USER_ID,"1942")).thenReturn(testItem);
         when(gameMetadataClient.getDetails("1942")).thenReturn(null);
 
-        gameService.refreshRatings("1942");
+        gameService.refreshRatings(TEST_USER_ID,"1942");
 
         verify(gameRepository, never()).save(any());
     }
 
     @Test
     void removeFromLibrary_ShouldCallDelete() {
-        gameService.removeFromLibrary("1942");
+        gameService.removeFromLibrary(TEST_USER_ID,"1942");
 
-        verify(gameRepository, times(1)).delete("1942");
+        verify(gameRepository, times(1)).delete(TEST_USER_ID,"1942");
     }
 
     @Test

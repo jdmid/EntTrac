@@ -1,5 +1,6 @@
 package com.enttrac.backend.controller;
 
+import com.enttrac.backend.auth.CurrentUserId;
 import com.enttrac.backend.model.item.GameItem;
 import com.enttrac.backend.model.MediaType;
 import com.enttrac.backend.model.result.GameSearchResult;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/games")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @Validated
 public class GameController {
 
@@ -33,78 +34,84 @@ public class GameController {
     }
 
     @GetMapping("/library")
-    public ResponseEntity<List<GameItem>> getLibrary() {
-        return ResponseEntity.ok(gameService.getLibrary());
+    public ResponseEntity<List<GameItem>> getLibrary(@CurrentUserId String userId) {
+        return ResponseEntity.ok(gameService.getLibrary(userId));
     }
 
     @GetMapping("/library/{gameId}")
-    public ResponseEntity<GameItem> getGame(@PathVariable String gameId) {
-        GameItem item = gameService.getGame(gameId);
+    public ResponseEntity<GameItem> getGame(@CurrentUserId String userId, @PathVariable String gameId) {
+        GameItem item = gameService.getGame(userId, gameId);
         if (item == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(item);
     }
 
     @PostMapping("/library")
-    public ResponseEntity<GameItem> addToLibrary(@Valid @RequestBody GameItem item) {
-        return ResponseEntity.ok(gameService.addToLibrary(item));
+    public ResponseEntity<GameItem> addToLibrary(@CurrentUserId String userId, @Valid @RequestBody GameItem item) {
+        return ResponseEntity.ok(gameService.addToLibrary(userId, item));
     }
 
     @DeleteMapping("/library/{gameId}")
-    public ResponseEntity<Void> removeFromLibrary(@PathVariable String gameId) {
-        gameService.removeFromLibrary(gameId);
+    public ResponseEntity<Void> removeFromLibrary(@CurrentUserId String userId, @PathVariable String gameId) {
+        gameService.removeFromLibrary(userId, gameId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/library/{gameId}/progress")
     public ResponseEntity<GameItem> updateProgress(
+            @CurrentUserId String userId,
             @PathVariable String gameId,
             @RequestParam int hoursPlayed) {
-        return ResponseEntity.ok(gameService.updateProgress(gameId, hoursPlayed));
+        return ResponseEntity.ok(gameService.updateProgress(userId, gameId, hoursPlayed));
     }
 
     @PatchMapping("/library/{gameId}/score")
     public ResponseEntity<GameItem> updateScore(
+            @CurrentUserId String userId,
             @PathVariable String gameId,
             @RequestParam @Min(1) @Max(10) int score) {
-        return ResponseEntity.ok(gameService.updateScore(gameId, score));
+        return ResponseEntity.ok(gameService.updateScore(userId, gameId, score));
     }
 
     @PatchMapping("/library/{gameId}/status")
     public ResponseEntity<GameItem> updateStatus(
+            @CurrentUserId String userId,
             @PathVariable String gameId,
             @RequestParam @ValidStatus(MediaType.GAME) String status) {
-        return ResponseEntity.ok(gameService.updateStatus(gameId, status));
+        return ResponseEntity.ok(gameService.updateStatus(userId, gameId, status));
     }
 
     @PatchMapping("/library/{gameId}/platform")
     public ResponseEntity<GameItem> updateUserPlatform(
+            @CurrentUserId String userId,
             @PathVariable String gameId,
             @RequestParam String userPlatform) {
-        return ResponseEntity.ok(gameService.updateUserPlatform(gameId, userPlatform));
+        return ResponseEntity.ok(gameService.updateUserPlatform(userId, gameId, userPlatform));
     }
 
     @PatchMapping("/library/{gameId}/dlc")
     public ResponseEntity<GameItem> updateOwnedDlc(
+            @CurrentUserId String userId,
             @PathVariable String gameId,
             @RequestBody List<String> ownedDlcIds) {
-        return ResponseEntity.ok(gameService.updateOwnedDlc(gameId, ownedDlcIds));
+        return ResponseEntity.ok(gameService.updateOwnedDlc(userId, gameId, ownedDlcIds));
     }
 
     @PatchMapping("/library/{gameId}/notes")
     public ResponseEntity<GameItem> updateNotes(
+            @CurrentUserId String userId,
             @PathVariable String gameId,
             @RequestBody(required = false) String notes) {
-        return ResponseEntity.ok(gameService.updateNotes(gameId, notes != null ? notes : ""));
+        return ResponseEntity.ok(gameService.updateNotes(userId, gameId, notes != null ? notes : ""));
     }
 
     @PostMapping("/library/{gameId}/enrich")
-    public ResponseEntity<GameItem> enrich(@PathVariable String gameId) {
-        return ResponseEntity.ok(gameService.enrichIgdbRating(gameId));
+    public ResponseEntity<GameItem> enrich(@CurrentUserId String userId, @PathVariable String gameId) {
+        return ResponseEntity.ok(gameService.enrichIgdbRating(userId, gameId));
     }
 
     @PostMapping("/library/{gameId}/refresh")
-    public ResponseEntity<GameItem> refresh(@PathVariable String gameId) {
-        return ResponseEntity.ok(gameService.refreshRatings(gameId));
+    public ResponseEntity<GameItem> refresh(@CurrentUserId String userId, @PathVariable String gameId) {
+        return ResponseEntity.ok(gameService.refreshRatings(userId, gameId));
     }
 
     @GetMapping("/details/{gameId}")

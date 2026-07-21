@@ -1,5 +1,9 @@
 package com.enttrac.backend;
 
+import com.enttrac.backend.auth.AuthFilter;
+import com.enttrac.backend.auth.CurrentUserIdArgumentResolver;
+import com.enttrac.backend.auth.JwtService;
+import com.enttrac.backend.config.WebMvcConfig;
 import com.enttrac.backend.model.item.MangaItem;
 import com.enttrac.backend.model.result.MangaSearchResult;
 import com.enttrac.backend.service.MangaService;
@@ -7,21 +11,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
+import static com.enttrac.backend.auth.AuthTestSupport.accessTokenCookie;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = com.enttrac.backend.controller.MangaController.class)
+@Import({AuthFilter.class, CurrentUserIdArgumentResolver.class, WebMvcConfig.class, JwtService.class})
 public class MangaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JwtService jwtService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -40,6 +51,7 @@ public class MangaControllerTest {
         when(mangaService.search("One Piece")).thenReturn(List.of(result));
 
         mockMvc.perform(get("/api/manga/search")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("q", "One Piece"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("One Piece"))
@@ -54,9 +66,9 @@ public class MangaControllerTest {
         item.setStatus("CONSUMING");
         item.setChaptersRead(100);
 
-        when(mangaService.getLibrary()).thenReturn(List.of(item));
+        when(mangaService.getLibrary(TEST_USER_ID)).thenReturn(List.of(item));
 
-        mockMvc.perform(get("/api/manga/library"))
+        mockMvc.perform(get("/api/manga/library").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("One Piece"))
                 .andExpect(jsonPath("$[0].chaptersRead").value(100));
@@ -64,9 +76,9 @@ public class MangaControllerTest {
 
     @Test
     void getManga_ShouldReturn404WhenNotFound() throws Exception {
-        when(mangaService.getManga("notreal")).thenReturn(null);
+        when(mangaService.getManga(TEST_USER_ID,"notreal")).thenReturn(null);
 
-        mockMvc.perform(get("/api/manga/library/notreal"))
+        mockMvc.perform(get("/api/manga/library/notreal").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isNotFound());
     }
 
@@ -78,9 +90,10 @@ public class MangaControllerTest {
         item.setStatus("CONSUMING");
         item.setChaptersRead(0);
 
-        when(mangaService.addToLibrary(any(MangaItem.class))).thenReturn(item);
+        when(mangaService.addToLibrary(eq(TEST_USER_ID) ,any(MangaItem.class))).thenReturn(item);
 
         mockMvc.perform(post("/api/manga/library")
+                        .cookie(accessTokenCookie(jwtService))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(item)))
                 .andExpect(status().isOk())
@@ -94,9 +107,10 @@ public class MangaControllerTest {
         item.setTitle("One Piece");
         item.setChaptersRead(150);
 
-        when(mangaService.updateProgress("abc123", 150)).thenReturn(item);
+        when(mangaService.updateProgress(TEST_USER_ID,"abc123", 150)).thenReturn(item);
 
         mockMvc.perform(patch("/api/manga/library/abc123/progress")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("chaptersRead", "150"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.chaptersRead").value(150));
@@ -104,9 +118,9 @@ public class MangaControllerTest {
 
     @Test
     void removeFromLibrary_ShouldReturn204() throws Exception {
-        doNothing().when(mangaService).removeFromLibrary("abc123");
+        doNothing().when(mangaService).removeFromLibrary(TEST_USER_ID,"abc123");
 
-        mockMvc.perform(delete("/api/manga/library/abc123"))
+        mockMvc.perform(delete("/api/manga/library/abc123").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isNoContent());
     }
 
@@ -117,9 +131,9 @@ public class MangaControllerTest {
         item.setTitle("One Piece");
         item.setLatestChapter(1105);
 
-        when(mangaService.refreshLatestChapter("abc123")).thenReturn(item);
+        when(mangaService.refreshLatestChapter(TEST_USER_ID,"abc123")).thenReturn(item);
 
-        mockMvc.perform(post("/api/manga/library/abc123/refresh"))
+        mockMvc.perform(post("/api/manga/library/abc123/refresh").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.latestChapter").value(1105));
     }
@@ -131,9 +145,9 @@ public class MangaControllerTest {
         item.setTitle("One Piece");
         item.setStatus("CONSUMING");
 
-        when(mangaService.getManga("abc123")).thenReturn(item);
+        when(mangaService.getManga(TEST_USER_ID,"abc123")).thenReturn(item);
 
-        mockMvc.perform(get("/api/manga/library/abc123"))
+        mockMvc.perform(get("/api/manga/library/abc123").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("One Piece"));
     }
@@ -145,9 +159,10 @@ public class MangaControllerTest {
         item.setTitle("One Piece");
         item.setScore(9);
 
-        when(mangaService.updateScore("abc123", 9)).thenReturn(item);
+        when(mangaService.updateScore(TEST_USER_ID,"abc123", 9)).thenReturn(item);
 
         mockMvc.perform(patch("/api/manga/library/abc123/score")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("score", "9"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.score").value(9));
@@ -162,6 +177,7 @@ public class MangaControllerTest {
         item.setChaptersRead(0);
 
         mockMvc.perform(post("/api/manga/library")
+                        .cookie(accessTokenCookie(jwtService))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(item)))
                 .andExpect(status().isBadRequest());
@@ -169,18 +185,18 @@ public class MangaControllerTest {
 
     @Test
     void shouldReturn400OnIllegalArgument() throws Exception {
-        when(mangaService.getLibrary()).thenThrow(new IllegalArgumentException("Invalid argument"));
+        when(mangaService.getLibrary(TEST_USER_ID)).thenThrow(new IllegalArgumentException("Invalid argument"));
 
-        mockMvc.perform(get("/api/manga/library"))
+        mockMvc.perform(get("/api/manga/library").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Invalid argument"));
     }
 
     @Test
     void shouldReturn500OnRuntimeException() throws Exception {
-        when(mangaService.getLibrary()).thenThrow(new RuntimeException("Something went wrong"));
+        when(mangaService.getLibrary(TEST_USER_ID)).thenThrow(new RuntimeException("Something went wrong"));
 
-        mockMvc.perform(get("/api/manga/library"))
+        mockMvc.perform(get("/api/manga/library").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error").value("Something went wrong. Please try again."));
     }
@@ -192,9 +208,10 @@ public class MangaControllerTest {
         item.setTitle("One Piece");
         item.setStatus("CONSUMING");
 
-        when(mangaService.updateStatus("abc123", "CONSUMING")).thenReturn(item);
+        when(mangaService.updateStatus(TEST_USER_ID,"abc123", "CONSUMING")).thenReturn(item);
 
         mockMvc.perform(patch("/api/manga/library/abc123/status")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("status", "CONSUMING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CONSUMING"));
@@ -203,6 +220,7 @@ public class MangaControllerTest {
     @Test
     void updateStatus_ShouldReturn400WhenStatusInvalid() throws Exception {
         mockMvc.perform(patch("/api/manga/library/abc123/status")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("status", "INVALID"))
                 .andExpect(status().isBadRequest());
     }
@@ -217,7 +235,7 @@ public class MangaControllerTest {
 
         when(mangaService.getDetails("abc123")).thenReturn(result);
 
-        mockMvc.perform(get("/api/manga/details/abc123"))
+        mockMvc.perform(get("/api/manga/details/abc123").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("One Piece"))
                 .andExpect(jsonPath("$.id").value("abc123"));
@@ -227,7 +245,7 @@ public class MangaControllerTest {
     void getDetails_ShouldReturn404WhenNotFound() throws Exception {
         when(mangaService.getDetails("notreal")).thenReturn(null);
 
-        mockMvc.perform(get("/api/manga/details/notreal"))
+        mockMvc.perform(get("/api/manga/details/notreal").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isNotFound());
     }
 
@@ -237,9 +255,10 @@ public class MangaControllerTest {
         item.setMangaId("abc123");
         item.setTitle("One Piece");
 
-        when(mangaService.updateNotes("abc123", "Great manga")).thenReturn(item);
+        when(mangaService.updateNotes(TEST_USER_ID,"abc123", "Great manga")).thenReturn(item);
 
         mockMvc.perform(patch("/api/manga/library/abc123/notes")
+                        .cookie(accessTokenCookie(jwtService))
                         .contentType(MediaType.TEXT_PLAIN)
                         .content("Great manga"))
                 .andExpect(status().isOk());
@@ -251,9 +270,9 @@ public class MangaControllerTest {
         item.setMangaId("abc123");
         item.setTitle("One Piece");
 
-        when(mangaService.updateNotes("abc123", "")).thenReturn(item);
+        when(mangaService.updateNotes(TEST_USER_ID,"abc123", "")).thenReturn(item);
 
-        mockMvc.perform(patch("/api/manga/library/abc123/notes"))
+        mockMvc.perform(patch("/api/manga/library/abc123/notes").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk());
     }
 
@@ -263,9 +282,9 @@ public class MangaControllerTest {
         item.setMangaId("abc123");
         item.setTitle("One Piece");
 
-        when(mangaService.refreshAll()).thenReturn(List.of(item));
+        when(mangaService.refreshAll(TEST_USER_ID)).thenReturn(List.of(item));
 
-        mockMvc.perform(post("/api/manga/library/refresh-all"))
+        mockMvc.perform(post("/api/manga/library/refresh-all").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].mangaId").value("abc123"));
     }
@@ -276,9 +295,9 @@ public class MangaControllerTest {
         item.setMangaId("abc123");
         item.setTitle("One Piece");
 
-        when(mangaService.refreshOngoing()).thenReturn(List.of(item));
+        when(mangaService.refreshOngoing(TEST_USER_ID)).thenReturn(List.of(item));
 
-        mockMvc.perform(post("/api/manga/library/refresh-ongoing"))
+        mockMvc.perform(post("/api/manga/library/refresh-ongoing").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].mangaId").value("abc123"));
     }
@@ -289,9 +308,9 @@ public class MangaControllerTest {
         item.setMangaId("abc123");
         item.setMangadexRating(9.6);
 
-        when(mangaService.enrichMangadexRating("abc123")).thenReturn(item);
+        when(mangaService.enrichMangadexRating(TEST_USER_ID,"abc123")).thenReturn(item);
 
-        mockMvc.perform(post("/api/manga/library/abc123/enrich"))
+        mockMvc.perform(post("/api/manga/library/abc123/enrich").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.mangadexRating").value(9.6));
     }
@@ -305,17 +324,18 @@ public class MangaControllerTest {
 
         when(mangaService.getWorksByAuthor("author-uuid-1")).thenReturn(List.of(result));
 
-        mockMvc.perform(get("/api/manga/creator/author-uuid-1"))
+        mockMvc.perform(get("/api/manga/creator/author-uuid-1").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Wanted!"));
     }
 
     @Test
     void shouldReturn404WhenNotFoundExceptionThrown() throws Exception {
-        when(mangaService.updateProgress("notreal", 10))
+        when(mangaService.updateProgress(TEST_USER_ID,"notreal", 10))
                 .thenThrow(new com.enttrac.backend.config.NotFoundException("Manga not found: notreal"));
 
         mockMvc.perform(patch("/api/manga/library/notreal/progress")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("chaptersRead", "10"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Manga not found: notreal"));
@@ -327,6 +347,7 @@ public class MangaControllerTest {
                 .thenThrow(new org.springframework.web.client.RestClientException("Connection refused"));
 
         mockMvc.perform(get("/api/manga/search")
+                        .cookie(accessTokenCookie(jwtService))
                         .param("q", "one piece"))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.error").value("Could not reach an external service. Please try again later."));

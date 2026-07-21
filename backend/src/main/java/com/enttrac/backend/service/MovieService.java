@@ -45,21 +45,21 @@ public class MovieService {
         return result;
     }
 
-    public List<MovieItem> getLibrary() {
-        return movieRepository.findAll();
+    public List<MovieItem> getLibrary(String userId) {
+        return movieRepository.findAll(userId);
     }
 
-    public MovieItem getMovie(String movieId) {
-        return movieRepository.findById(movieId);
+    public MovieItem getMovie(String userId, String movieId) {
+        return movieRepository.findById(userId, movieId);
     }
 
-    public MovieItem addToLibrary(MovieItem item) {
-        MovieItem existing = movieRepository.findById(item.getMovieId());
+    public MovieItem addToLibrary(String userId, MovieItem item) {
+        MovieItem existing = movieRepository.findById(userId, item.getMovieId());
         if (existing != null) {
             log.info("Movie already in library, skipping add: {}", item.getMovieId());
             return existing;
         }
-        item.setPk("USER#default");
+        item.setPk(userId);
         item.setSk("MOVIE#TMDB#" + item.getMovieId());
         String now = Instant.now().toString();
         item.setCreatedAt(now);
@@ -69,8 +69,8 @@ public class MovieService {
         return item;
     }
 
-    public MovieItem updateScore(String movieId, int score) {
-        MovieItem item = movieRepository.findById(movieId);
+    public MovieItem updateScore(String userId, String movieId, int score) {
+        MovieItem item = movieRepository.findById(userId, movieId);
         if (item == null) {
             throw new NotFoundException("Movie not found: " + movieId);
         }
@@ -81,8 +81,8 @@ public class MovieService {
         return item;
     }
 
-    public MovieItem updateStatus(String movieId, String status) {
-        MovieItem item = movieRepository.findById(movieId);
+    public MovieItem updateStatus(String userId, String movieId, String status) {
+        MovieItem item = movieRepository.findById(userId, movieId);
         if (item == null) {
             throw new NotFoundException("Movie not found: " + movieId);
         }
@@ -93,8 +93,8 @@ public class MovieService {
         return item;
     }
 
-    public MovieItem updateNotes(String movieId, String notes) {
-        MovieItem item = movieRepository.findById(movieId);
+    public MovieItem updateNotes(String userId, String movieId, String notes) {
+        MovieItem item = movieRepository.findById(userId, movieId);
         if (item == null) {
             throw new NotFoundException("Movie not found: " + movieId);
         }
@@ -105,8 +105,8 @@ public class MovieService {
         return item;
     }
 
-    public MovieItem refreshRatings(String movieId) {
-        MovieItem item = movieRepository.findById(movieId);
+    public MovieItem refreshRatings(String userId, String movieId) {
+        MovieItem item = movieRepository.findById(userId, movieId);
         if (item == null) {
             throw new NotFoundException("Movie not found: " + movieId);
         }
@@ -130,8 +130,8 @@ public class MovieService {
         return item;
     }
 
-    public MovieItem enrichFromCache(String movieId) {
-        MovieItem item = movieRepository.findById(movieId);
+    public MovieItem enrichFromCache(String userId, String movieId) {
+        MovieItem item = movieRepository.findById(userId, movieId);
         if (item == null) throw new NotFoundException("Movie not found: " + movieId);
 
         boolean hasCachedRatings = item.getImdbRating() != null
@@ -160,8 +160,8 @@ public class MovieService {
         return item;
     }
 
-    public void removeFromLibrary(String movieId) {
-        movieRepository.delete(movieId);
+    public void removeFromLibrary(String userId, String movieId) {
+        movieRepository.delete(userId, movieId);
     }
 
     private String normalizeMovieStatus(String rawStatus) {
@@ -184,8 +184,8 @@ public class MovieService {
         return tmdbMovieClient.searchCreators(name);
     }
 
-    public MovieItem enrichWatchProviders(String movieId, String region) {
-        MovieItem item = movieRepository.findById(movieId);
+    public MovieItem enrichWatchProviders(String userId, String movieId, String region) {
+        MovieItem item = movieRepository.findById(userId, movieId);
         if (item == null) throw new NotFoundException("Movie not found: " + movieId);
 
         boolean needsRefresh = item.getWatchProvidersRefreshedAt() == null

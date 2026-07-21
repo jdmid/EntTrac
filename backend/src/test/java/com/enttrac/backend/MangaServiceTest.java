@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -46,9 +47,9 @@ public class MangaServiceTest {
 
     @Test
     void addToLibrary_ShouldSetPkAndSk() {
-        MangaItem result = mangaService.addToLibrary(testItem);
+        MangaItem result = mangaService.addToLibrary(TEST_USER_ID,testItem);
 
-        assertEquals("USER#default", result.getPk());
+        assertEquals(TEST_USER_ID, result.getPk());
         assertEquals("MANGA#MANGADEX#abc123", result.getSk());
         assertEquals("author-uuid-1", result.getAuthorId());
         assertEquals("artist-uuid-1", result.getArtistId());
@@ -57,9 +58,9 @@ public class MangaServiceTest {
 
     @Test
     void updateProgress_ShouldUpdateChaptersRead() {
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.updateProgress("abc123", 25);
+        MangaItem result = mangaService.updateProgress(TEST_USER_ID,"abc123", 25);
 
         assertEquals(25, result.getChaptersRead());
         verify(mangaRepository, times(1)).save(testItem);
@@ -67,19 +68,19 @@ public class MangaServiceTest {
 
     @Test
     void updateProgress_ShouldThrowWhenMangaNotFound() {
-        when(mangaRepository.findById("notreal")).thenReturn(null);
+        when(mangaRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                mangaService.updateProgress("notreal", 25));
+                mangaService.updateProgress(TEST_USER_ID,"notreal", 25));
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
 
     @Test
     void getLibrary_ShouldReturnAllItems() {
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<MangaItem> result = mangaService.getLibrary();
+        List<MangaItem> result = mangaService.getLibrary(TEST_USER_ID);
 
         assertEquals(1, result.size());
         assertEquals("Test Manga", result.get(0).getTitle());
@@ -105,8 +106,8 @@ public class MangaServiceTest {
 
     @Test
     void removeFromLibrary_ShouldCallDelete() {
-        mangaService.removeFromLibrary("abc123");
-        verify(mangaRepository, times(1)).delete("abc123");
+        mangaService.removeFromLibrary(TEST_USER_ID,"abc123");
+        verify(mangaRepository, times(1)).delete(TEST_USER_ID,"abc123");
     }
 
     @Test
@@ -125,12 +126,12 @@ public class MangaServiceTest {
 
     @Test
     void getManga_ShouldReturnItemFromRepository() {
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.getManga("abc123");
+        MangaItem result = mangaService.getManga(TEST_USER_ID,"abc123");
 
         assertEquals("Test Manga", result.getTitle());
-        verify(mangaRepository, times(1)).findById("abc123");
+        verify(mangaRepository, times(1)).findById(TEST_USER_ID,"abc123");
     }
 
     @Test
@@ -140,10 +141,10 @@ public class MangaServiceTest {
                 .latestChapter(75)
                 .build();
 
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
 
-        MangaItem result = mangaService.refreshLatestChapter("abc123");
+        MangaItem result = mangaService.refreshLatestChapter(TEST_USER_ID,"abc123");
 
         assertEquals(75, result.getLatestChapter());
         verify(mangaRepository, times(1)).save(testItem);
@@ -151,19 +152,19 @@ public class MangaServiceTest {
 
     @Test
     void refreshLatestChapter_ShouldThrowWhenNotFound() {
-        when(mangaRepository.findById("notreal")).thenReturn(null);
+        when(mangaRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                mangaService.refreshLatestChapter("notreal"));
+                mangaService.refreshLatestChapter(TEST_USER_ID,"notreal"));
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateScore_ShouldUpdateScore() {
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.updateScore("abc123", 9);
+        MangaItem result = mangaService.updateScore(TEST_USER_ID,"abc123", 9);
 
         assertEquals(9, result.getScore());
         verify(mangaRepository, times(1)).save(testItem);
@@ -171,19 +172,19 @@ public class MangaServiceTest {
 
     @Test
     void updateScore_ShouldThrowWhenNotFound() {
-        when(mangaRepository.findById("notreal")).thenReturn(null);
+        when(mangaRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                mangaService.updateScore("notreal", 9));
+                mangaService.updateScore(TEST_USER_ID,"notreal", 9));
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
 
     @Test
     void updateStatus_ShouldUpdateStatus() {
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.updateStatus("abc123", "FINISHED");
+        MangaItem result = mangaService.updateStatus(TEST_USER_ID,"abc123", "FINISHED");
 
         assertEquals("FINISHED", result.getStatus());
         verify(mangaRepository, times(1)).save(testItem);
@@ -191,19 +192,19 @@ public class MangaServiceTest {
 
     @Test
     void updateStatus_ShouldThrowWhenNotFound() {
-        when(mangaRepository.findById("notreal")).thenReturn(null);
+        when(mangaRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                mangaService.updateStatus("notreal", "FINISHED"));
+                mangaService.updateStatus(TEST_USER_ID,"notreal", "FINISHED"));
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
 
     @Test
     void addToLibrary_ShouldReturnExistingWhenAlreadyInLibrary() {
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.addToLibrary(testItem);
+        MangaItem result = mangaService.addToLibrary(TEST_USER_ID,testItem);
 
         assertEquals(testItem, result);
         verify(mangaRepository, never()).save(any());
@@ -211,9 +212,9 @@ public class MangaServiceTest {
 
     @Test
     void updateNotes_ShouldUpdateNotes() {
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.updateNotes("abc123", "Great manga");
+        MangaItem result = mangaService.updateNotes(TEST_USER_ID,"abc123", "Great manga");
 
         assertEquals("Great manga", result.getNotes());
         verify(mangaRepository, times(1)).save(testItem);
@@ -221,10 +222,10 @@ public class MangaServiceTest {
 
     @Test
     void updateNotes_ShouldThrowWhenNotFound() {
-        when(mangaRepository.findById("notreal")).thenReturn(null);
+        when(mangaRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                mangaService.updateNotes("notreal", "some notes"));
+                mangaService.updateNotes(TEST_USER_ID,"notreal", "some notes"));
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
@@ -241,10 +242,10 @@ public class MangaServiceTest {
                 .latestChapter(110)
                 .build();
 
-        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(item));
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
 
-        List<MangaItem> result = mangaService.refreshAll();
+        List<MangaItem> result = mangaService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         assertEquals(110, result.get(0).getLatestChapter());
@@ -257,10 +258,10 @@ public class MangaServiceTest {
         item.setMangaId("abc123");
         item.setLatestChapter(100);
 
-        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(item));
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(null);
 
-        List<MangaItem> result = mangaService.refreshAll();
+        List<MangaItem> result = mangaService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaRepository, never()).save(any());
@@ -277,10 +278,10 @@ public class MangaServiceTest {
                 .latestChapter(null)
                 .build();
 
-        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(item));
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
 
-        List<MangaItem> result = mangaService.refreshAll();
+        List<MangaItem> result = mangaService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaRepository, never()).save(any());
@@ -291,11 +292,11 @@ public class MangaServiceTest {
         MangaItem item = new MangaItem();
         item.setMangaId("abc123");
 
-        when(mangaRepository.findAll()).thenReturn(List.of(item));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(item));
         when(mangaMetadataClient.getDetails("abc123"))
                 .thenThrow(new RuntimeException("API down"));
 
-        List<MangaItem> result = mangaService.refreshAll();
+        List<MangaItem> result = mangaService.refreshAll(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaRepository, never()).save(any());
@@ -304,9 +305,9 @@ public class MangaServiceTest {
     @Test
     void refreshOngoing_ShouldSkipCompletedItems() {
         testItem.setSeriesStatus("completed");
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<MangaItem> result = mangaService.refreshOngoing();
+        List<MangaItem> result = mangaService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaMetadataClient, never()).getDetails(any());
@@ -316,9 +317,9 @@ public class MangaServiceTest {
     @Test
     void refreshOngoing_ShouldSkipCancelledItems() {
         testItem.setSeriesStatus("cancelled");
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
 
-        List<MangaItem> result = mangaService.refreshOngoing();
+        List<MangaItem> result = mangaService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaMetadataClient, never()).getDetails(any());
@@ -332,10 +333,10 @@ public class MangaServiceTest {
         MangaSearchResult details = MangaSearchResult.builder()
                 .id("abc123").latestChapter(110).build();
 
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
 
-        List<MangaItem> result = mangaService.refreshOngoing();
+        List<MangaItem> result = mangaService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(110, result.get(0).getLatestChapter());
         verify(mangaRepository, times(1)).save(testItem);
@@ -344,10 +345,10 @@ public class MangaServiceTest {
     @Test
     void refreshOngoing_ShouldSkipWhenDetailsNull() {
         testItem.setSeriesStatus("ongoing");
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(null);
 
-        List<MangaItem> result = mangaService.refreshOngoing();
+        List<MangaItem> result = mangaService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaRepository, never()).save(any());
@@ -359,10 +360,10 @@ public class MangaServiceTest {
         MangaSearchResult details = MangaSearchResult.builder()
                 .id("abc123").latestChapter(null).build();
 
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
 
-        List<MangaItem> result = mangaService.refreshOngoing();
+        List<MangaItem> result = mangaService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaRepository, never()).save(any());
@@ -371,11 +372,11 @@ public class MangaServiceTest {
     @Test
     void refreshOngoing_ShouldContinueWhenOneItemFails() {
         testItem.setSeriesStatus("ongoing");
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(mangaMetadataClient.getDetails("abc123"))
                 .thenThrow(new RuntimeException("API down"));
 
-        List<MangaItem> result = mangaService.refreshOngoing();
+        List<MangaItem> result = mangaService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaRepository, never()).save(any());
@@ -388,10 +389,10 @@ public class MangaServiceTest {
         MangaSearchResult details = MangaSearchResult.builder()
                 .id("abc123").latestChapter(100).build();
 
-        when(mangaRepository.findAll()).thenReturn(List.of(testItem));
+        when(mangaRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
 
-        List<MangaItem> result = mangaService.refreshOngoing();
+        List<MangaItem> result = mangaService.refreshOngoing(TEST_USER_ID);
 
         assertEquals(1, result.size());
         verify(mangaRepository, times(1)).save(testItem);
@@ -400,10 +401,10 @@ public class MangaServiceTest {
     @Test
     void enrichMangadexRating_ShouldFetchAndCacheWhenNull() {
         testItem.setMangadexRating(null);
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getMangadexRating("abc123")).thenReturn(9.6);
 
-        MangaItem result = mangaService.enrichMangadexRating("abc123");
+        MangaItem result = mangaService.enrichMangadexRating(TEST_USER_ID,"abc123");
 
         assertEquals(9.6, result.getMangadexRating());
         verify(mangaRepository, times(1)).save(testItem);
@@ -412,9 +413,9 @@ public class MangaServiceTest {
     @Test
     void enrichMangadexRating_ShouldSkipWhenAlreadyCached() {
         testItem.setMangadexRating(9.6);
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
 
-        MangaItem result = mangaService.enrichMangadexRating("abc123");
+        MangaItem result = mangaService.enrichMangadexRating(TEST_USER_ID,"abc123");
 
         assertEquals(9.6, result.getMangadexRating());
         verify(mangaMetadataClient, never()).getMangadexRating(any());
@@ -423,10 +424,10 @@ public class MangaServiceTest {
 
     @Test
     void enrichMangadexRating_ShouldThrowWhenNotFound() {
-        when(mangaRepository.findById("notreal")).thenReturn(null);
+        when(mangaRepository.findById(TEST_USER_ID,"notreal")).thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                mangaService.enrichMangadexRating("notreal"));
+                mangaService.enrichMangadexRating(TEST_USER_ID,"notreal"));
 
         assertEquals("Manga not found: notreal", ex.getMessage());
     }
@@ -437,11 +438,11 @@ public class MangaServiceTest {
         MangaSearchResult details = MangaSearchResult.builder()
                 .id("abc123").latestChapter(75).build();
 
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
         when(mangaMetadataClient.getMangadexRating("abc123")).thenReturn(9.6);
 
-        MangaItem result = mangaService.refreshLatestChapter("abc123");
+        MangaItem result = mangaService.refreshLatestChapter(TEST_USER_ID,"abc123");
 
         assertEquals(75, result.getLatestChapter());
         assertEquals(9.6, result.getMangadexRating());
@@ -454,10 +455,10 @@ public class MangaServiceTest {
         MangaSearchResult details = MangaSearchResult.builder()
                 .id("abc123").latestChapter(75).build();
 
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(details);
 
-        MangaItem result = mangaService.refreshLatestChapter("abc123");
+        MangaItem result = mangaService.refreshLatestChapter(TEST_USER_ID,"abc123");
 
         assertEquals(9.6, result.getMangadexRating());
         verify(mangaMetadataClient, never()).getMangadexRating(any());
@@ -466,11 +467,11 @@ public class MangaServiceTest {
     @Test
     void refreshLatestChapter_ShouldSaveEvenWhenDetailsNull() {
         testItem.setMangadexRating(null);
-        when(mangaRepository.findById("abc123")).thenReturn(testItem);
+        when(mangaRepository.findById(TEST_USER_ID,"abc123")).thenReturn(testItem);
         when(mangaMetadataClient.getDetails("abc123")).thenReturn(null);
         when(mangaMetadataClient.getMangadexRating("abc123")).thenReturn(9.6);
 
-        MangaItem result = mangaService.refreshLatestChapter("abc123");
+        MangaItem result = mangaService.refreshLatestChapter(TEST_USER_ID,"abc123");
 
         assertNotNull(result);
         assertEquals(9.6, result.getMangadexRating());
