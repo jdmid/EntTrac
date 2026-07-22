@@ -4,6 +4,7 @@ import Navbar from './Navbar'
 import NotesDialog from './NotesDialog'
 import { statusStyles, statusLabels } from '../theme/themes'
 import AttributionFooter from './AttributionFooter'
+import { stripMarkdown } from '../utils/textFormat'
 
 
 function DetailPageLayout({
@@ -49,7 +50,7 @@ function DetailPageLayout({
   const [descExpanded, setDescExpanded] = useState(false)
   const [notesOpen, setNotesOpen] = useState(false)
 
-  const description = item?.description ?? 'No description available.'
+  const description = stripMarkdown(item?.description) || 'No description available.'
   const isLongDesc = description.length > 300
 
   return (

@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { themes } from '../theme/themes'
 import { useSettings } from '../context/SettingsContext'
+import Wordmark from './Wordmark'
 
 function Navbar({ activeMedia = 'manga' }) {
   const navigate = useNavigate()
@@ -22,9 +23,7 @@ function Navbar({ activeMedia = 'manga' }) {
         className="border-b border-white/5 px-5 h-12 flex items-center"
         style={{ background: theme.topBar }}
       >
-        <span className="text-sm font-medium text-white/90 mr-5">
-          Ent<span style={{ color: theme.accent }}>Trac</span>
-        </span>
+        <span className="mr-5"><Wordmark size={14} accent={theme.accent} /></span>
 
         {visibleTabs.map((tab) => (
           <button

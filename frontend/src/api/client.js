@@ -10,13 +10,15 @@ const client = axios.create({
 
 let refreshPromise = null
 
+const PUBLIC_AUTH_PATHS = ['/auth/google', '/auth/refresh', '/auth/logout']
+
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
-    const isAuthEndpoint = originalRequest?.url?.includes('/auth/')
+    const isPublicAuthEndpoint = PUBLIC_AUTH_PATHS.some((path) => originalRequest?.url?.includes(path))
 
-    if (error.response?.status !== 401 || isAuthEndpoint || originalRequest._retry) {
+    if (error.response?.status !== 401 || isPublicAuthEndpoint || originalRequest._retry) {
       return Promise.reject(error)
     }
 
@@ -29,7 +31,7 @@ client.interceptors.response.use(
       return client(originalRequest)
     } catch (refreshError) {
       refreshPromise = null
-      window.location.href = '/login'
+      window.dispatchEvent(new Event('auth:session-expired'))
       return Promise.reject(refreshError)
     }
   }

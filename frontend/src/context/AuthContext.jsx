@@ -18,6 +18,15 @@ export function AuthProvider({ children }) {
       })
   }, [])
 
+  useEffect(() => {
+    function handleSessionExpired() {
+      setUser(null)
+      setStatus('unauthenticated')
+    }
+    window.addEventListener('auth:session-expired', handleSessionExpired)
+    return () => window.removeEventListener('auth:session-expired', handleSessionExpired)
+  }, [])
+
   async function loginWithGoogle(idToken) {
     const res = await client.post('/auth/google', { idToken })
     setUser(res.data)
