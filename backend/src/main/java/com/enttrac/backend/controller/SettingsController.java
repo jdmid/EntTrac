@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/settings")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class SettingsController {
 
     private final SettingsRepository settingsRepository;

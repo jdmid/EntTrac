@@ -12,7 +12,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Optional;
 
-@Component
 public class AuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -46,12 +45,7 @@ public class AuthFilter extends OncePerRequestFilter {
         }
 
         request.setAttribute("userId", userId.get());
-        MDC.put("userId", userId.get());
-        try {
-            filterChain.doFilter(request, response);
-        } finally {
-            MDC.remove("userId");
-        }
+        filterChain.doFilter(request, response);
     }
 
     private Optional<String> extractCookie(HttpServletRequest request, String name) {
