@@ -14,9 +14,9 @@ The project started as a manga and anime tracker and is continuously growing to 
 
 ## Screenshots
 
-### Manga Library
+### Library Page
 
-![Manga Library](docs/screenshots/library.png)
+![Library Page](docs/screenshots/library.png)
 
 ### Search
 
