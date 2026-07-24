@@ -3,7 +3,7 @@ package com.enttrac.backend.service;
 import com.enttrac.backend.config.NotFoundException;
 import com.enttrac.backend.model.item.MediaItem;
 import com.enttrac.backend.model.result.MediaSearchResult;
-import com.enttrac.backend.repository.MediaRepository;
+import com.enttrac.backend.repository.BaseMediaRepository;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -12,9 +12,9 @@ import java.util.List;
 @Slf4j
 public abstract class MediaService<T extends MediaItem, R extends MediaSearchResult> {
 
-    protected final MediaRepository<T> repository;
+    protected final BaseMediaRepository<T> repository;
 
-    protected MediaService(MediaRepository<T> repository) {
+    protected MediaService(BaseMediaRepository<T> repository) {
         this.repository = repository;
     }
 
