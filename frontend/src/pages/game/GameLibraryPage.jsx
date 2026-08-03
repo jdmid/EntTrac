@@ -6,6 +6,7 @@ import { getGameLibrary } from '../../api/gameApi'
 import { themes } from '../../theme/themes'
 import { SERIES_STATUS_FILTERS, SORT_OPTIONS } from '../../utils/statusMapping'
 import { sortGames } from '../../utils/sortUtils'
+import { useMediaLibrary } from '../../hooks/useMediaLibrary'
 
 const GAME_STATUS_FILTERS = [
   { value: 'ALL',       label: 'All' },
@@ -18,27 +19,11 @@ const GAME_STATUS_FILTERS = [
 function GameLibraryPage() {
   const navigate = useNavigate()
 
-  const [library, setLibrary] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [seriesStatusFilter, setSeriesStatusFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('RECENTLY_ADDED')
 
-  useEffect(() => {
-    setLoading(true)
-    getGameLibrary()
-      .then((res) => {
-        setLibrary(res.data)
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.error('Failed to load library:', err)
-        setError('Failed to load library.')
-        setLoading(false)
-      })
-  }, [])
+  const { library, loading, error } = useMediaLibrary({ getLibrary: getGameLibrary })
 
   return (
     <LibraryPageLayout

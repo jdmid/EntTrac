@@ -6,6 +6,8 @@ import { getTvLibrary, refreshAllTv, refreshOngoingTv } from '../../api/tvApi'
 import { themes } from '../../theme/themes'
 import { SERIES_STATUS_FILTERS, SORT_OPTIONS } from '../../utils/statusMapping'
 import { sortTv } from '../../utils/sortUtils'
+import { useMediaLibrary } from '../../hooks/useMediaLibrary'
+
 
 const TV_STATUS_FILTERS = [
   { value: 'ALL',       label: 'All' },
@@ -18,46 +20,15 @@ const TV_STATUS_FILTERS = [
 function TvLibraryPage() {
   const navigate = useNavigate()
 
-  const [library, setLibrary] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [seriesStatusFilter, setSeriesStatusFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('MOST_UNREAD')
 
-  useEffect(() => {
-    setLoading(true)
-    getTvLibrary()
-      .then((res) => {
-        setLibrary(res.data)
-        setLoading(false)
-        backgroundRefreshOngoing(res.data)
-      })
-      .catch((err) => {
-        console.error('Failed to load library:', err)
-        setError('Failed to load library.')
-        setLoading(false)
-      })
-  }, [])
-
-  function backgroundRefreshOngoing(items) {
-    const ongoing = items.filter(
-      (item) =>
-        (item.seriesStatus === 'ongoing' || item.seriesStatus === 'hiatus') &&
-        item.status !== 'DROPPED'
-    )
-    if (ongoing.length === 0) return
-
-    refreshOngoingTv()
-      .then((res) => setLibrary(res.data))
-      .catch((err) => console.warn('Background refresh failed:', err))
-  }
-
-  async function handleRefreshAll() {
-    const res = await refreshAllTv()
-    setLibrary(res.data)
-  }
+  const { library, loading, error, handleRefreshAll } = useMediaLibrary({
+    getLibrary: getTvLibrary,
+    refreshAll: refreshAllTv,
+    refreshOngoing: refreshOngoingTv,
+  })
 
   return (
     <LibraryPageLayout
