@@ -11,7 +11,7 @@ public class BookRepository extends BaseMediaRepository<BookItem> {
     private static final String TABLE_NAME = "EntTrac";
 
     public BookRepository(DynamoDbEnhancedClient enhancedClient) {
-        super(enhancedClient.table(TABLE_NAME, TableSchema.fromBean(BookItem.class)), "ANIME#");
+        super(enhancedClient.table(TABLE_NAME, TableSchema.fromBean(BookItem.class)), "BOOK#");
     }
 
     @Override

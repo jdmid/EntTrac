@@ -5,7 +5,6 @@ import java.util.Set;
 public enum MediaType {
 
     MANGA(Set.of("CONSUMING", "PLANNED", "FINISHED", "DROPPED")),
-    ANIME(Set.of("CONSUMING", "PLANNED", "FINISHED", "DROPPED")),
     TV(Set.of("CONSUMING", "PLANNED", "FINISHED", "DROPPED")),
     MOVIE(Set.of("PLANNED", "FINISHED", "DROPPED")),
     BOOK(Set.of("CONSUMING", "PLANNED", "FINISHED", "DROPPED")),

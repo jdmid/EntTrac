@@ -28,7 +28,7 @@ class AuthFilterTest {
     void doFilter_ShouldSetUserIdAndContinueChain_WhenTokenValid() throws Exception {
         authFilter = new AuthFilter(jwtService);
 
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/anime/library");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/tv/library");
         request.setCookies(new Cookie("accessToken", "valid-token"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -44,7 +44,7 @@ class AuthFilterTest {
     void doFilter_ShouldReturn401_WhenNoCookiePresent() throws Exception {
         authFilter = new AuthFilter(jwtService);
 
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/anime/library");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/tv/library");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         authFilter.doFilter(request, response, filterChain);
@@ -57,7 +57,7 @@ class AuthFilterTest {
     void doFilter_ShouldReturn401_WhenTokenInvalid() throws Exception {
         authFilter = new AuthFilter(jwtService);
 
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/anime/library");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/tv/library");
         request.setCookies(new Cookie("accessToken", "bad-token"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -88,7 +88,7 @@ class AuthFilterTest {
     @Test
     void shouldNotFilter_ShouldNotSkipProtectedApiPaths() {
         authFilter = new AuthFilter(jwtService);
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/anime/library");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/tv/library");
 
         assertFalse(authFilter.shouldNotFilter(request));
     }
@@ -96,7 +96,7 @@ class AuthFilterTest {
     @Test
     void shouldNotFilter_ShouldSkipOptionsPreflightRequests() {
         authFilter = new AuthFilter(jwtService);
-        MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/api/anime/library");
+        MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/api/tv/library");
 
         assertTrue(authFilter.shouldNotFilter(request));
     }

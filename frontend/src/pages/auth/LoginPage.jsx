@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 import { themes } from '../../theme/themes'
 import Wordmark from '../../components/Wordmark'
 
-const SHELF_MEDIA = ['manga', 'anime', 'tv', 'movie', 'book', 'game']
-const SPINE_HEIGHTS = [44, 34, 50, 38, 46, 30]
+const SHELF_MEDIA = ['manga', 'tv', 'movie', 'book', 'game']
+const SPINE_HEIGHTS = [44, 34, 50, 38, 46]
 
 export default function LoginPage() {
   const buttonRef = useRef(null)

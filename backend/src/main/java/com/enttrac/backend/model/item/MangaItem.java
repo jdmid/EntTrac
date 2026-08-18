@@ -27,7 +27,6 @@ public class MangaItem extends MediaItem {
     private Integer latestChapter;
     private Integer totalChapters;
     private Double mangadexRating;
-    private Double anilistRating;
     private String authorId;
     private String artistId;
 

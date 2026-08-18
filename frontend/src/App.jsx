@@ -2,9 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import MangaLibraryPage from './pages/manga/MangaLibraryPage'
 import MangaSearchPage from './pages/manga/MangaSearchPage'
 import MangaDetailPage from './pages/manga/MangaDetailPage'
-import AnimeLibraryPage from './pages/anime/AnimeLibraryPage'
-import AnimeSearchPage from './pages/anime/AnimeSearchPage'
-import AnimeDetailPage from './pages/anime/AnimeDetailPage'
 import TvLibraryPage from './pages/tv/TvLibraryPage'
 import TvSearchPage from './pages/tv/TvSearchPage'
 import TvDetailPage from './pages/tv/TvDetailPage'
@@ -58,10 +55,6 @@ function App() {
         <Route path="/manga/library" element={<RequireAuth><TabGuard tabId="manga"><MangaLibraryPage /></TabGuard></RequireAuth>} />
         <Route path="/manga/search" element={<RequireAuth><TabGuard tabId="manga"><MangaSearchPage /></TabGuard></RequireAuth>} />
         <Route path="/manga/library/:mangaId" element={<RequireAuth><TabGuard tabId="manga"><MangaDetailPage /></TabGuard></RequireAuth>} />
-
-        <Route path="/anime/library" element={<RequireAuth><TabGuard tabId="anime"><AnimeLibraryPage /></TabGuard></RequireAuth>} />
-        <Route path="/anime/search" element={<RequireAuth><TabGuard tabId="anime"><AnimeSearchPage /></TabGuard></RequireAuth>} />
-        <Route path="/anime/library/:animeId" element={<RequireAuth><TabGuard tabId="anime"><AnimeDetailPage /></TabGuard></RequireAuth>} />
 
         <Route path="/tv/library" element={<RequireAuth><TabGuard tabId="tv"><TvLibraryPage /></TabGuard></RequireAuth>} />
         <Route path="/tv/search" element={<RequireAuth><TabGuard tabId="tv"><TvSearchPage /></TabGuard></RequireAuth>} />

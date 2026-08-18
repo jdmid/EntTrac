@@ -13,20 +13,6 @@ export const themes = {
     unreadBadge: '#b97fff33',
     name: 'Manga',
   },
-  anime: {
-    accent: '#2dd4bf',
-    accentBg: '#2dd4bf18',
-    accentBorder: '#2dd4bf55',
-    background: '#0a1414',
-    topBar: '#0d1a1a',
-    subNav: '#0b1616',
-    cardCover: '#102828',
-    cardBody: '#0e2222',
-    cardBorder: '#144040',
-    cardIcon: '#1a5050',
-    unreadBadge: '#2dd4bf33',
-    name: 'Anime',
-  },
   tv: {
     accent: '#f59e0b',
     accentBg: '#f59e0b18',
@@ -124,12 +110,6 @@ export const statusLabels = {
   manga: {
     CONSUMING: 'Reading',
     PLANNED: 'Plan to Read',
-    FINISHED: 'Finished',
-    DROPPED: 'Dropped',
-  },
-  anime: {
-    CONSUMING: 'Watching',
-    PLANNED: 'Plan to Watch',
     FINISHED: 'Finished',
     DROPPED: 'Dropped',
   },

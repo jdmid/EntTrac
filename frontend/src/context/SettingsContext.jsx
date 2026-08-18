@@ -5,7 +5,6 @@ import { useAuth } from './AuthContext'
 
 const DEFAULT_TABS = [
   { id: 'manga',  label: 'Manga',  visible: true },
-  { id: 'anime',  label: 'Anime',  visible: true },
   { id: 'tv',     label: 'TV',     visible: true },
   { id: 'movie',  label: 'Movies', visible: true },
   { id: 'book',   label: 'Books',  visible: true },

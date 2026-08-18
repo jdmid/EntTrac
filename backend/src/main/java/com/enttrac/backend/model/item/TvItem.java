@@ -34,6 +34,8 @@ public class TvItem extends MediaItem {
     private Double tmdbRating;
     private String creatorName;
     private String creatorId;
+    private String studio;
+    private String studioId;
 
     private List<Integer> seasonEpisodes;
 

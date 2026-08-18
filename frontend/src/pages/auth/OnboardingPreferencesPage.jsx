@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, BookMarked, Tv, Film, BookOpen, Gamepad2 } from 'lucide-react'
+import { BookMarked, Tv, Film, BookOpen, Gamepad2 } from 'lucide-react'
 import client from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import { themes } from '../../theme/themes'
 import Wordmark from '../../components/Wordmark'
 
-const ICONS = { anime: Sparkles, manga: BookMarked, tv: Tv, movie: Film, book: BookOpen, game: Gamepad2 }
+const ICONS = { manga: BookMarked, tv: Tv, movie: Film, book: BookOpen, game: Gamepad2 }
 
 function ShelfTile({ tab, selected, onToggle }) {
   const Icon = ICONS[tab.id]

@@ -12,13 +12,6 @@ export const normalizeSeriesStatus = (apiStatus, medium) => {
     if (status === 'cancelled') return 'cancelled'
   }
  
-  if (medium === 'anime') {
-    // Jikan/MAL values
-    if (status === 'currently airing') return 'ongoing'
-    if (status === 'finished airing') return 'completed'
-    if (status === 'not yet aired') return 'upcoming'
-  }
- 
   if (medium === 'tv') {
     // TMDB TV values
     if (status === 'returning series') return 'ongoing'
@@ -60,12 +53,6 @@ export const SERIES_STATUS_FILTERS = {
     { value: 'hiatus',    label: 'Hiatus' },
     { value: 'cancelled', label: 'Cancelled' },
   ],
-  anime: [
-    { value: 'ALL',      label: 'All' },
-    { value: 'ongoing',  label: 'Currently Airing' },
-    { value: 'completed', label: 'Finished Airing' },
-    { value: 'upcoming', label: 'Not Yet Aired' },
-  ],
   tv: [
     { value: 'ALL',       label: 'All' },
     { value: 'ongoing',   label: 'Ongoing' },
@@ -98,15 +85,6 @@ export const SERIES_STATUS_FILTERS = {
 export const SORT_OPTIONS = {
   manga: [
     { value: 'MOST_UNREAD',      label: 'Most unread' },
-    { value: 'ALPHA_AZ',         label: 'Alphabetical A–Z' },
-    { value: 'ALPHA_ZA',         label: 'Alphabetical Z–A' },
-    { value: 'SCORE_HIGH',       label: 'Score (high to low)' },
-    { value: 'SCORE_LOW',        label: 'Score (low to high)' },
-    { value: 'RECENTLY_UPDATED', label: 'Recently updated' },
-    { value: 'RECENTLY_ADDED',   label: 'Recently added' },
-  ],
-  anime: [
-    { value: 'MOST_UNREAD',      label: 'Most unwatched' },
     { value: 'ALPHA_AZ',         label: 'Alphabetical A–Z' },
     { value: 'ALPHA_ZA',         label: 'Alphabetical Z–A' },
     { value: 'SCORE_HIGH',       label: 'Score (high to low)' },
@@ -157,12 +135,6 @@ export const DETAIL_STATUS_OPTIONS = {
   manga: [
     { value: 'CONSUMING', label: 'Reading' },
     { value: 'PLANNED',   label: 'Plan to Read' },
-    { value: 'FINISHED',  label: 'Finished' },
-    { value: 'DROPPED',   label: 'Dropped' },
-  ],
-  anime: [
-    { value: 'CONSUMING', label: 'Watching' },
-    { value: 'PLANNED',   label: 'Plan to Watch' },
     { value: 'FINISHED',  label: 'Finished' },
     { value: 'DROPPED',   label: 'Dropped' },
   ],
