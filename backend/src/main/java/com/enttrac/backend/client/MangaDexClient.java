@@ -2,6 +2,7 @@ package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.MangaSearchResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -143,7 +144,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
             for (JsonNode rel : relationships) {
                 if ("cover_art".equals(rel.get("type").asText())) {
                     String fileName = rel.get("attributes").get("fileName").asText();
-                    coverUrl = "https://uploads.mangadex.org/covers/" + id + "/" + fileName;
+                    coverUrl = "/api/manga/cover/" + id + "/" + fileName;
                     break;
                 }
             }
@@ -290,7 +291,7 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
             for (JsonNode rel : manga.get("relationships")) {
                 if ("cover_art".equals(rel.path("type").asText()) && rel.has("attributes")) {
                     String fileName = rel.get("attributes").path("fileName").asText();
-                    coverUrl = "https://uploads.mangadex.org/covers/" + id + "/" + fileName;
+                    coverUrl = "/api/manga/cover/" + id + "/" + fileName;
                     break;
                 }
             }
@@ -302,6 +303,15 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
                 .status(status)
                 .coverUrl(coverUrl)
                 .build();
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getCoverImage(String mangaId, String fileName) {
+        return restClient.get()
+                .uri("https://uploads.mangadex.org/covers/{mangaId}/{fileName}", mangaId, fileName)
+                .header("User-Agent", "EntTrac/1.0 (+https://enttrac.fly.dev)")
+                .retrieve()
+                .toEntity(byte[].class);
     }
 
     @Override

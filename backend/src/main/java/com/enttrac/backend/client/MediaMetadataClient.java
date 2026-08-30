@@ -1,6 +1,8 @@
 package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.MediaSearchResult;
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 import java.util.Map;
 
@@ -14,5 +16,9 @@ public interface MediaMetadataClient<T extends MediaSearchResult> {
 
     default List<Map<String, String>> searchCreators(String name) {
         return List.of();
+    }
+
+    default ResponseEntity<byte[]> getCoverImage(String id, String fileName) {
+        return ResponseEntity.notFound().build();
     }
 }

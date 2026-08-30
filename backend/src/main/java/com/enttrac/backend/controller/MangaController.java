@@ -49,6 +49,11 @@ public class MangaController {
         return ResponseEntity.ok(item);
     }
 
+    @GetMapping("/cover/{mangaId}/{fileName}")
+    public ResponseEntity<byte[]> getCover(@PathVariable String mangaId, @PathVariable String fileName) {
+        return mangaService.getCoverImage(mangaId, fileName);
+    }
+
     // Add manga to library
     @PostMapping("/library")
     public ResponseEntity<MangaItem> addToLibrary(@CurrentUserId String userId, @Valid @RequestBody MangaItem item) {

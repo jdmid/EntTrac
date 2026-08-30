@@ -8,6 +8,7 @@ import com.enttrac.backend.model.result.MangaSearchResult;
 import com.enttrac.backend.repository.MangaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -160,6 +161,10 @@ public class MangaService extends MediaService<MangaItem, MangaSearchResult> {
             }
         }
         return item;
+    }
+
+    public ResponseEntity<byte[]> getCoverImage(String mangaId, String fileName) {
+        return mangaMetadataClient.getCoverImage(mangaId, fileName);
     }
 
     public List<MangaSearchResult> getWorksByAuthor(String authorId) {
