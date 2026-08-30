@@ -101,6 +101,7 @@ function DetailPageLayout({
                   src={item.coverUrl}
                   alt={title}
                   className="w-full object-contain"
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <span style={{ fontSize: 40, color: theme.cardIcon }}>

@@ -1,0 +1,23 @@
+# fly.toml app configuration file generated for enttrac on 2026-08-27T12:10:56-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'enttrac'
+primary_region = 'dfw'
+
+[build]
+ [build.args]
+    VITE_GOOGLE_CLIENT_ID = "913039005514-ru509a92u99ci27b1fbjfgm0lr9jfdid.apps.googleusercontent.com"
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'off'
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024

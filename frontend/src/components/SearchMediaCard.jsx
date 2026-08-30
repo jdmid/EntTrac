@@ -23,7 +23,7 @@ function SearchMediaCard({
         style={{ background: theme.cardCover }}
       >
         {coverUrl ? (
-          <img src={coverUrl} alt={title} className="w-full h-full object-cover" />
+          <img src={coverUrl} alt={title} className="w-full h-full object-cover" referrerPolicy="no-referrer"/>
         ) : (
           <span style={{ fontSize: 28, color: theme.cardIcon }}>{icon}</span>
         )}

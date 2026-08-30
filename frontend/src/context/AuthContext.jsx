@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useCallback, useEffect, useState } from 'react'
 import client from '../api/client'
 
 const AuthContext = createContext(null)
@@ -27,28 +27,28 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('auth:session-expired', handleSessionExpired)
   }, [])
 
-  async function loginWithGoogle(idToken) {
+  const loginWithGoogle = useCallback(async (idToken) => {
     const res = await client.post('/auth/google', { idToken })
     setUser(res.data)
     setStatus('authenticated')
     return res.data
-  }
+  }, [])
 
-  async function logout() {
+  const logout = useCallback(async () => {
     await client.post('/auth/logout')
     setUser(null)
     setStatus('unauthenticated')
-  }
+  }, [])
 
-  async function markOnboarded() {
+  const markOnboarded = useCallback(async () => {
     await client.patch('/auth/onboarded')
     setUser((prev) => (prev ? { ...prev, onboarded: true } : prev))
-  }
+  }, [])
 
-  async function updateDisplayName(displayName) {
+  const updateDisplayName = useCallback(async (displayName) => {
     await client.patch('/auth/profile', { displayName })
     setUser((prev) => (prev ? { ...prev, displayName } : prev))
-  }
+  }, [])
 
   return (
     <AuthContext.Provider value={{ user, status, loginWithGoogle, logout, markOnboarded, updateDisplayName }}>

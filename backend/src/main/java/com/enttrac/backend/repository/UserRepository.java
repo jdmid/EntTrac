@@ -2,6 +2,7 @@ package com.enttrac.backend.repository;
 
 import com.enttrac.backend.model.item.RefreshTokenItem;
 import com.enttrac.backend.model.item.UserProfileItem;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -13,14 +14,13 @@ import java.util.Optional;
 @Repository
 public class UserRepository {
 
-    private static final String TABLE_NAME = "EntTrac";
-
     private final DynamoDbTable<UserProfileItem> profileTable;
     private final DynamoDbTable<RefreshTokenItem> refreshTable;
 
-    public UserRepository(DynamoDbEnhancedClient enhancedClient) {
-        this.profileTable = enhancedClient.table(TABLE_NAME, TableSchema.fromBean(UserProfileItem.class));
-        this.refreshTable = enhancedClient.table(TABLE_NAME, TableSchema.fromBean(RefreshTokenItem.class));
+    public UserRepository(DynamoDbEnhancedClient enhancedClient,
+                          @Value("${dynamodb.table-name:EntTrac}") String tableName) {
+        this.profileTable = enhancedClient.table(tableName, TableSchema.fromBean(UserProfileItem.class));
+        this.refreshTable = enhancedClient.table(tableName, TableSchema.fromBean(RefreshTokenItem.class));
     }
 
     public static String pkFor(String provider, String providerId) {

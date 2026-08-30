@@ -13,21 +13,35 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!window.google) return
+    const initializeGoogleButton = () => {
+      window.google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: async (response) => {
+          const user = await loginWithGoogle(response.credential)
+          navigate(user.onboarded ? '/' : '/onboarding', { replace: true })
+        },
+      })
 
-    window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: async (response) => {
-        const user = await loginWithGoogle(response.credential)
-        navigate(user.onboarded ? '/' : '/onboarding', { replace: true })
-      },
-    })
+      window.google.accounts.id.renderButton(buttonRef.current, {
+        theme: 'filled_black',
+        size: 'large',
+        shape: 'rectangular',
+      })
+    }
 
-    window.google.accounts.id.renderButton(buttonRef.current, {
-      theme: 'filled_black',
-      size: 'large',
-      shape: 'rectangular',
-    })
+    if (window.google) {
+      initializeGoogleButton()
+      return
+    }
+
+    const pollForGoogle = setInterval(() => {
+      if (window.google) {
+        clearInterval(pollForGoogle)
+        initializeGoogleButton()
+      }
+    }, 100)
+
+    return () => clearInterval(pollForGoogle)
   }, [loginWithGoogle, navigate])
 
   return (

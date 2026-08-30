@@ -17,7 +17,7 @@ public abstract class BaseMediaRepository<T> {
         this.typePrefix = typePrefix;
     }
 
-    /** Builds the exact sort key for one item, e.g. "ANIME#ANILIST#123". */
+    /** Builds the exact sort key for one item, e.g. "BOOK#OPENLIBRARY#123". */
     protected abstract String buildSortKey(String id);
 
     public void save(T item) {
