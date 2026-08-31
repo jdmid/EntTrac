@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { themes } from '../../theme/themes'
 import Wordmark from '../../components/Wordmark'
@@ -67,6 +67,13 @@ export default function LoginPage() {
         </div>
 
         <div ref={buttonRef} />
+
+        <Link
+          to="/privacy"
+          style={{ fontSize: 12, color: '#555566' }}
+        >
+          Privacy Policy
+        </Link>
       </div>
     </div>
   )

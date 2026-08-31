@@ -18,6 +18,7 @@ import LoginPage from './pages/auth/LoginPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import OnboardingChoicePage from './pages/auth/OnboardingChoicePage'
 import OnboardingPreferencesPage from './pages/auth/OnboardingPreferencesPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import { useSettings } from './context/SettingsContext'
 import { useAuth } from './context/AuthContext'
 
@@ -47,6 +48,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/onboarding" element={<RequireAuth><OnboardingChoicePage /></RequireAuth>} />
         <Route path="/onboarding/preferences" element={<RequireAuth><OnboardingPreferencesPage /></RequireAuth>} />
 
