@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -675,6 +676,33 @@ public class TvServiceTest {
         assertEquals(1, results.size());
         assertEquals("Breaking Bad", results.get(0).getTitle());
         verify(tvMetadataClient, times(1)).getWorksByCreator("66633");
+    }
+
+    @Test
+    void getWorksByStudio_ShouldDelegateToClient() {
+        TvSearchResult result = TvSearchResult.builder()
+                .id("1396")
+                        .title("Breaking Bad")
+                                .build();
+        when(tvMetadataClient.getWorksByStudio("33")).thenReturn(List.of(result));
+
+                List<TvSearchResult> results = tvService.getWorksByStudio("33");
+
+                        assertEquals(1, results.size());
+        assertEquals("Breaking Bad", results.get(0).getTitle());
+                verify(tvMetadataClient, times(1)).getWorksByStudio("33");
+    }
+
+    @Test
+    void searchStudios_ShouldDelegateToClient() {
+        Map<String, String> match = Map.of("id", "33", "name", "Sony Pictures Television");
+                when(tvMetadataClient.searchStudios("Sony")).thenReturn(List.of(match));
+
+                        List<Map<String, String>> results = tvService.searchStudios("Sony");
+
+                                assertEquals(1, results.size());
+        assertEquals("Sony Pictures Television", results.get(0).get("name"));
+                verify(tvMetadataClient, times(1)).searchStudios("Sony");
     }
 
     @Test

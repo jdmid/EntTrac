@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.enttrac.backend.auth.AuthTestSupport.TEST_USER_ID;
 import static com.enttrac.backend.auth.AuthTestSupport.accessTokenCookie;
@@ -289,6 +290,31 @@ public class TvControllerTest {
         mockMvc.perform(get("/api/tv/creator/66633").cookie(accessTokenCookie(jwtService)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Breaking Bad"));
+    }
+
+    @Test
+    void getWorksByStudio_ShouldReturnResults() throws Exception {
+        TvSearchResult result = TvSearchResult.builder()
+                .id("1396")
+                        .title("Breaking Bad")
+                                .build();
+
+        when(tvService.getWorksByStudio("33")).thenReturn(List.of(result));
+
+                mockMvc.perform(get("/api/tv/studio/33").cookie(accessTokenCookie(jwtService)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].title").value("Breaking Bad"));
+    }
+
+    @Test
+    void searchStudios_ShouldReturnResults() throws Exception {
+        Map<String, String> match = Map.of("id", "33", "name", "Sony Pictures Television");
+
+                when(tvService.searchStudios("Sony")).thenReturn(List.of(match));
+
+                        mockMvc.perform(get("/api/tv/company-search").param("name", "Sony").cookie(accessTokenCookie(jwtService)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].name").value("Sony Pictures Television"));
     }
 
     @Test
