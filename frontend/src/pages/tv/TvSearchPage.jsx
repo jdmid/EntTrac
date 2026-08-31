@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import SearchPageLayout from '../../components/SearchPageLayout'
 import SearchMediaCard from '../../components/SearchMediaCard'
-import { searchTv, addTvToLibrary, getTvLibrary, getTvDetails, getWorksByCreator, searchPeople } from '../../api/tvApi'
+import { searchTv, addTvToLibrary, getTvLibrary, getTvDetails, getWorksByCreator, searchPeople, getWorksByStudio, searchStudios } from '../../api/tvApi'
 import { normalizeSeriesStatus } from '../../utils/statusMapping'
 import { themes } from '../../theme/themes'
 
@@ -22,6 +22,12 @@ function TvSearchPage() {
   const [creatorLoading, setCreatorLoading] = useState(false)
   const [creatorName, setCreatorName] = useState('')
   const [creatorMatches, setCreatorMatches] = useState([])
+
+  const [studioTab, setStudioTab] = useState(false)
+  const [studioResults, setStudioResults] = useState([])
+  const [studioLoading, setStudioLoading] = useState(false)
+  const [studioName, setStudioName] = useState('')
+  const [studioMatches, setStudioMatches] = useState([])
 
   useEffect(() => {
     getTvLibrary()
@@ -46,6 +52,21 @@ function TvSearchPage() {
           setCreatorLoading(false)
         })
         .catch(() => setCreatorLoading(false))
+    }
+
+    const studioId = searchParams.get('studioId')
+    const sName = searchParams.get('studioName')
+
+    if (tab === 'studio' && studioId) {
+      setStudioTab(true)
+      setStudioName(sName ?? '')
+      setStudioLoading(true)
+      getWorksByStudio(studioId)
+        .then((res) => {
+          setStudioResults(res.data)
+          setStudioLoading(false)
+        })
+        .catch(() => setStudioLoading(false))
     }
   }, [])
 
@@ -106,6 +127,46 @@ function TvSearchPage() {
       })
   }
 
+  function handleStudioSearch(e) {
+    e.preventDefault()
+    if (!studioName.trim()) return
+    setStudioLoading(true)
+    setStudioMatches([])
+    setStudioResults([])
+    searchStudios(studioName)
+      .then((res) => {
+        const matches = res.data
+        if (matches.length === 1) {
+          return getWorksByStudio(matches[0].id)
+            .then((worksRes) => {
+              setStudioResults(worksRes.data)
+              setStudioLoading(false)
+            })
+        }
+        setStudioMatches(matches)
+        setStudioLoading(false)
+      })
+      .catch((err) => {
+        console.error('Failed to search TV shows by studio:', err)
+        setStudioLoading(false)
+      })
+  }
+
+  function handleStudioMatchSelect(match) {
+    setStudioLoading(true)
+    setStudioMatches([])
+    getWorksByStudio(match.id)
+      .then((res) => {
+        setStudioResults(res.data)
+        setStudioName(match.name)
+        setStudioLoading(false)
+      })
+      .catch((err) => {
+        console.error('Failed to load TV show works for studio:', err)
+        setStudioLoading(false)
+      })
+  }
+
   async function handleAdd(show) {
     try {
       const detailRes = await getTvDetails(show.id)
@@ -130,6 +191,8 @@ function TvSearchPage() {
         nextEpisodeDate: full.nextEpisodeDate,
         creatorName: full.creatorName ?? null,
         creatorId: full.creatorId ?? null,
+        studio: full.studio ?? null,
+        studioId: full.studioId ?? null,
       })
       setAddedIds((prev) => new Set([...prev, show.id]))
     } catch (err) {
@@ -143,8 +206,10 @@ function TvSearchPage() {
       pageTitle="Search TV Shows"
       pageSubtitle="Find and add titles to your library"
       creatorTabLabel="By creator"
+      studioTabLabel="By studio"
       titlePlaceholder="Search for TV shows..."
       creatorPlaceholder="Search by creator name..."
+      studioPlaceholder="Search by studio name..."
       results={results}
       loading={loading}
       error={error}
@@ -161,6 +226,16 @@ function TvSearchPage() {
       onCreatorSearch={handleCreatorSearch}
       onCreatorMatchSelect={handleCreatorMatchSelect}
       disambiguationLabel="Multiple creators found — select one"
+      studioTab={studioTab}
+      onStudioTabChange={setStudioTab}
+      studioName={studioName}
+      onStudioNameChange={setStudioName}
+      studioResults={studioResults}
+      studioLoading={studioLoading}
+      studioMatches={studioMatches}
+      onStudioSearch={handleStudioSearch}
+      onStudioMatchSelect={handleStudioMatchSelect}
+      studioDisambiguationLabel="Multiple studios found — select one"
       renderCard={(item) => (
         <SearchMediaCard
           key={item.id}

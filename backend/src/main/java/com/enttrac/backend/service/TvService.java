@@ -261,6 +261,14 @@ public class TvService extends MediaService<TvItem, TvSearchResult> {
         return item;
     }
 
+    public List<TvSearchResult> getWorksByStudio(String studioId) {
+        return tvMetadataClient.getWorksByStudio(studioId);
+    }
+
+    public List<Map<String, String>> searchStudios(String name) {
+        return tvMetadataClient.searchStudios(name);
+    }
+
     public List<TvSearchResult> getWorksByCreator(String personId) {
         return tvMetadataClient.getWorksByCreator(personId);
     }

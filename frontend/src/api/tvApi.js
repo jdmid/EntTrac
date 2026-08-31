@@ -56,6 +56,12 @@ export const getWorksByCreator = (creatorId) =>
 export const searchPeople = (name) =>
   client.get('/tv/person-search', { params: { name } })
 
+export const getWorksByStudio = (studioId) =>
+  client.get(`/tv/studio/${studioId}`)
+
+export const searchStudios = (name) =>
+  client.get('/tv/company-search', { params: { name } })
+
 export const enrichTvWatchProviders = (tvId, region) =>
   client.post(`/tv/library/${tvId}/watch-providers`, null, {
     params: { region },

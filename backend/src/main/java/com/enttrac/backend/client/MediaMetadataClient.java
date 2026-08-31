@@ -18,6 +18,14 @@ public interface MediaMetadataClient<T extends MediaSearchResult> {
         return List.of();
     }
 
+    default List<T> getWorksByStudio(String studioId) {
+        return List.of();
+    }
+
+    default List<Map<String, String>> searchStudios(String name) {
+        return List.of();
+    }
+
     default ResponseEntity<byte[]> getCoverImage(String id, String fileName) {
         return ResponseEntity.notFound().build();
     }

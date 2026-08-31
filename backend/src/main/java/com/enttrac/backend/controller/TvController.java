@@ -137,4 +137,15 @@ public class TvController {
     public ResponseEntity<List<Map<String, String>>> searchPeople(@RequestParam String name) {
         return ResponseEntity.ok(tvService.searchPeople(name));
     }
+
+    @GetMapping("/studio/{studioId}")
+    public ResponseEntity<List<TvSearchResult>> getWorksByStudio(
+            @PathVariable String studioId) {
+        return ResponseEntity.ok(tvService.getWorksByStudio(studioId));
+    }
+
+    @GetMapping("/company-search")
+    public ResponseEntity<List<Map<String, String>>> searchStudios(@RequestParam String name) {
+        return ResponseEntity.ok(tvService.searchStudios(name));
+    }
 }

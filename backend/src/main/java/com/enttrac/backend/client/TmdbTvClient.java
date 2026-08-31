@@ -101,6 +101,15 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
             }
         }
 
+        if (response.has("production_companies") && response.get("production_companies").isArray()
+                && response.get("production_companies").size() > 0) {
+            JsonNode firstCompany = response.get("production_companies").get(0);
+            if (firstCompany.has("name") && !firstCompany.get("name").isNull()) {
+                result.setStudio(firstCompany.get("name").asText());
+                result.setStudioId(firstCompany.get("id").asText());
+            }
+        }
+
         return result;
     }
 
@@ -296,6 +305,44 @@ public class TmdbTvClient implements MediaMetadataClient<TvSearchResult> {
             }
         }
 
+        return results;
+    }
+
+    @Override
+    public List<TvSearchResult> getWorksByStudio(String studioId) {
+        JsonNode response = restClient.get()
+                .uri("/discover/tv?with_companies={id}&language=en-US&api_key={apiKey}",
+                        studioId, apiKey)
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<TvSearchResult> results = new ArrayList<>();
+        if (response != null && response.has("results")) {
+            for (JsonNode show : response.get("results")) {
+                results.add(mapToSearchResult(show));
+            }
+        }
+        log.info("Fetched {} TV works for studio: {}", results.size(), studioId);
+        return results;
+    }
+
+    @Override
+    public List<Map<String, String>> searchStudios(String name) {
+        JsonNode response = restClient.get()
+                .uri("/search/company?query={name}&api_key={apiKey}", name, apiKey)
+                .retrieve()
+                .body(JsonNode.class);
+
+        List<Map<String, String>> results = new ArrayList<>();
+        if (response != null && response.has("results")) {
+            for (JsonNode company : response.get("results")) {
+                String id = company.path("id").asText();
+                String companyName = company.path("name").asText();
+                if (!id.isBlank() && !companyName.isBlank()) {
+                    results.add(Map.of("id", id, "name", companyName));
+                }
+            }
+        }
         return results;
     }
 

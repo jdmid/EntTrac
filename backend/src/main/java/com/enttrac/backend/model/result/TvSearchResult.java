@@ -23,6 +23,8 @@ public class TvSearchResult extends MediaSearchResult {
     private Integer numberOfSeasons;
     private String creatorName;
     private String creatorId;
+    private String studio;
+    private String studioId;
     private Double tmdbRating;
 
     @lombok.Builder
@@ -31,7 +33,7 @@ public class TvSearchResult extends MediaSearchResult {
                           String network, String genres, String firstAirYear,
                           String seriesType, Integer totalEpisodes,
                           List<Integer> seasonEpisodes, String nextEpisodeDate, Integer numberOfSeasons,
-                          String creatorName, String creatorId) {
+                          String creatorName, String creatorId, String studio, String studioId) {
         super();
         setId(id);
         setTitle(title);
@@ -48,6 +50,8 @@ public class TvSearchResult extends MediaSearchResult {
         this.numberOfSeasons = numberOfSeasons;
         this.creatorName = creatorName;
         this.creatorId = creatorId;
+        this.studio = studio;
+        this.studioId = studioId;
         this.tmdbRating = tmdbRating;
     }
 }
