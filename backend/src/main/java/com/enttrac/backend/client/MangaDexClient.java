@@ -2,6 +2,7 @@ package com.enttrac.backend.client;
 
 import com.enttrac.backend.model.result.MangaSearchResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -307,11 +308,17 @@ public class MangaDexClient implements MediaMetadataClient<MangaSearchResult> {
 
     @Override
     public ResponseEntity<byte[]> getCoverImage(String mangaId, String fileName) {
-        return restClient.get()
+        ResponseEntity<byte[]> upstream = restClient.get()
                 .uri("https://uploads.mangadex.org/covers/{mangaId}/{fileName}", mangaId, fileName)
                 .header("User-Agent", "EntTrac/1.0 (+https://enttrac.fly.dev)")
                 .retrieve()
                 .toEntity(byte[].class);
+
+        MediaType contentType = upstream.getHeaders().getContentType();
+
+        return ResponseEntity.ok()
+                .contentType(contentType != null ? contentType : MediaType.IMAGE_JPEG)
+                .body(upstream.getBody());
     }
 
     @Override
