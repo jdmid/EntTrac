@@ -114,15 +114,4 @@ public class BookController {
     public ResponseEntity<BookItem> resetProgress(@CurrentUserId String userId,@PathVariable String bookId) {
         return ResponseEntity.ok(bookService.resetProgress(userId, bookId));
     }
-
-    @GetMapping("/search/upcoming")
-    public ResponseEntity<List<BookSearchResult>> searchUpcoming(@RequestParam String q) {
-        return ResponseEntity.ok(bookService.searchUpcoming(q));
-    }
-
-    @PostMapping("/library/migrate-upcoming")
-    public ResponseEntity<Void> migrateUpcoming(@CurrentUserId String userId) {
-        bookService.migrateUpcomingIfPublished(userId);
-        return ResponseEntity.noContent().build();
-    }
 }

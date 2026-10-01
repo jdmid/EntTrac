@@ -291,30 +291,4 @@ public class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("J.R.R. Tolkien"));
     }
-
-    @Test
-    void searchUpcoming_ShouldReturnResults() throws Exception {
-        BookSearchResult result = BookSearchResult.builder()
-                .id("gb_123")
-                .title("Upcoming Fantasy Novel")
-                .source("GOOGLEBOOKS")
-                .build();
-
-        when(bookService.searchUpcoming("fantasy")).thenReturn(List.of(result));
-
-        mockMvc.perform(get("/api/books/search/upcoming")
-                        .cookie(accessTokenCookie(jwtService))
-                        .param("q", "fantasy"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Upcoming Fantasy Novel"));
-    }
-
-    @Test
-    void migrateUpcoming_ShouldReturn204() throws Exception {
-        mockMvc.perform(post("/api/books/library/migrate-upcoming")
-                        .cookie(accessTokenCookie(jwtService)))
-                .andExpect(status().isNoContent());
-
-        verify(bookService, times(1)).migrateUpcomingIfPublished(TEST_USER_ID);
-    }
 }

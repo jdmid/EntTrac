@@ -24,8 +24,8 @@ function BookSearchPage() {
 
   useEffect(() => {
     getBookLibrary().then((res) => {
-      const ids = new Set(res.data.map((b) => b.bookId))
-      setAddedIds(ids)
+    const ids = new Set(res.data.map((b) => b.bookId))
+    setAddedIds(ids)
     }).catch((err) => console.error('Failed to load library for added state:', err))
   }, [])
 
@@ -114,6 +114,11 @@ function BookSearchPage() {
       authors: book.authors ?? [],
       firstPublishYear: book.firstPublishYear ?? null,
       genres: book.genres ?? null,
+      source: book.source ?? null,
+      publishedDate: book.publishedDate ?? null,
+      isbn: book.isbn ?? null,
+      seriesName: book.seriesName ?? null,
+      seriesPosition: book.seriesPosition ?? null,
     })
       .then(() => setAddedIds((prev) => new Set([...prev, book.id])))
       .catch((err) => console.error('Failed to add book to library:', err))

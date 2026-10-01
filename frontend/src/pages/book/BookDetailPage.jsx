@@ -100,7 +100,7 @@ function BookDetailPage() {
       score={score}
       theme={theme}
       icon="📚"
-      statusOptions={DETAIL_STATUS_OPTIONS.book}
+      statusOptions={DETAIL_STATUS_OPTIONS.book}     
       metaLine={
         <div>
           {book.firstPublishYear && (
@@ -138,7 +138,7 @@ function BookDetailPage() {
         </div>
       }
       progressSection={
-        <BookProgressSection
+         <BookProgressSection
             currentChapter={book.currentChapter}
             currentPage={book.currentPage}
             theme={theme}
@@ -168,6 +168,11 @@ function BookDetailPage() {
           authors: book.authors ?? [],
           firstPublishYear: book.firstPublishYear ?? null,
           genres: book.genres ?? null,
+          source: book.source ?? null,
+          publishedDate: book.publishedDate ?? null,
+          isbn: book.isbn ?? null,
+          seriesName: book.seriesName ?? null,
+          seriesPosition: book.seriesPosition ?? null,
         }).then(() => setInLibrary(true))
       }
       onScoreSave={(n) =>

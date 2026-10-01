@@ -158,4 +158,144 @@ public class AuthControllerTest {
 
         verify(userRepository).deleteRefreshToken("USER#google#123", "token-id");
     }
+// --- /me ---
+
+    @Test
+    void me_ShouldReturnProfile_WhenUserExists() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        UserProfileItem profile = new UserProfileItem();
+        profile.setEmail("test@example.com");
+        profile.setDisplayName("Joseph");
+        profile.setOnboarded(true);
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.of(profile));
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new Cookie("accessToken", accessToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.displayName").value("Joseph"))
+                .andExpect(jsonPath("$.onboarded").value(true));
+    }
+
+    @Test
+    void me_ShouldReturnEmptyDisplayName_WhenDisplayNameIsNull() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        UserProfileItem profile = new UserProfileItem();
+        profile.setEmail("test@example.com");
+        profile.setDisplayName(null);
+        profile.setOnboarded(false);
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.of(profile));
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new Cookie("accessToken", accessToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.displayName").value(""));
+    }
+
+    @Test
+    void me_ShouldReturn404_WhenUserNotFound() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new Cookie("accessToken", accessToken)))
+                .andExpect(status().isNotFound());
+    }
+
+// --- /onboarded ---
+
+    @Test
+    void markOnboarded_ShouldSetOnboardedTrueAndSave_WhenUserExists() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        UserProfileItem profile = new UserProfileItem();
+        profile.setOnboarded(false);
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.of(profile));
+
+        mockMvc.perform(patch("/api/auth/onboarded")
+                        .cookie(new Cookie("accessToken", accessToken)))
+                .andExpect(status().isOk());
+
+        verify(userRepository).saveProfile(argThat(p -> p.isOnboarded()));
+    }
+
+    @Test
+    void markOnboarded_ShouldReturn200_WhenUserNotFound() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/api/auth/onboarded")
+                        .cookie(new Cookie("accessToken", accessToken)))
+                .andExpect(status().isOk());
+
+        verify(userRepository, never()).saveProfile(any());
+    }
+
+// --- /profile ---
+
+    @Test
+    void updateProfile_ShouldUpdateDisplayNameAndSave_WhenUserExists() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        UserProfileItem profile = new UserProfileItem();
+        profile.setDisplayName("Old Name");
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.of(profile));
+
+        mockMvc.perform(patch("/api/auth/profile")
+                        .cookie(new Cookie("accessToken", accessToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("displayName", "New Name"))))
+                .andExpect(status().isOk());
+
+        verify(userRepository).saveProfile(argThat(p -> "New Name".equals(p.getDisplayName())));
+    }
+
+    @Test
+    void updateProfile_ShouldNotChangeDisplayName_WhenKeyAbsentFromBody() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        UserProfileItem profile = new UserProfileItem();
+        profile.setDisplayName("Unchanged");
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.of(profile));
+
+        mockMvc.perform(patch("/api/auth/profile")
+                        .cookie(new Cookie("accessToken", accessToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of())))
+                .andExpect(status().isOk());
+
+        verify(userRepository).saveProfile(argThat(p -> "Unchanged".equals(p.getDisplayName())));
+    }
+
+    @Test
+    void updateProfile_ShouldReturn200_WhenUserNotFound() throws Exception {
+        String userId = "USER#google#google-sub-123";
+        String accessToken = jwtService.generateAccessToken(userId);
+
+        when(userRepository.findProfile(userId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/api/auth/profile")
+                        .cookie(new Cookie("accessToken", accessToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("displayName", "Whatever"))))
+                .andExpect(status().isOk());
+
+        verify(userRepository, never()).saveProfile(any());
+    }
 }

@@ -77,11 +77,6 @@ public class BookService extends MediaService<BookItem, BookSearchResult> {
         return bookMetadataClient.search(query);
     }
 
-    public List<BookSearchResult> searchUpcoming(String query) {
-        log.info("Searching upcoming books with query: {}", query);
-        return googleBooksClient.searchUpcoming(query);
-    }
-
     public BookSearchResult getDetails(String id) {
         log.info("Fetching book details for id: {}", id);
         return bookMetadataClient.getDetails(id);
@@ -124,52 +119,6 @@ public class BookService extends MediaService<BookItem, BookSearchResult> {
         item.setUpdatedAt(Instant.now().toString());
         repository.save(item);
         return item;
-    }
-
-    public void migrateUpcomingIfPublished(String userId) {
-        List<BookItem> library = repository.findAll(userId);
-        for (BookItem item : library) {
-            if (!"GOOGLEBOOKS".equals(item.getSource())) continue;
-            if (!isPublished(item.getPublishedDate())) continue;
-
-            log.info("Attempting migration of upcoming book: {}", item.getTitle());
-
-            // Look up by ISBN on Open Library if available
-            if (item.getIsbn() == null) continue;
-
-            try {
-                BookSearchResult olResult = bookMetadataClient.search("isbn:" + item.getIsbn())
-                        .stream().findFirst().orElse(null);
-                if (olResult == null) continue;
-
-                // Delete GOOGLEBOOKS entry, create OPENLIBRARY entry
-                bookRepository.deleteByFullSk(userId, item.getSk());
-
-                item.setBookId(olResult.getId());
-                item.setSource("OPENLIBRARY");
-                item.setSeriesStatus(null);
-                item.setSk("BOOK#OPENLIBRARY#" + olResult.getId());
-                item.setStatus("PLANNED");
-                item.setUpdatedAt(Instant.now().toString());
-
-                // Re-enrich with Google Books now that we have OL data
-                String authorLastName = extractAuthorLastName(item.getAuthors());
-                BookEnrichmentData enrichment = googleBooksClient.enrich(item.getTitle(), authorLastName);
-                if (enrichment != null) {
-                    item.setGoogleBooksId(enrichment.googleBooksId());
-                    item.setIsbn(enrichment.isbn());
-                    item.setPublishedDate(enrichment.publishedDate());
-                    item.setSeriesName(enrichment.seriesName());
-                    item.setSeriesPosition(enrichment.seriesPosition());
-                }
-
-                repository.save(item);
-                log.info("Migrated upcoming book '{}' to OPENLIBRARY", item.getTitle());
-
-            } catch (Exception e) {
-                log.error("Failed to migrate upcoming book '{}': {}", item.getTitle(), e.getMessage());
-            }
-        }
     }
 
     private String extractAuthorLastName(List<Map<String, String>> authors) {
