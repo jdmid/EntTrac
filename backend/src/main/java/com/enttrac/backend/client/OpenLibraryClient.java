@@ -84,6 +84,7 @@ public class OpenLibraryClient implements MediaMetadataClient<BookSearchResult> 
             return BookSearchResult.builder()
                     .id(id)
                     .description(description)
+                    .source("OPENLIBRARY")
                     .build();
 
         } catch (Exception e) {
@@ -216,6 +217,7 @@ public class OpenLibraryClient implements MediaMetadataClient<BookSearchResult> 
                 .firstPublishYear(firstPublishYear)
                 .authors(authors)
                 .genres(genres)
+                .source("OPENLIBRARY")
                 .build();
     }
 
@@ -234,6 +236,7 @@ public class OpenLibraryClient implements MediaMetadataClient<BookSearchResult> 
                 .id(id)
                 .title(title)
                 .coverUrl(coverUrl)
+                .source("OPENLIBRARY")
                 .build();
     }
 }

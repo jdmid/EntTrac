@@ -4,6 +4,7 @@ import com.enttrac.backend.model.item.BookItem;
 import org.springframework.stereotype.Repository;
 import org.springframework.beans.factory.annotation.Value;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 @Repository
@@ -17,5 +18,13 @@ public class BookRepository extends BaseMediaRepository<BookItem> {
     @Override
     protected String buildSortKey(String bookId) {
         return "BOOK#OPENLIBRARY#" + bookId;
+    }
+
+    public void deleteByFullSk(String userId, String sk) {
+        Key key = Key.builder()
+                .partitionValue(userId)
+                .sortValue(sk)
+                .build();
+        table.deleteItem(key);
     }
 }

@@ -1,10 +1,15 @@
 package com.enttrac.backend;
 
+import com.enttrac.backend.client.GoogleBooksClient;
 import com.enttrac.backend.client.MediaMetadataClient;
 import com.enttrac.backend.model.item.BookItem;
 import com.enttrac.backend.model.result.BookSearchResult;
 import com.enttrac.backend.repository.BookRepository;
 import com.enttrac.backend.service.BookService;
+import com.enttrac.backend.client.GoogleBooksClient;
+import com.enttrac.backend.client.BookEnrichmentData;
+import com.enttrac.backend.config.ValidationException;
+import com.enttrac.backend.config.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +32,9 @@ public class BookServiceTest {
 
     @Mock
     private MediaMetadataClient<BookSearchResult> bookMetadataClient;
+
+    @Mock
+    private GoogleBooksClient googleBooksClient;
 
     @InjectMocks
     private BookService bookService;
@@ -253,5 +261,164 @@ public class BookServiceTest {
         assertEquals(1, results.size());
         assertEquals("J.R.R. Tolkien", results.get(0).get("name"));
         verify(bookMetadataClient, times(1)).searchCreators("tolkien");
+    }
+
+    @Test
+    void beforeSave_ShouldThrowWhenGoogleBooksEntryNotPlanned() {
+        BookItem item = new BookItem();
+        item.setBookId("gb_123");
+        item.setSource("GOOGLEBOOKS");
+        item.setStatus("CONSUMING");
+        item.setAuthors(List.of(Map.of("name", "Brandon Sanderson")));
+
+        when(bookRepository.findById(TEST_USER_ID, "gb_123")).thenReturn(null);
+
+        assertThrows(ValidationException.class, () ->
+                bookService.addToLibrary(TEST_USER_ID, item));
+    }
+
+    @Test
+    void beforeSave_ShouldSetSeriesStatusUpcomingForGoogleBooks() {
+        BookItem item = new BookItem();
+        item.setBookId("gb_123");
+        item.setSource("GOOGLEBOOKS");
+        item.setStatus("PLANNED");
+        item.setAuthors(List.of(Map.of("name", "Brandon Sanderson")));
+
+        when(bookRepository.findById(TEST_USER_ID, "gb_123")).thenReturn(null);
+
+        BookItem result = bookService.addToLibrary(TEST_USER_ID, item);
+
+        assertEquals("upcoming", result.getSeriesStatus());
+    }
+
+    @Test
+    void beforeSave_ShouldEnrichOpenLibraryEntry() {
+        BookEnrichmentData enrichment = new BookEnrichmentData(
+                "gb_abc", "9780593099322", "2024-03-05", "The Stormlight Archive", "5");
+        when(googleBooksClient.enrich("The Way of Kings", "Sanderson")).thenReturn(enrichment);
+
+        testItem.setSource("OPENLIBRARY");
+
+        when(bookRepository.findById(TEST_USER_ID, "OL27448W")).thenReturn(null);
+
+        // Override testItem authors for last name extraction
+        testItem.setAuthors(List.of(Map.of("name", "Brandon Sanderson")));
+        testItem.setTitle("The Way of Kings");
+
+        BookItem result = bookService.addToLibrary(TEST_USER_ID, testItem);
+
+        assertEquals("gb_abc", result.getGoogleBooksId());
+        assertEquals("9780593099322", result.getIsbn());
+        assertEquals("The Stormlight Archive", result.getSeriesName());
+        assertEquals("5", result.getSeriesPosition());
+    }
+
+    @Test
+    void beforeSave_ShouldSkipEnrichmentWhenGoogleBooksReturnsNull() {
+        when(googleBooksClient.enrich(any(), any())).thenReturn(null);
+
+        testItem.setSource("OPENLIBRARY");
+        testItem.setAuthors(List.of(Map.of("name", "J.R.R. Tolkien")));
+        when(bookRepository.findById(TEST_USER_ID, "OL27448W")).thenReturn(null);
+
+        BookItem result = bookService.addToLibrary(TEST_USER_ID, testItem);
+
+        assertNull(result.getGoogleBooksId());
+        assertNull(result.getSeriesName());
+    }
+
+// ── resetProgress ────────────────────────────────────────────────────────────
+
+    @Test
+    void resetProgress_ShouldClearChapterAndPage() {
+        when(bookRepository.findById(TEST_USER_ID, "OL27448W")).thenReturn(testItem);
+
+        BookItem result = bookService.resetProgress(TEST_USER_ID, "OL27448W");
+
+        assertNull(result.getCurrentChapter());
+        assertNull(result.getCurrentPage());
+        verify(bookRepository, times(1)).save(testItem);
+    }
+
+    @Test
+    void resetProgress_ShouldThrowWhenNotFound() {
+        when(bookRepository.findById(TEST_USER_ID, "notreal")).thenReturn(null);
+
+        assertThrows(NotFoundException.class, () ->
+                bookService.resetProgress(TEST_USER_ID, "notreal"));
+    }
+
+// ── migrateUpcomingIfPublished ───────────────────────────────────────────────
+
+    @Test
+    void migrateUpcoming_ShouldSkipNonGoogleBooksEntries() {
+        testItem.setSource("OPENLIBRARY");
+        when(bookRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
+
+        bookService.migrateUpcomingIfPublished(TEST_USER_ID);
+
+        verify(bookMetadataClient, never()).search(any());
+    }
+
+    @Test
+    void migrateUpcoming_ShouldSkipWhenIsbnNull() {
+        testItem.setSource("GOOGLEBOOKS");
+        testItem.setPublishedDate("2020-01-01");
+        testItem.setIsbn(null);
+        when(bookRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
+
+        bookService.migrateUpcomingIfPublished(TEST_USER_ID);
+
+        verify(bookMetadataClient, never()).search(any());
+    }
+
+    @Test
+    void migrateUpcoming_ShouldSkipWhenNotYetPublished() {
+        testItem.setSource("GOOGLEBOOKS");
+        testItem.setPublishedDate("2099-01-01");
+        testItem.setIsbn("9780593099322");
+        when(bookRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
+
+        bookService.migrateUpcomingIfPublished(TEST_USER_ID);
+
+        verify(bookMetadataClient, never()).search(any());
+    }
+
+    @Test
+    void migrateUpcoming_ShouldSkipWhenOpenLibraryReturnsNoResult() {
+        testItem.setSource("GOOGLEBOOKS");
+        testItem.setPublishedDate("2020-01-01");
+        testItem.setIsbn("9780593099322");
+        when(bookRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
+        when(bookMetadataClient.search("isbn:9780593099322")).thenReturn(List.of());
+
+        bookService.migrateUpcomingIfPublished(TEST_USER_ID);
+
+        verify(bookRepository, never()).deleteByFullSk(any(), any());
+    }
+
+    @Test
+    void migrateUpcoming_ShouldMigratePublishedGoogleBooksEntry() {
+        testItem.setSource("GOOGLEBOOKS");
+        testItem.setPublishedDate("2020-01-01");
+        testItem.setIsbn("9780593099322");
+        testItem.setSk("BOOK#GOOGLEBOOKS#gb_123");
+
+        BookSearchResult olResult = BookSearchResult.builder()
+                .id("OL27448W").title("The Lord of the Rings").build();
+
+        when(bookRepository.findAll(TEST_USER_ID)).thenReturn(List.of(testItem));
+        when(bookMetadataClient.search("isbn:9780593099322")).thenReturn(List.of(olResult));
+        when(googleBooksClient.enrich(any(), any())).thenReturn(null);
+
+        bookService.migrateUpcomingIfPublished(TEST_USER_ID);
+
+        verify(bookRepository, times(1)).deleteByFullSk(TEST_USER_ID, "BOOK#GOOGLEBOOKS#gb_123");
+        verify(bookRepository, times(1)).save(testItem);
+        assertEquals("OPENLIBRARY", testItem.getSource());
+        assertEquals("OL27448W", testItem.getBookId());
+        assertEquals("PLANNED", testItem.getStatus());
+        assertNull(testItem.getSeriesStatus());
     }
 }

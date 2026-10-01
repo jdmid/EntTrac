@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public abstract class BaseMediaRepository<T> {
 
-    private final DynamoDbTable<T> table;
+    protected final DynamoDbTable<T> table;
     private final String typePrefix;
 
     protected BaseMediaRepository(DynamoDbTable<T> table, String typePrefix) {

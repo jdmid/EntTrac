@@ -6,3 +6,4 @@ igdb.client.secret=YOUR_IGDB_CLIENT_SECRET_HERE
 jwt.secret=REPLACE_WITH_A_RANDOM_SECRET_AT_LEAST_32_CHARACTERS
 google.oauth.client-id=YOUR_GOOGLE_OAUTH_CLIENT_ID_HERE
 cors.allowed-origin=http://localhost:5173
+google.books.api.key=${GOOGLE_BOOKS_API_KEY}

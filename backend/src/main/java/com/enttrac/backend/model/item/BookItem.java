@@ -26,6 +26,12 @@ public class BookItem extends MediaItem {
     private Integer currentChapter;
     private Integer currentPage;
     private Double bookRating;
+    private String source;
+    private String googleBooksId;
+    private String isbn;
+    private String publishedDate;
+    private String seriesName;
+    private String seriesPosition;
 
     @Override
     @ValidStatus(MediaType.BOOK)
